@@ -22,21 +22,26 @@ public sealed class Settings
     private static string FilePath => Path.Combine(Dir, "settings.json");
 
     /// <summary>Gryphmark was called Quillforge up to 1.1.1: copy its settings, recent files and recovery
-    /// drafts the first time. The old folder is left untouched.</summary>
+    /// drafts the first time. The old folder is left untouched; its WebView2 cache is not copied (rebuilt on start).</summary>
     private static void MigrateFromQuillforge()
     {
         var old = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Quill" + "forge");
         if (Directory.Exists(Dir) || !Directory.Exists(old)) return;
-        try
+        Directory.CreateDirectory(Dir);
+        try { if (File.Exists(Path.Combine(old, "settings.json"))) File.Copy(Path.Combine(old, "settings.json"), FilePath, false); }
+        catch { /* best effort: start with defaults */ }
+        var oldRecovery = Path.Combine(old, "recovery");
+        if (!Directory.Exists(oldRecovery)) return;
+        foreach (var src in Directory.EnumerateFiles(oldRecovery))
         {
-            foreach (var src in Directory.EnumerateFiles(old, "*", SearchOption.AllDirectories))
+            try
             {
-                var dst = Path.Combine(Dir, Path.GetRelativePath(old, src));
+                var dst = Path.Combine(Dir, "recovery", Path.GetFileName(src));
                 Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
                 File.Copy(src, dst, false);
             }
+            catch { /* skip a draft that cannot be read */ }
         }
-        catch { /* best effort: start with defaults */ }
     }
 
     public static Settings Load()
