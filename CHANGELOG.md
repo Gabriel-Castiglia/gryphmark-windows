@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.1 — 2026-11-10
+
+- **Task lists in the GitHub view:** check boxes are now clear, GitHub-style boxes (green with a white tick when done,
+  in light and dark) instead of greyed-out disabled controls with a list bullet drawn on top of them. Done items
+  are shown in a softer colour.
+
 ## 1.7.0 — 2026-11-10
 
 - **Dedicated instances:** a file or folder can open in its own Gryphmark, always separate from the main window,

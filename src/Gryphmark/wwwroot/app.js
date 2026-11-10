@@ -52,7 +52,16 @@
     for (const k in slugCount) delete slugCount[k];
     let html = md.parse(text || '');
     html = html.replace(/<input (checked="" )?disabled="" type="checkbox">/g, (m, c) => '<input type="checkbox" disabled ' + (c ? 'checked ' : '') + 'class="task-list-item-checkbox">');
-    return html;
+    // GitHub's classes on task items and their lists: no bullet under the box (styled in app.css)
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    tmp.querySelectorAll('li > input.task-list-item-checkbox:first-child, li > p:first-child > input.task-list-item-checkbox:first-child').forEach((box) => {
+      const li = box.closest('li');
+      li.classList.add('task-list-item');
+      if (box.checked) li.classList.add('checked');
+      li.parentElement.classList.add('contains-task-list');
+    });
+    return tmp.innerHTML;
   }
 
   let mermaidLoading = null;

@@ -28,6 +28,25 @@ body.dark .toastui-editor-context-menu { border-color: #3A3A3C !important; backg
 ::highlight(gm-cur)  { background-color: rgba(255, 159, 10, .85); color: #1d1d1f; }
 body.dark ::highlight(gm-find) { background-color: rgba(255, 214, 10, .28); }
 
+/* Task lists in the GitHub view: crisp boxes instead of the greyed-out disabled checkbox */
+#preview .contains-task-list { padding-left: 1.6em; }
+#preview .task-list-item { list-style: none; }
+#preview .task-list-item-checkbox {
+  -webkit-appearance: none; appearance: none; box-sizing: border-box;
+  width: 16px; height: 16px; margin: 0 .5em .2em -1.6em; vertical-align: middle;
+  border: 1.5px solid #8c959f; border-radius: 4px; background: #fff;
+  display: inline-grid; place-content: center; opacity: 1; cursor: default;
+}
+#preview .task-list-item-checkbox:checked { background: #1f883d; border-color: #1f883d; }
+#preview .task-list-item-checkbox:checked::before {
+  content: ""; width: 9px; height: 5px; margin-top: -2px;
+  border: solid #fff; border-width: 0 0 2px 2px; transform: rotate(-45deg);
+}
+#preview .task-list-item.checked { color: var(--fgColor-muted, #59636e); }
+body.dark #preview .task-list-item-checkbox { background: #0d1117; border-color: #6e7681; }
+body.dark #preview .task-list-item-checkbox:checked { background: #238636; border-color: #238636; }
+body.dark #preview .task-list-item.checked { color: var(--fgColor-muted, #9198a1); }
+
 /* Mermaid diagrams centred like on GitHub */
 .markdown-body pre.mermaid { background: transparent; text-align: center; }
 
