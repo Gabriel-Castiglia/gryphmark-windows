@@ -5,10 +5,10 @@
         Title="Quillforge" Width="1200" Height="820" MinWidth="560" MinHeight="380"
         Icon="pack://application:,,,/Quillforge.ico"
         WindowStartupLocation="CenterScreen" UseLayoutRounding="True"
-        AllowDrop="True">
+        AllowDrop="True" Background="{DynamicResource Qf.Chrome}">
     <DockPanel>
-        <Menu x:Name="MainMenu" DockPanel.Dock="Top" FontSize="13" Padding="2,1" />
-        <StatusBar x:Name="Status" DockPanel.Dock="Bottom" FontSize="12" Padding="6,0">
+        <Menu x:Name="MainMenu" DockPanel.Dock="Top" />
+        <StatusBar x:Name="Status" DockPanel.Dock="Bottom">
             <StatusBarItem>
                 <TextBlock x:Name="StatusPath" TextTrimming="CharacterEllipsis" />
             </StatusBarItem>

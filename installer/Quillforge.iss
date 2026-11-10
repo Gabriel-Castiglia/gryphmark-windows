@@ -24,7 +24,7 @@ MinVersion=10.0.17763
 OutputDir=..\out
 OutputBaseFilename=Quillforge-Setup-{#AppVersion}
 SetupIconFile=..\src\Quillforge\Quillforge.ico
-UninstallDisplayIcon={app}\Quillforge.exe
+UninstallDisplayIcon={app}\Quillforge.ico
 UninstallDisplayName=Quillforge
 WizardStyle=modern
 WizardImageFile=wizard.bmp
@@ -59,15 +59,15 @@ Name: "assoc"; Description: "{cm:AssocTask}"; GroupDescription: "{cm:AssocGroup}
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\Quillforge"; Filename: "{app}\Quillforge.exe"
+Name: "{autoprograms}\Quillforge"; Filename: "{app}\Quillforge.exe"; IconFilename: "{app}\Quillforge.ico"
 Name: "{autoprograms}\{cm:Manual}"; Filename: "{app}\docs\Quillforge_Manual_EN.pdf"; Languages: en
 Name: "{autoprograms}\{cm:Manual}"; Filename: "{app}\docs\Quillforge_Manual_ES.pdf"; Languages: es
-Name: "{autodesktop}\Quillforge"; Filename: "{app}\Quillforge.exe"; Tasks: desktopicon
+Name: "{autodesktop}\Quillforge"; Filename: "{app}\Quillforge.exe"; IconFilename: "{app}\Quillforge.ico"; Tasks: desktopicon
 
 [Registry]
 ; ProgID
 Root: HKA; Subkey: "Software\Classes\Quillforge.md"; ValueType: string; ValueData: "{cm:MdDoc}"; Flags: uninsdeletekey
-Root: HKA; Subkey: "Software\Classes\Quillforge.md\DefaultIcon"; ValueType: string; ValueData: "{app}\Quillforge.exe,0"
+Root: HKA; Subkey: "Software\Classes\Quillforge.md\DefaultIcon"; ValueType: string; ValueData: "{app}\Quillforge.ico"
 Root: HKA; Subkey: "Software\Classes\Quillforge.md\shell\open\command"; ValueType: string; ValueData: """{app}\Quillforge.exe"" ""%1"""
 ; "Open with" list (always)
 Root: HKA; Subkey: "Software\Classes\.md\OpenWithProgids"; ValueType: string; ValueName: "Quillforge.md"; ValueData: ""; Flags: uninsdeletevalue

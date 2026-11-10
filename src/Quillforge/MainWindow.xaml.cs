@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Win32;
 
@@ -30,8 +31,10 @@ public partial class MainWindow : Window
         _pendingOpen = startPath;
         Width = _settings.Width; Height = _settings.Height;
         if (_settings.Maximized) WindowState = WindowState.Maximized;
+        ThemeManager.Apply(this, _settings.Theme == "dark");
         BuildMenu();
         UpdateTitle();
+        SourceInitialized += (_, _) => ThemeManager.Apply(this, _settings.Theme == "dark");
         Loaded += async (_, _) => await InitWebAsync();
         Closing += OnClosing;
         PreviewKeyDown += OnKey;
@@ -340,9 +343,27 @@ public partial class MainWindow : Window
     }
 
     // ------------------------------------------------------------------ Menu
+    // Segoe Fluent Icons glyph per command (empty = no icon)
+    private static readonly Dictionary<string, string> Glyphs = new()
+    {
+        ["New"] = "", ["NewWindow"] = "", ["Open"] = "", ["Recent"] = "",
+        ["Save"] = "", ["SaveAs"] = "", ["ExportHtml"] = "", ["Print"] = "",
+        ["OpenFolder"] = "", ["Exit"] = "", ["Undo"] = "", ["Redo"] = "",
+        ["Bold"] = "", ["Italic"] = "", ["Strike"] = "", ["Code"] = "",
+        ["Heading"] = "", ["Quote"] = "", ["Ul"] = "", ["Ol"] = "",
+        ["Task"] = "", ["CodeBlock"] = "", ["Hr"] = "",
+        ["ModeVisual"] = "", ["ModeSource"] = "", ["ModePreview"] = "",
+        ["Dark"] = "", ["ZoomIn"] = "", ["ZoomOut"] = "", ["ZoomReset"] = "",
+        ["Manual"] = "", ["Guide"] = "", ["About"] = "", ["RecentClear"] = "",
+    };
+
+    private static object? Glyph(string key) => Glyphs.TryGetValue(key, out var g)
+        ? new TextBlock { Text = g, FontFamily = (FontFamily)Application.Current.Resources["Qf.Icons"], FontSize = 14 }
+        : null;
+
     private MenuItem Item(string key, string? gesture, Func<Task> action, bool? check = null, bool enabled = true)
     {
-        var mi = new MenuItem { Header = Strings.Get(key), InputGestureText = gesture ?? "", IsEnabled = enabled };
+        var mi = new MenuItem { Header = Strings.Get(key), InputGestureText = gesture ?? "", IsEnabled = enabled, Icon = Glyph(key) };
         if (check.HasValue) { mi.IsCheckable = true; mi.IsChecked = check.Value; }
         mi.Click += async (_, _) => await action();
         return mi;
@@ -357,14 +378,14 @@ public partial class MainWindow : Window
         file.Items.Add(Item("New", ctrl + "N", () => RunCommand("new")));
         file.Items.Add(Item("NewWindow", null, () => RunCommand("newwindow")));
         file.Items.Add(Item("Open", ctrl + "O", () => RunCommand("open")));
-        var recent = new MenuItem { Header = Strings.Get("Recent") };
+        var recent = new MenuItem { Header = Strings.Get("Recent"), Icon = Glyph("Recent") };
         if (_settings.Recent.Count == 0) recent.Items.Add(new MenuItem { Header = Strings.Get("RecentEmpty"), IsEnabled = false });
         else
         {
             int i = 1;
             foreach (var p in _settings.Recent.ToList())
             {
-                var mi = new MenuItem { Header = $"_{(i <= 9 ? i.ToString() : "")} {p.Replace("_", "__")}" };
+                var mi = new MenuItem { Header = $"_{(i <= 9 ? i.ToString() : "")}  {Path.GetFileName(p).Replace("_", "__")}", InputGestureText = ShortDir(p), ToolTip = p };
                 var path = p;
                 mi.Click += (_, _) => OpenPath(path);
                 recent.Items.Add(mi); i++;
@@ -395,7 +416,7 @@ public partial class MainWindow : Window
         fmt.Items.Add(Item("Strike", null, () => Exec("strike")));
         fmt.Items.Add(Item("Code", null, () => Exec("code")));
         fmt.Items.Add(new Separator());
-        var heading = new MenuItem { Header = Strings.Get("Heading") };
+        var heading = new MenuItem { Header = Strings.Get("Heading"), Icon = Glyph("Heading") };
         for (int lv = 1; lv <= 6; lv++)
         {
             int level = lv;
@@ -422,6 +443,7 @@ public partial class MainWindow : Window
         view.Items.Add(Item("Dark", null, async () =>
         {
             _settings.Theme = _settings.Theme == "dark" ? "light" : "dark"; _settings.Save();
+            ThemeManager.Apply(this, _settings.Theme == "dark");
             if (_ready) await Js($"mdApp.setTheme({Q(_settings.Theme)})");
             BuildMenu();
         }, _settings.Theme == "dark"));
@@ -460,6 +482,14 @@ public partial class MainWindow : Window
         InputBindings.Clear();
         var f1 = new KeyBinding(new RelayCommand(OpenManual), Key.F1, ModifierKeys.None);
         InputBindings.Add(f1);
+    }
+
+    private static string ShortDir(string p)
+    {
+        var d = Path.GetDirectoryName(p) ?? "";
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        if (d.StartsWith(home, StringComparison.OrdinalIgnoreCase)) d = "~" + d[home.Length..];
+        return d.Length > 38 ? "…" + d[^37..] : d;
     }
 
     private void OpenManual()
