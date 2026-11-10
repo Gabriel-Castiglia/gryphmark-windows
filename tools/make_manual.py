@@ -55,7 +55,8 @@ without memorising syntax.</p>
 administrator rights: it installs for the current user in <code>%LOCALAPPDATA%\\Programs\\Gryphmark</code>.</p>
 <table><tr><th>Option</th><th>What it does</th></tr>
 <tr><td>Desktop shortcut</td><td>Adds a Gryphmark icon to the desktop.</td></tr>
-<tr><td>Open .md files with Gryphmark</td><td>Adds Gryphmark to <i>Open with</i> for .md / .markdown files, and makes it the handler for those files for the current user.</td></tr></table>
+<tr><td>Open .md files with Gryphmark</td><td>Adds Gryphmark to <i>Open with</i> for .md / .markdown files, and makes it the handler for those files for the current user.</td></tr>
+<tr><td>Add "Open with Gryphmark" to folders</td><td>Right-click a folder (or the empty space inside one) in Explorer to open it in the Files panel. In Windows 11 it is under <i>Show more options</i>.</td></tr></table>
 <p>Requirements: Windows 10 or 11 (64-bit) and Microsoft Edge WebView2 Runtime, which is already part of Windows 11.
 The .NET runtime is included; nothing else has to be installed.</p>
 <p>Up to version 1.1.1 the program was called <b>Quillforge</b>. If that version is installed, the installer removes it,
@@ -79,6 +80,21 @@ and Gryphmark copies its settings, recent files and recovery drafts on the first
 <tr><td><b>GitHub</b><br><small>GitHub preview</small></td><td><kbd>Ctrl</kbd>+<kbd>3</kbd></td><td>Read-only page rendered like GitHub, with syntax highlighting, task lists and clickable links.</td></tr></table>
 <figure><img src="{img('source_light_en.png')}"><figcaption>Markdown source with live preview.</figcaption></figure>
 <figure><img src="{img('preview_light_en.png')}"><figcaption>GitHub preview (light theme).</figcaption></figure>
+"""),
+   ("Folders: the Files panel", f"""
+<p>Like VS Code or Obsidian, Gryphmark can open a whole folder and show its tree on the left: subfolders and
+Markdown files (<code>.md</code>, <code>.markdown</code>). Click a file and it opens beside the tree.</p>
+<figure><img src="{img('files_panel_light.png')}" style="width:260px"><figcaption>The Files panel with a folder open; the open file is marked.</figcaption></figure>
+<table><tr><th>Action</th><th>How</th></tr>
+<tr><td>Open a folder</td><td><i>File → Open folder…</i>, the <b>Open folder…</b> button of the empty panel, dropping a folder on the window, or right-clicking a folder in Explorer → <i>Open with Gryphmark</i> (installer option; in Windows 11 it is under <i>Show more options</i>).</td></tr>
+<tr><td>Show / hide the panel</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>, the folder button at the left of the toolbar, or <i>View → Files panel</i>. Drag its right edge to make it wider.</td></tr>
+<tr><td>Browse</td><td>Click a folder to open or close it; click a file to open it. <kbd>Enter</kbd> does the same on the selected row.</td></tr>
+<tr><td>Right-click</td><td>On a file: open, open in a new window, show in folder, copy path. On a folder: show in folder, copy path, refresh.</td></tr>
+<tr><td>Panel buttons</td><td>Refresh, collapse all, close folder.</td></tr></table>
+<p>The panel follows the disk: files and folders created, renamed or deleted by other programs appear at once.
+The open file is marked in the tree. Hidden folders and tool folders (<code>.git</code>, <code>node_modules</code>,
+<code>bin</code>, <code>obj</code>…) are left out. The folder is reopened the next time Gryphmark starts, and recent
+folders are listed in <i>File → Open recent</i>.</p>
 """),
    ("Formatting toolbar", """
 <table><tr><th>Button</th><th>Action</th><th>Markdown it writes</th></tr>
@@ -118,7 +134,7 @@ In GitHub preview, links to web pages open in your browser, links to other <code
    ("Working tools", """
 <table><tr><th>Feature</th><th>How it works</th></tr>
 <tr><td>Find / Replace</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> open a bar above the document. <kbd>F3</kbd> and <kbd>Shift</kbd>+<kbd>F3</kbd> jump between matches; <kbd>Esc</kbd> closes it. <i>Aa</i> matches case.</td></tr>
-<tr><td>Outline</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> or the first toolbar button shows the headings on the left; click one to jump to it.</td></tr>
+<tr><td>Outline</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> or the outline button of the toolbar shows the headings on the left; click one to jump to it.</td></tr>
 <tr><td>Your formatting is kept</td><td>Only the lines you change are rewritten when you save: list markers, <code>__bold__</code>, table alignment, line endings (CRLF/LF) and BOM stay as they were.</td></tr>
 <tr><td>Changed outside</td><td>If another program modifies the open file, Gryphmark reloads it (or asks first if you have unsaved changes).</td></tr>
 <tr><td>Crash recovery</td><td>Unsaved work is backed up every 20 seconds. If Gryphmark or Windows stops unexpectedly, the next start offers to recover it.</td></tr>
@@ -147,7 +163,8 @@ The first time, Gryphmark follows the Windows language.</p>
 <tr><td><kbd>Ctrl</kbd>+<kbd>P</kbd></td><td>Print / PDF</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>-</kbd> / <kbd>0</kbd></td><td>Zoom</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Close window</td><td><kbd>F1</kbd></td><td>This manual</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Find / Replace</td><td><kbd>F3</kbd> / <kbd>Shift</kbd>+<kbd>F3</kbd></td><td>Next / previous match</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd></td><td>Outline</td><td><kbd>Esc</kbd></td><td>Close find bar</td></tr></table>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd></td><td>Outline</td><td><kbd>Esc</kbd></td><td>Close find bar</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td><td>Files panel</td><td></td><td></td></tr></table>
 """),
    ("Technical information", """
 <table><tr><th>Item</th><th>Detail</th></tr>
@@ -180,7 +197,8 @@ sin aprenderte la sintaxis.</p>
 administrador: instala para el usuario actual en <code>%LOCALAPPDATA%\\Programs\\Gryphmark</code>.</p>
 <table><tr><th>Opción</th><th>Qué hace</th></tr>
 <tr><td>Acceso directo en el escritorio</td><td>Pone el ícono de Gryphmark en el escritorio.</td></tr>
-<tr><td>Abrir los .md con Gryphmark</td><td>Agrega Gryphmark a <i>Abrir con</i> para los .md / .markdown y lo deja como programa para esos archivos en el usuario actual.</td></tr></table>
+<tr><td>Abrir los .md con Gryphmark</td><td>Agrega Gryphmark a <i>Abrir con</i> para los .md / .markdown y lo deja como programa para esos archivos en el usuario actual.</td></tr>
+<tr><td>Agregar «Abrir con Gryphmark» a las carpetas</td><td>Clic derecho sobre una carpeta (o sobre el espacio vacío dentro de ella) en el Explorador para abrirla en el panel de archivos. En Windows 11 está en <i>Mostrar más opciones</i>.</td></tr></table>
 <p>Requisitos: Windows 10 u 11 de 64 bits y Microsoft Edge WebView2 Runtime, que ya viene con Windows 11.
 El runtime de .NET va incluido; no hay que instalar nada más.</p>
 <p>Hasta la versión 1.1.1 el programa se llamaba <b>Quillforge</b>. Si esa versión está instalada, el instalador la quita
@@ -204,6 +222,21 @@ configuración en <code>%APPDATA%\\Gryphmark</code> se conserva.</p>
 <tr><td><b>GitHub</b><br><small>Vista GitHub</small></td><td><kbd>Ctrl</kbd>+<kbd>3</kbd></td><td>Página de solo lectura igual a GitHub, con colores de código, listas de tareas y enlaces que funcionan.</td></tr></table>
 <figure><img src="{img('source_light_es.png')}"><figcaption>Código Markdown con vista previa en vivo.</figcaption></figure>
 <figure><img src="{img('preview_light_es.png')}"><figcaption>Vista GitHub (tema claro).</figcaption></figure>
+"""),
+   ("Carpetas: el panel de archivos", f"""
+<p>Como VS Code u Obsidian, Gryphmark puede abrir una carpeta entera y mostrar su árbol a la izquierda: subcarpetas y
+archivos Markdown (<code>.md</code>, <code>.markdown</code>). Hacés clic en un archivo y se abre al costado del árbol.</p>
+<figure><img src="{img('files_panel_light.png')}" style="width:260px"><figcaption>El panel de archivos con una carpeta abierta; el archivo abierto queda marcado.</figcaption></figure>
+<table><tr><th>Acción</th><th>Cómo</th></tr>
+<tr><td>Abrir una carpeta</td><td><i>Archivo → Abrir carpeta…</i>, el botón <b>Abrir carpeta…</b> del panel vacío, arrastrando una carpeta a la ventana, o con clic derecho sobre una carpeta en el Explorador → <i>Abrir con Gryphmark</i> (opción del instalador; en Windows 11 está en <i>Mostrar más opciones</i>).</td></tr>
+<tr><td>Mostrar / ocultar el panel</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>E</kbd>, el botón de carpeta a la izquierda de la barra, o <i>Ver → Panel de archivos</i>. Arrastrando su borde derecho se ensancha.</td></tr>
+<tr><td>Recorrer</td><td>Clic en una carpeta la abre o la cierra; clic en un archivo lo abre. <kbd>Enter</kbd> hace lo mismo sobre la fila seleccionada.</td></tr>
+<tr><td>Clic derecho</td><td>Sobre un archivo: abrir, abrir en otra ventana, mostrar en la carpeta, copiar ruta. Sobre una carpeta: mostrar en la carpeta, copiar ruta, actualizar.</td></tr>
+<tr><td>Botones del panel</td><td>Actualizar, contraer todo, cerrar carpeta.</td></tr></table>
+<p>El panel sigue al disco: los archivos y carpetas que otros programas crean, renombran o borran aparecen enseguida.
+El archivo abierto queda marcado en el árbol. Las carpetas ocultas y las de herramientas (<code>.git</code>,
+<code>node_modules</code>, <code>bin</code>, <code>obj</code>…) no se muestran. La carpeta se vuelve a abrir la próxima vez
+que arranca Gryphmark, y las carpetas recientes aparecen en <i>Archivo → Abrir reciente</i>.</p>
 """),
    ("Barra de formato", """
 <table><tr><th>Botón</th><th>Acción</th><th>Markdown que escribe</th></tr>
@@ -243,7 +276,7 @@ En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otro
    ("Herramientas de trabajo", """
 <table><tr><th>Función</th><th>Cómo funciona</th></tr>
 <tr><td>Buscar / Reemplazar</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> abren una barra sobre el documento. <kbd>F3</kbd> y <kbd>Mayús</kbd>+<kbd>F3</kbd> saltan entre coincidencias; <kbd>Esc</kbd> la cierra. <i>Aa</i> distingue mayúsculas.</td></tr>
-<tr><td>Esquema</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd> o el primer botón de la barra muestra los títulos a la izquierda; un clic salta a ese título.</td></tr>
+<tr><td>Esquema</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd> o el botón de esquema de la barra muestra los títulos a la izquierda; un clic salta a ese título.</td></tr>
 <tr><td>Se respeta tu formato</td><td>Al guardar sólo se reescriben las líneas que cambiaste: viñetas, <code>__negrita__</code>, alineación de tablas, finales de línea (CRLF/LF) y BOM quedan como estaban.</td></tr>
 <tr><td>Cambios externos</td><td>Si otro programa modifica el archivo abierto, Gryphmark lo recarga (o pregunta antes si tenés cambios sin guardar).</td></tr>
 <tr><td>Recuperación</td><td>Lo no guardado se respalda cada 20 segundos. Si Gryphmark o Windows se cierran de golpe, al volver a abrir ofrece recuperarlo.</td></tr>
@@ -272,7 +305,8 @@ La primera vez, Gryphmark toma el idioma de Windows.</p>
 <tr><td><kbd>Ctrl</kbd>+<kbd>P</kbd></td><td>Imprimir / PDF</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>-</kbd> / <kbd>0</kbd></td><td>Zoom</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Cerrar ventana</td><td><kbd>F1</kbd></td><td>Este manual</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Buscar / Reemplazar</td><td><kbd>F3</kbd> / <kbd>Mayús</kbd>+<kbd>F3</kbd></td><td>Coincidencia siguiente / anterior</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd></td><td>Esquema</td><td><kbd>Esc</kbd></td><td>Cerrar búsqueda</td></tr></table>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd></td><td>Esquema</td><td><kbd>Esc</kbd></td><td>Cerrar búsqueda</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>E</kbd></td><td>Panel de archivos</td><td></td><td></td></tr></table>
 """),
    ("Información técnica", """
 <table><tr><th>Ítem</th><th>Detalle</th></tr>

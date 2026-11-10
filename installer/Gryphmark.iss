@@ -50,11 +50,18 @@ es.AssocGroup=Tipos de archivo:
 en.Manual=Gryphmark user manual
 es.Manual=Manual de usuario de Gryphmark
 en.MdDoc=Markdown document
+en.FolderTask=Add "Open with Gryphmark" to folders in Explorer
+es.FolderTask=Agregar «Abrir con Gryphmark» a las carpetas en el Explorador
+en.FolderVerb=Open with Gryphmark
+es.FolderVerb=Abrir con Gryphmark
+en.ExplorerGroup=Explorer:
+es.ExplorerGroup=Explorador:
 es.MdDoc=Documento Markdown
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 Name: "assoc"; Description: "{cm:AssocTask}"; GroupDescription: "{cm:AssocGroup}"
+Name: "foldermenu"; Description: "{cm:FolderTask}"; GroupDescription: "{cm:ExplorerGroup}"
 
 [Files]
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -85,6 +92,14 @@ Root: HKA; Subkey: "Software\Classes\Applications\Gryphmark.exe\SupportedTypes";
 ; Default handler (optional task)
 Root: HKA; Subkey: "Software\Classes\.md"; ValueType: string; ValueData: "Gryphmark.md"; Tasks: assoc; Flags: uninsdeletevalue
 Root: HKA; Subkey: "Software\Classes\.markdown"; ValueType: string; ValueData: "Gryphmark.md"; Tasks: assoc; Flags: uninsdeletevalue
+
+; Folder context menu (optional task): opens the folder in the Files panel
+Root: HKA; Subkey: "Software\Classes\Directory\shell\Gryphmark"; ValueType: string; ValueData: "{cm:FolderVerb}"; Tasks: foldermenu; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\Directory\shell\Gryphmark"; ValueType: string; ValueName: "Icon"; ValueData: "{app}\Gryphmark.ico"; Tasks: foldermenu
+Root: HKA; Subkey: "Software\Classes\Directory\shell\Gryphmark\command"; ValueType: string; ValueData: """{app}\Gryphmark.exe"" ""%1"""; Tasks: foldermenu
+Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\Gryphmark"; ValueType: string; ValueData: "{cm:FolderVerb}"; Tasks: foldermenu; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\Gryphmark"; ValueType: string; ValueName: "Icon"; ValueData: "{app}\Gryphmark.ico"; Tasks: foldermenu
+Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\Gryphmark\command"; ValueType: string; ValueData: """{app}\Gryphmark.exe"" ""%V"""; Tasks: foldermenu
 
 [Run]
 Filename: "{app}\Gryphmark.exe"; Description: "{cm:LaunchProgram,Gryphmark}"; Flags: nowait postinstall skipifsilent

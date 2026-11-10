@@ -44,7 +44,7 @@ public static class SelfTest
             {
                 Strings.Lang = lang;
                 string sfx = $"{lang}_{(dark ? "dark" : "light")}";
-                var about = new AboutDialog(w, "1.2.1");
+                var about = new AboutDialog(w, "1.3.0");
                 Layout(about.Card);
                 Save(about.Card, Path.Combine(dir, $"about_{sfx}.png"), dark);
                 about.Close();
@@ -64,9 +64,37 @@ public static class SelfTest
                 }
                 Layout(tips);
                 Save(tips, Path.Combine(dir, $"tooltips_{sfx}.png"), dark);
+
+                // Files panel: empty, then a small folder with one file selected
+                var pane = (FrameworkElement)w.FindName("FilesPane");
+                w.TestFolder(null, null);
+                w.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+                Save(pane, Path.Combine(dir, $"files_empty_{sfx}.png"));
+                var demo = DemoFolder();
+                w.TestFolder(demo, Path.Combine(demo, "Notes", "Projects", "Plan.md"));
+                w.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+                w.UpdateLayout();
+                Save(pane, Path.Combine(dir, $"files_tree_{sfx}.png"));
+                w.TestFolder(null, null);
             }
             Strings.Lang = keepLang;
         }
+    }
+
+    /// <summary>A throw-away folder for the Files panel pictures (hidden and tool folders must not show).</summary>
+    private static string DemoFolder()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "gm_files_demo", "My notes");
+        foreach (var f in new[] { "README.md", "Changelog.md", "Notes/Ideas.md", "Notes/Projects/Plan.md", "Notes/Projects/Budget.md",
+                                  "Archive/2025.md", "node_modules/skip.md", "image.png" })
+        {
+            var p = Path.Combine(root, f);
+            Directory.CreateDirectory(Path.GetDirectoryName(p)!);
+            if (!File.Exists(p)) File.WriteAllText(p, "# " + Path.GetFileNameWithoutExtension(p));
+        }
+        var hidden = Directory.CreateDirectory(Path.Combine(root, ".obsidian"));
+        hidden.Attributes |= FileAttributes.Hidden;
+        return root;
     }
 
     private static void Layout(FrameworkElement el)

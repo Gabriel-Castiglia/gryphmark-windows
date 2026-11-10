@@ -69,6 +69,7 @@ public partial class MainWindow
         FindCloseBtn.ToolTip = Strings.Get("Close");
         OutlineTitle.Text = Strings.Get("OutlineTitle");
         OutlineEmpty.Text = Strings.Get("OutlineEmpty");
+        if (_folderInit) LocalizeFolder();
     }
 
     private void StopFeatures()

@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.3.0 — 2026-11-10
+
+- **Files panel** (`Ctrl+Shift+E`, the folder button, or *View → Files panel*): open a whole folder and
+  browse its subfolders and Markdown files in a tree on the left, like VS Code or Obsidian. A click opens a
+  file beside the tree; the panel follows changes on disk, marks the open file and can be resized.
+  Hidden folders and tool folders (`.git`, `node_modules`, `bin`, `obj`…) are left out.
+- Open a folder with *File → Open folder…*, by dropping it on the window, from the command line, or with
+  the new optional installer task *Open with Gryphmark* in the Explorer context menu of folders.
+- The last folder is reopened on the next start; recent folders are listed in *File → Open recent*.
+- Right-click menu in the tree: open, open in a new window, show in folder, copy path.
+
 ## 1.2.1 — 2026-11-10
 
 - Sample document installed with the program (English and Spanish, hidden file in `samples\`): it opens on

@@ -11,6 +11,11 @@ public sealed class Settings
     public string Mode { get; set; } = "visual";
     public double Zoom { get; set; } = 1.0;
     public List<string> Recent { get; set; } = new();
+    /// <summary>Folder shown in the Files panel (reopened on the next start).</summary>
+    public string? Folder { get; set; }
+    public List<string> RecentFolders { get; set; } = new();
+    public bool FilesPanel { get; set; }
+    public double FilesWidth { get; set; } = 260;
     public double Width { get; set; } = 1200;
     public double Height { get; set; } = 820;
     public bool Maximized { get; set; }
@@ -68,6 +73,13 @@ public sealed class Settings
             File.WriteAllText(FilePath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
         }
         catch { /* settings are a convenience */ }
+    }
+
+    public void AddRecentFolder(string dir)
+    {
+        RecentFolders.RemoveAll(p => string.Equals(p, dir, StringComparison.OrdinalIgnoreCase));
+        RecentFolders.Insert(0, dir);
+        if (RecentFolders.Count > 6) RecentFolders.RemoveRange(6, RecentFolders.Count - 6);
     }
 
     public void AddRecent(string path)

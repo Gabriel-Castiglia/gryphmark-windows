@@ -20,6 +20,7 @@ public static class ThemeManager
         ["Gm.Pressed"] = ("#E1E1E6", "#454548"),
         ["Gm.Accent"] = ("#1D1D1F", "#F5F5F7"),
         ["Gm.Separator"] = ("#E8E8ED", "#38383A"),
+        ["Gm.FolderIcon"] = ("#D9652F", "#F08A5D"),   // the ember orange of the icon
     };
 
     public static void Apply(Window window, bool dark)

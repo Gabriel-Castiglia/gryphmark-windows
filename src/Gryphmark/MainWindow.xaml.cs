@@ -28,6 +28,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         Strings.Lang = _settings.Lang;
+        string? startFolder = null;
+        if (startPath != null && Directory.Exists(startPath)) { startFolder = startPath; startPath = null; }
         _pendingOpen = startPath;
         Width = _settings.Width; Height = _settings.Height;
         if (_settings.Maximized) WindowState = WindowState.Maximized;
@@ -41,10 +43,11 @@ public partial class MainWindow : Window
         Closing += OnClosing;
         Closed += (_, _) => CloseTrace.Log("window closed");
         InitFeatures();
+        InitFolder(startFolder);
         PreviewKeyDown += OnKey;
         Drop += (_, e) =>
         {
-            if (e.Data.GetData(DataFormats.FileDrop) is string[] f && f.Length > 0) OpenPath(f[0]);
+            if (e.Data.GetData(DataFormats.FileDrop) is string[] f && f.Length > 0) { if (Directory.Exists(f[0])) OpenFolder(f[0]); else OpenPath(f[0]); }
         };
     }
 
@@ -159,6 +162,7 @@ public partial class MainWindow : Window
     // ------------------------------------------------------------------ Files
     private async void OpenPath(string path)
     {
+        if (Directory.Exists(path)) { OpenFolder(path); return; }
         if (!_ready) { _pendingOpen = path; return; }
         if (!await ConfirmDiscardAsync()) return;
         await LoadFileAsync(path);
@@ -396,6 +400,8 @@ public partial class MainWindow : Window
             case "findprev": await FindStep(-1); break;
             case "findclose": await HideFind(); break;
             case "outline": ToggleOutline(); break;
+            case "files": ToggleFiles(); break;
+            case "opendir": PickFolder(); break;
             case "manual": OpenManual(); break;
             case "folder":
                 if (_path != null) Process.Start("explorer.exe", $"/select,\"{_path}\"");
@@ -433,6 +439,7 @@ public partial class MainWindow : Window
             Key.N => "new", Key.O => "open", Key.P => "print", Key.W => "close",
             Key.S => Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) ? "saveas" : "save",
             Key.D1 => "mode1", Key.D2 => "mode2", Key.D3 => "mode3",
+            Key.E when Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) => "files",
             _ => null,
         };
         if (cmd != null) { e.Handled = true; await RunCommand(cmd); }
@@ -450,7 +457,7 @@ public partial class MainWindow : Window
         ["Task"] = "", ["CodeBlock"] = "", ["Hr"] = "",
         ["ModeVisual"] = "", ["ModeSource"] = "", ["ModePreview"] = "",
         ["Dark"] = "", ["ZoomIn"] = "", ["ZoomOut"] = "", ["ZoomReset"] = "",
-        ["Sample"] = "\uE736", ["Manual"] = "", ["Guide"] = "", ["About"] = "",
+        ["OpenDir"] = "\uE838", ["Files"] = "\uE8B7", ["CloseDir"] = "\uE711", ["Sample"] = "\uE736", ["Manual"] = "", ["Guide"] = "", ["About"] = "",
         ["Find"] = "", ["Replace"] = "", ["FindNext"] = "", ["Outline"] = "", ["CheckUpdates"] = "", ["RecentClear"] = "",
     };
 
@@ -475,6 +482,7 @@ public partial class MainWindow : Window
         file.Items.Add(Item("New", ctrl + "N", () => RunCommand("new")));
         file.Items.Add(Item("NewWindow", null, () => RunCommand("newwindow")));
         file.Items.Add(Item("Open", ctrl + "O", () => RunCommand("open")));
+        file.Items.Add(Item("OpenDir", null, () => RunCommand("opendir")));
         var recent = new MenuItem { Header = Strings.Get("Recent"), Icon = Glyph("Recent") };
         if (SamplePath != null && !_settings.SampleHidden)
         {
@@ -486,7 +494,7 @@ public partial class MainWindow : Window
             recent.Items.Add(smi);
             recent.Items.Add(new Separator());
         }
-        if (_settings.Recent.Count == 0) recent.Items.Add(new MenuItem { Header = Strings.Get("RecentEmpty"), IsEnabled = false });
+        if (_settings.Recent.Count == 0 && _settings.RecentFolders.Count == 0) recent.Items.Add(new MenuItem { Header = Strings.Get("RecentEmpty"), IsEnabled = false });
         else
         {
             int i = 1;
@@ -497,10 +505,26 @@ public partial class MainWindow : Window
                 mi.Click += (_, _) => OpenPath(path);
                 recent.Items.Add(mi); i++;
             }
+        }
+        if (_settings.RecentFolders.Count > 0)
+        {
             recent.Items.Add(new Separator());
-            recent.Items.Add(Item("RecentClear", null, () => { _settings.Recent.Clear(); _settings.Save(); BuildMenu(); return Task.CompletedTask; }));
+            recent.Items.Add(new MenuItem { Header = Strings.Get("RecentFolders"), IsEnabled = false, FontSize = 11 });
+            foreach (var d in _settings.RecentFolders.ToList())
+            {
+                var mi = new MenuItem { Header = FolderLabel(d).Replace("_", "__"), InputGestureText = ShortDir(d), ToolTip = d, Icon = Glyph("Files") };
+                var dir = d;
+                mi.Click += (_, _) => OpenFolder(dir);
+                recent.Items.Add(mi);
+            }
+        }
+        if (_settings.Recent.Count > 0 || _settings.RecentFolders.Count > 0)
+        {
+            recent.Items.Add(new Separator());
+            recent.Items.Add(Item("RecentClear", null, () => { _settings.Recent.Clear(); _settings.RecentFolders.Clear(); _settings.Save(); BuildMenu(); return Task.CompletedTask; }));
         }
         file.Items.Add(recent);
+        file.Items.Add(Item("CloseDir", null, () => { CloseFolder(); return Task.CompletedTask; }, enabled: _folder != null));
         file.Items.Add(new Separator());
         file.Items.Add(Item("Save", ctrl + "S", () => RunCommand("save")));
         file.Items.Add(Item("SaveAs", ctrl + "Shift+S", () => RunCommand("saveas")));
@@ -563,6 +587,7 @@ public partial class MainWindow : Window
         view.Items.Add(Item("ZoomOut", ctrl + "-", () => RunCommand("zoom-")));
         view.Items.Add(Item("ZoomReset", ctrl + "0", () => RunCommand("zoom0")));
         view.Items.Add(new Separator());
+        view.Items.Add(Item("Files", ctrl + "Shift+E", () => { ToggleFiles(); return Task.CompletedTask; }, _settings.FilesPanel));
         view.Items.Add(Item("Outline", ctrl + "Shift+O", () => { ToggleOutline(); return Task.CompletedTask; }, _settings.Outline));
         view.Items.Add(Item("Spell", null, async () =>
         {
@@ -625,6 +650,7 @@ public partial class MainWindow : Window
     {
         Tools.Children.Clear();
         void Sep() => Tools.Children.Add(new Border { Style = (Style)FindResource("Gm.ToolSep") });
+        Tools.Children.Add(Tool("\uE8B7", "Files", "Ctrl+Shift+E", () => { ToggleFiles(); return Task.CompletedTask; }));
         Tools.Children.Add(Tool("", "Outline", "Ctrl+Shift+O", () => { ToggleOutline(); return Task.CompletedTask; }));
         Sep();
 
@@ -781,6 +807,7 @@ public partial class MainWindow : Window
     {
         var name = _path != null ? Path.GetFileName(_path) : Strings.Get(_isSample ? "SampleTitle" : "Untitled");
         Title = $"{(_dirty ? "● " : "")}{name} — Gryphmark";
+        RevealCurrent();   // the Files panel follows the open file
     }
 
     private void UpdateStatus()
