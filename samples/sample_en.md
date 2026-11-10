@@ -1,11 +1,9 @@
 # Welcome to Gryphmark
 
-This is a **sample document**. Change it as much as you like: it opens as an untitled copy, so the original
-is never overwritten. Save it with **Save as** if you want to keep your version.
+This is a **sample document**. Change it as much as you like: it opens as an untitled copy, so the original is never overwritten. Save it with **Save as** if you want to keep your version.
 
 > [!TIP]
-> Try the three buttons at the right end of the toolbar — **Visual · Markdown · GitHub** — or press
-> `Ctrl+1`, `Ctrl+2` and `Ctrl+3`. It is the same document seen three ways.
+> Try the three buttons at the right end of the toolbar — **Visual · Markdown · GitHub** — or press `Ctrl+1`, `Ctrl+2` and `Ctrl+3`. It is the same document seen three ways.
 
 ## The three views
 
@@ -21,8 +19,7 @@ is never overwritten. Save it with **Save as** if you want to keep your version.
 
 ## Text
 
-Plain text, *italic*, **bold**, ~~strikethrough~~, `inline code` and a [link to GitHub](https://github.com).
-Emoji by name work too :sparkles: :rocket:, and so do footnotes.[^1]
+Plain text, *italic*, **bold**, ~~strikethrough~~, `inline code` and a [link to GitHub](https://github.com). Emoji by name work too :sparkles: :rocket:, and so do footnotes.[^1]
 
 - A bulleted list
   - with a nested item
@@ -64,9 +61,12 @@ $$
 > [!WARNING]
 > Something that needs attention.
 
+## Folders
+
+Open a whole folder with **File → Open folder…** and its Markdown files appear in a tree on the left, like in VS Code or Obsidian. Click a file to open it; `Ctrl+Shift+E` shows or hides the panel.
+
 ---
 
-To stop showing this sample in **File → Open recent**, right-click it there and choose **Hide sample**.
-It is always available again from **Help → Sample document**.
+To stop showing this sample in **File → Open recent**, right-click it there and choose **Hide sample**. It is always available again from **Help → Sample document**.
 
 [^1]: A footnote: it is listed at the end of the page in the GitHub view.

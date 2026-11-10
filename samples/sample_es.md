@@ -1,11 +1,9 @@
 # Bienvenido a Gryphmark
 
-Este es un **documento de ejemplo**. Cambialo todo lo que quieras: se abre como una copia sin título, así que el
-original nunca se pisa. Si querés conservar tu versión, guardala con **Guardar como**.
+Este es un **documento de ejemplo**. Cambialo todo lo que quieras: se abre como una copia sin título, así que el original nunca se pisa. Si querés conservar tu versión, guardala con **Guardar como**.
 
 > [!TIP]
-> Probá los tres botones del extremo derecho de la barra — **Visual · Markdown · GitHub** — o apretá
-> `Ctrl+1`, `Ctrl+2` y `Ctrl+3`. Es el mismo documento visto de tres maneras.
+> Probá los tres botones del extremo derecho de la barra — **Visual · Markdown · GitHub** — o apretá `Ctrl+1`, `Ctrl+2` y `Ctrl+3`. Es el mismo documento visto de tres maneras.
 
 ## Las tres vistas
 
@@ -21,8 +19,7 @@ original nunca se pisa. Si querés conservar tu versión, guardala con **Guardar
 
 ## Texto
 
-Texto normal, *cursiva*, **negrita**, ~~tachado~~, `código en línea` y un [enlace a GitHub](https://github.com).
-También andan los emoji por nombre :sparkles: :rocket: y las notas al pie.[^1]
+Texto normal, *cursiva*, **negrita**, ~~tachado~~, `código en línea` y un [enlace a GitHub](https://github.com). También andan los emoji por nombre :sparkles: :rocket: y las notas al pie.[^1]
 
 - Una lista con viñetas
   - con un elemento anidado
@@ -64,9 +61,12 @@ $$
 > [!WARNING]
 > Algo que requiere atención.
 
+## Carpetas
+
+Abrí una carpeta entera con **Archivo → Abrir carpeta…** y sus archivos Markdown aparecen en un árbol a la izquierda, como en VS Code u Obsidian. Clic en un archivo para abrirlo; `Ctrl+Shift+E` muestra u oculta el panel.
+
 ---
 
-Para que este ejemplo no aparezca más en **Archivo → Abrir reciente**, hacé clic derecho sobre él ahí y elegí
-**Ocultar ejemplo**. Siempre lo podés volver a abrir desde **Ayuda → Documento de ejemplo**.
+Para que este ejemplo no aparezca más en **Archivo → Abrir reciente**, hacé clic derecho sobre él ahí y elegí **Ocultar ejemplo**. Siempre lo podés volver a abrir desde **Ayuda → Documento de ejemplo**.
 
 [^1]: Una nota al pie: en la vista GitHub aparece al final de la página.
