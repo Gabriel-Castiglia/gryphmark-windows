@@ -530,7 +530,7 @@ public partial class MainWindow : Window
         help.Items.Add(new Separator());
         help.Items.Add(Item("About", null, () =>
         {
-            MessageBox.Show(this, string.Format(Strings.Get("AboutText"), Version), Strings.Plain("About"), MessageBoxButton.OK, MessageBoxImage.Information);
+            new AboutDialog(this, Version).ShowDialog();
             return Task.CompletedTask;
         }));
         MainMenu.Items.Add(help);
@@ -604,9 +604,9 @@ public partial class MainWindow : Window
         SegVisual.Content = Strings.Get("SegVisual");
         SegSource.Content = Strings.Get("SegSource");
         SegPreview.Content = Strings.Get("SegPreview");
-        SegVisual.ToolTip = Strings.Plain("ModeVisual") + "   Ctrl+1";
-        SegSource.ToolTip = Strings.Plain("ModeSource") + "   Ctrl+2";
-        SegPreview.ToolTip = Strings.Plain("ModePreview") + "   Ctrl+3";
+        SegVisual.ToolTip = SegTip("ModeVisual", "TipVisual", "Ctrl+1");
+        SegSource.ToolTip = SegTip("ModeSource", "TipSource", "Ctrl+2");
+        SegPreview.ToolTip = SegTip("ModePreview", "TipPreview", "Ctrl+3");
         SyncSegments();
         if (!_segWired)
         {
@@ -615,6 +615,15 @@ public partial class MainWindow : Window
             SegSource.Checked += async (_, _) => { if (_settings.Mode != "source") await SetMode("source"); };
             SegPreview.Checked += async (_, _) => { if (_settings.Mode != "preview") await SetMode("preview"); };
         }
+    }
+
+    /// <summary>Two-line tooltip for the mode buttons: name + shortcut in bold, then what the mode is for.</summary>
+    internal static object SegTip(string nameKey, string tipKey, string gesture)
+    {
+        var p = new StackPanel { MaxWidth = 380 };
+        p.Children.Add(new TextBlock { Text = Strings.Plain(nameKey) + "   " + gesture, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 3) });
+        p.Children.Add(new TextBlock { Text = Strings.Get(tipKey), TextWrapping = TextWrapping.Wrap });
+        return p;
     }
 
     private void SyncSegments()

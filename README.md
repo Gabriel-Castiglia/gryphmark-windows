@@ -24,8 +24,8 @@ Quillforge writes the Markdown tags for you. Documents are rendered exactly like
 **Build:** Windows, .NET 8 SDK, Node.js, Python 3 + Pillow/numpy/scipy/opencv, Inno Setup 6, Microsoft Edge.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.1.0
-# -> out/Quillforge-Setup-1.1.0.exe
+powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.1.1
+# -> out/Quillforge-Setup-1.1.1.exe
 ```
 
 ## Español
@@ -48,8 +48,8 @@ tema claro u oscuro.
 **Compilar:** Windows, SDK de .NET 8, Node.js, Python 3 + Pillow/numpy/scipy/opencv, Inno Setup 6, Microsoft Edge.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.1.0
-# -> out/Quillforge-Setup-1.1.0.exe
+powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.1.1
+# -> out/Quillforge-Setup-1.1.1.exe
 ```
 
 ## Project layout / Estructura

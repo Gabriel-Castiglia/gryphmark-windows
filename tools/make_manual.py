@@ -70,10 +70,11 @@ The .NET runtime is included; nothing else has to be installed.</p>
 <p>The title bar shows the file name; a <b>●</b> in front of it means there are unsaved changes.</p>
 """),
    ("Three ways to see a document", f"""
-<table><tr><th>Mode</th><th>Shortcut</th><th>What you see</th></tr>
-<tr><td><b>Visual editor</b></td><td><kbd>Ctrl</kbd>+<kbd>1</kbd></td><td>The formatted document. Type and use the buttons; the Markdown is generated for you.</td></tr>
-<tr><td><b>Markdown source</b></td><td><kbd>Ctrl</kbd>+<kbd>2</kbd></td><td>The raw Markdown on the left and a live preview on the right. For when you want to see or touch the tags.</td></tr>
-<tr><td><b>GitHub preview</b></td><td><kbd>Ctrl</kbd>+<kbd>3</kbd></td><td>Read-only page rendered like GitHub, with syntax highlighting, task lists and clickable links.</td></tr></table>
+<p>Switch with the three buttons at the right end of the toolbar — <b>Visual · Markdown · GitHub</b> —, the <i>View</i> menu or the shortcuts. Hover over a button to see what it does.</p>
+<table><tr><th>Button</th><th>Shortcut</th><th>What you see</th></tr>
+<tr><td><b>Visual</b><br><small>Visual editor</small></td><td><kbd>Ctrl</kbd>+<kbd>1</kbd></td><td>The formatted document. Type and use the buttons; the Markdown is generated for you.</td></tr>
+<tr><td><b>Markdown</b><br><small>Markdown source</small></td><td><kbd>Ctrl</kbd>+<kbd>2</kbd></td><td>The raw Markdown on the left and a live preview on the right. For when you want to see or touch the tags.</td></tr>
+<tr><td><b>GitHub</b><br><small>GitHub preview</small></td><td><kbd>Ctrl</kbd>+<kbd>3</kbd></td><td>Read-only page rendered like GitHub, with syntax highlighting, task lists and clickable links.</td></tr></table>
 <figure><img src="{img('source_light_en.png')}"><figcaption>Markdown source with live preview.</figcaption></figure>
 <figure><img src="{img('preview_light_en.png')}"><figcaption>GitHub preview (light theme).</figcaption></figure>
 """),
@@ -121,7 +122,8 @@ In GitHub preview, links to web pages open in your browser, links to other <code
 <tr><td>Crash recovery</td><td>Unsaved work is backed up every 20 seconds. If Quillforge or Windows stops unexpectedly, the next start offers to recover it.</td></tr>
 <tr><td>Spell check</td><td><i>View → Spell check</i> underlines misspelled words (Windows dictionaries).</td></tr>
 <tr><td>One window per file</td><td>Opening a .md while Quillforge is running brings the existing window forward instead of starting a second copy. <i>File → New window</i> still opens another one.</td></tr>
-<tr><td>Updates</td><td>Quillforge checks once a day for a new version; <i>Help → Check for updates</i> does it on demand.</td></tr></table>
+<tr><td>Updates</td><td>Quillforge checks once a day for a new version; <i>Help → Check for updates</i> does it on demand.</td></tr>
+<tr><td>About</td><td><i>Help → About Quillforge</i> shows the version, author, license and credits. <i>Copy info</i> copies the version details, handy for reporting a problem.</td></tr></table>
 <h3>GitHub extras</h3>
 <p>Also rendered exactly like GitHub: alerts (<code>&gt; [!NOTE]</code>, <code>[!TIP]</code>, <code>[!IMPORTANT]</code>, <code>[!WARNING]</code>, <code>[!CAUTION]</code>),
 <code>```mermaid</code> diagrams, math (<code>$E=mc^2$</code> and <code>$$ … $$</code>), footnotes (<code>[^1]</code>) and emoji shortcodes (<code>:rocket:</code>).</p>
@@ -190,12 +192,13 @@ configuración en <code>%APPDATA%\\Quillforge</code> se conserva.</p>
 <p>La barra de título muestra el nombre del archivo; un <b>●</b> delante indica que hay cambios sin guardar.</p>
 """),
    ("Tres formas de ver un documento", f"""
-<table><tr><th>Modo</th><th>Atajo</th><th>Qué ves</th></tr>
-<tr><td><b>Editor visual</b></td><td><kbd>Ctrl</kbd>+<kbd>1</kbd></td><td>El documento con formato. Escribís y usás los botones; el Markdown se genera solo.</td></tr>
-<tr><td><b>Código Markdown</b></td><td><kbd>Ctrl</kbd>+<kbd>2</kbd></td><td>El Markdown a la izquierda y la vista previa en vivo a la derecha. Para ver o tocar las etiquetas.</td></tr>
-<tr><td><b>Vista GitHub</b></td><td><kbd>Ctrl</kbd>+<kbd>3</kbd></td><td>Página de solo lectura igual a GitHub, con colores de código, listas de tareas y enlaces que funcionan.</td></tr></table>
-<figure><img src="{img('source_light_en.png')}"><figcaption>Código Markdown con vista previa en vivo.</figcaption></figure>
-<figure><img src="{img('preview_light_en.png')}"><figcaption>Vista GitHub (tema claro).</figcaption></figure>
+<p>Se cambia con los tres botones del extremo derecho de la barra — <b>Visual · Markdown · GitHub</b> —, con el menú <i>Ver</i> o con los atajos. Pasá el mouse sobre un botón para ver qué hace.</p>
+<table><tr><th>Botón</th><th>Atajo</th><th>Qué ves</th></tr>
+<tr><td><b>Visual</b><br><small>Editor visual</small></td><td><kbd>Ctrl</kbd>+<kbd>1</kbd></td><td>El documento con formato. Escribís y usás los botones; el Markdown se genera solo.</td></tr>
+<tr><td><b>Markdown</b><br><small>Código Markdown</small></td><td><kbd>Ctrl</kbd>+<kbd>2</kbd></td><td>El Markdown a la izquierda y la vista previa en vivo a la derecha. Para ver o tocar las etiquetas.</td></tr>
+<tr><td><b>GitHub</b><br><small>Vista GitHub</small></td><td><kbd>Ctrl</kbd>+<kbd>3</kbd></td><td>Página de solo lectura igual a GitHub, con colores de código, listas de tareas y enlaces que funcionan.</td></tr></table>
+<figure><img src="{img('source_light_es.png')}"><figcaption>Código Markdown con vista previa en vivo.</figcaption></figure>
+<figure><img src="{img('preview_light_es.png')}"><figcaption>Vista GitHub (tema claro).</figcaption></figure>
 """),
    ("Barra de formato", """
 <table><tr><th>Botón</th><th>Acción</th><th>Markdown que escribe</th></tr>
@@ -241,7 +244,8 @@ En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otro
 <tr><td>Recuperación</td><td>Lo no guardado se respalda cada 20 segundos. Si Quillforge o Windows se cierran de golpe, al volver a abrir ofrece recuperarlo.</td></tr>
 <tr><td>Ortografía</td><td><i>Ver → Revisar ortografía</i> subraya las palabras mal escritas (diccionarios de Windows).</td></tr>
 <tr><td>Una sola ventana</td><td>Abrir un .md con Quillforge ya abierto trae al frente la ventana existente en vez de abrir otra copia. <i>Archivo → Nueva ventana</i> sigue abriendo otra.</td></tr>
-<tr><td>Actualizaciones</td><td>Quillforge busca una versión nueva una vez por día; <i>Ayuda → Buscar actualizaciones</i> lo hace en el momento.</td></tr></table>
+<tr><td>Actualizaciones</td><td>Quillforge busca una versión nueva una vez por día; <i>Ayuda → Buscar actualizaciones</i> lo hace en el momento.</td></tr>
+<tr><td>Acerca de</td><td><i>Ayuda → Acerca de Quillforge</i> muestra la versión, el autor, la licencia y los créditos. <i>Copiar info</i> copia los datos de versión, útil para reportar un problema.</td></tr></table>
 <h3>Extras de GitHub</h3>
 <p>También se muestran igual que en GitHub: avisos (<code>&gt; [!NOTE]</code>, <code>[!TIP]</code>, <code>[!IMPORTANT]</code>, <code>[!WARNING]</code>, <code>[!CAUTION]</code>),
 diagramas <code>```mermaid</code>, fórmulas (<code>$E=mc^2$</code> y <code>$$ … $$</code>), notas al pie (<code>[^1]</code>) y emojis por código (<code>:rocket:</code>).</p>

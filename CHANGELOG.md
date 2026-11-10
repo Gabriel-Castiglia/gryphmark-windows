@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1 — 2026-11-10
+
+- New About window in the app style: icon, version, author, GPL-2.0 license with a link to the full text,
+  complete credits (highlight.js and jsdiff are BSD-3-Clause) and a *Copy info* button. English and Spanish.
+- The Visual / Markdown / GitHub buttons now explain in their tooltip what each mode is for.
+- Manual: the modes are named as on the buttons; About documented; Spanish screenshots.
+
 ## 1.1.0 — 2026-11-10
 
 - Find & replace bar (`Ctrl+F`, `Ctrl+H`, `F3` / `Shift+F3`, match case).

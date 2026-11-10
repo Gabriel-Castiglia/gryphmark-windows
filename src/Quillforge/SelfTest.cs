@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -37,7 +38,42 @@ public static class SelfTest
                 top.IsSubmenuOpen = false;
                 i++;
             }
+            // About window and the mode-button tooltips, in both languages
+            var keepLang = Strings.Lang;
+            foreach (var lang in new[] { "en", "es" })
+            {
+                Strings.Lang = lang;
+                string sfx = $"{lang}_{(dark ? "dark" : "light")}";
+                var about = new AboutDialog(w, "1.1.1");
+                Layout(about.Card);
+                Save(about.Card, Path.Combine(dir, $"about_{sfx}.png"), dark);
+                about.Close();
+                var tips = new StackPanel();
+                foreach (var (n, t, g) in new[] { ("ModeVisual", "TipVisual", "Ctrl+1"), ("ModeSource", "TipSource", "Ctrl+2"), ("ModePreview", "TipPreview", "Ctrl+3") })
+                {
+                    // same look as the ToolTip template in Theme.xaml (a real ToolTip cannot be parented)
+                    var tt = new Border { CornerRadius = new CornerRadius(7), Padding = new Thickness(9, 5, 9, 5), Margin = new Thickness(6, 4, 6, 6),
+                                          BorderThickness = new Thickness(1), Child = (UIElement)MainWindow.SegTip(n, t, g),
+                                          HorizontalAlignment = HorizontalAlignment.Left };
+                    tt.SetResourceReference(Border.BackgroundProperty, "Qf.Popup");
+                    tt.SetResourceReference(Border.BorderBrushProperty, "Qf.PopupBorder");
+                    tt.SetResourceReference(TextElement.ForegroundProperty, "Qf.Text");
+                    tt.SetResourceReference(TextElement.FontFamilyProperty, "Qf.Font");
+                    TextElement.SetFontSize(tt, 12);
+                    tips.Children.Add(tt);
+                }
+                Layout(tips);
+                Save(tips, Path.Combine(dir, $"tooltips_{sfx}.png"), dark);
+            }
+            Strings.Lang = keepLang;
         }
+    }
+
+    private static void Layout(FrameworkElement el)
+    {
+        el.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        el.Arrange(new Rect(el.DesiredSize));
+        el.UpdateLayout();
     }
 
     private static void Save(FrameworkElement el, string path, bool? darkBg = null)
