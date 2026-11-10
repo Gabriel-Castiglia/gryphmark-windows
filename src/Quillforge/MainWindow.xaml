@@ -1,0 +1,25 @@
+<Window x:Class="Quillforge.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="Quillforge" Width="1200" Height="820" MinWidth="560" MinHeight="380"
+        Icon="pack://application:,,,/Quillforge.ico"
+        WindowStartupLocation="CenterScreen" UseLayoutRounding="True"
+        AllowDrop="True">
+    <DockPanel>
+        <Menu x:Name="MainMenu" DockPanel.Dock="Top" FontSize="13" Padding="2,1" />
+        <StatusBar x:Name="Status" DockPanel.Dock="Bottom" FontSize="12" Padding="6,0">
+            <StatusBarItem>
+                <TextBlock x:Name="StatusPath" TextTrimming="CharacterEllipsis" />
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="StatusWords" Margin="0,0,18,0" />
+                    <TextBlock x:Name="StatusMode" Margin="0,0,18,0" />
+                    <TextBlock x:Name="StatusState" />
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
+        <wv2:WebView2 x:Name="Web" />
+    </DockPanel>
+</Window>

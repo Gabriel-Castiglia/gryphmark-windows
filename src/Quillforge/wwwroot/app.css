@@ -1,0 +1,52 @@
+html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+body.light { background: #ffffff; }
+body.dark  { background: #0d1117; }
+
+#editorHost { height: 100%; }
+#previewHost { display: none; height: 100%; overflow: auto; box-sizing: border-box; }
+body.mode-preview #editorHost { display: none; }
+body.mode-preview #previewHost { display: block; }
+
+/* GitHub page layout for the read-only view */
+#preview { box-sizing: border-box; max-width: 980px; margin: 0 auto; padding: 32px 45px 64px; }
+
+/* Toast UI frame tuned to look like a document, not a widget */
+.toastui-editor-defaultUI { border: none !important; border-radius: 0 !important; }
+.toastui-editor-defaultUI .toastui-editor-toolbar { position: sticky; top: 0; z-index: 5; }
+.toastui-editor-mode-switch { display: none !important; }
+
+/* Visual editor page: same column and spacing as github.com */
+.toastui-editor-ww-container .toastui-editor-contents.markdown-body {
+  max-width: 980px; margin: 0 auto; padding: 24px 45px 64px; box-sizing: border-box;
+  font-size: 16px; line-height: 1.5;
+}
+/* Toast's own colours lose to GitHub's inside documents */
+.toastui-editor-contents.markdown-body p,
+.toastui-editor-contents.markdown-body li,
+.toastui-editor-contents.markdown-body td { color: inherit; }
+.toastui-editor-contents.markdown-body h1,
+.toastui-editor-contents.markdown-body h2 { border-bottom: 1px solid var(--borderColor-muted, #d1d9e0b3); }
+.toastui-editor-contents.markdown-body h1 { font-size: 2em; margin: .67em 0; padding-bottom: .3em; }
+.toastui-editor-contents.markdown-body h2 { font-size: 1.5em; padding-bottom: .3em; }
+.toastui-editor-contents.markdown-body h3 { font-size: 1.25em; border: none; }
+.toastui-editor-contents.markdown-body h4 { font-size: 1em; border: none; }
+.toastui-editor-contents.markdown-body h5 { font-size: .875em; border: none; }
+.toastui-editor-contents.markdown-body h6 { font-size: .85em; border: none; }
+.toastui-editor-contents.markdown-body blockquote { border-left: .25em solid var(--borderColor-default, #d1d9e0); color: var(--fgColor-muted, #59636e); padding: 0 1em; margin: 0 0 16px; }
+.toastui-editor-contents.markdown-body blockquote p { color: inherit; }
+.toastui-editor-contents.markdown-body table td,
+.toastui-editor-contents.markdown-body table th { border: 1px solid var(--borderColor-default, #d1d9e0); padding: 6px 13px; }
+.toastui-editor-contents.markdown-body table th { background: transparent; color: inherit; font-weight: 600; }
+.toastui-editor-contents.markdown-body code { background: var(--bgColor-neutral-muted, #818b981f); color: inherit; border-radius: 6px; padding: .2em .4em; font-size: 85%; }
+.toastui-editor-contents.markdown-body pre { background: var(--bgColor-muted, #f6f8fa); border-radius: 6px; padding: 16px; font-size: 13.6px; line-height: 1.45; }
+.toastui-editor-contents.markdown-body pre code { background: transparent; padding: 0; font-size: 100%; }
+body.dark .toastui-editor-contents.markdown-body { background: #0d1117; }
+body.dark .toastui-editor-dark .toastui-editor-ww-container,
+body.dark .toastui-editor-dark .toastui-editor-md-container { background: #0d1117; }
+
+@media print {
+  #editorHost { display: none !important; }
+  #previewHost { display: block !important; overflow: visible; height: auto; }
+  #preview { padding: 0; max-width: none; }
+  html, body { overflow: visible; height: auto; }
+}

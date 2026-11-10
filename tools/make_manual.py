@@ -1,0 +1,258 @@
+"""Builds docs/Quillforge_Manual_EN.html and _ES.html; build.ps1 prints them to PDF with Edge."""
+import pathlib, base64, sys
+
+root = pathlib.Path(__file__).resolve().parents[1]
+docs = root / "docs"
+version = sys.argv[1] if len(sys.argv) > 1 else "1.0.0"
+
+def img(name):
+    return "data:image/png;base64," + base64.b64encode((docs / "img" / name).read_bytes()).decode()
+
+icon = "data:image/png;base64," + base64.b64encode((root / "assets" / "quillforge.png").read_bytes()).decode()
+
+CSS = """
+@page { size: A4; margin: 18mm 17mm 20mm; }
+* { box-sizing: border-box; }
+body { font-family: "Segoe UI", system-ui, sans-serif; color: #1f2328; font-size: 10.5pt; line-height: 1.55; margin: 0; }
+.cover { height: 257mm; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+  background: radial-gradient(ellipse at 50% 95%, #7a3412 0%, #2a1416 45%, #15172a 100%); color: #fff; border-radius: 10px; page-break-after: always; }
+.cover img { width: 190px; height: 190px; filter: drop-shadow(0 12px 30px rgba(255,120,30,.45)); }
+.cover h1 { font-size: 46pt; margin: 22px 0 4px; letter-spacing: 1px; font-weight: 700; }
+.cover .tag { font-size: 14pt; color: #ffcf8a; margin: 0 0 40px; }
+.cover .meta { font-size: 10pt; color: #c9c3d9; }
+h2 { font-size: 17pt; color: #8a3a0e; border-bottom: 2px solid #f0a35a; padding-bottom: 4px; margin: 26px 0 10px; page-break-after: avoid; }
+h3 { font-size: 12.5pt; margin: 18px 0 6px; color: #2a1416; page-break-after: avoid; }
+p { margin: 6px 0 9px; }
+table { border-collapse: collapse; width: 100%; margin: 8px 0 14px; font-size: 9.8pt; page-break-inside: avoid; }
+th, td { border: 1px solid #d0d7de; padding: 5px 9px; text-align: left; vertical-align: top; }
+th { background: #fbeee2; }
+kbd { font-family: Consolas, monospace; font-size: 9pt; background: #f6f8fa; border: 1px solid #d0d7de; border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; white-space: nowrap; }
+code { font-family: Consolas, monospace; font-size: 9.2pt; background: #f2f2f4; border-radius: 4px; padding: 0 4px; }
+figure { margin: 10px 0 16px; page-break-inside: avoid; text-align: center; }
+figure img { width: 100%; border: 1px solid #d0d7de; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+figcaption { font-size: 9pt; color: #59636e; margin-top: 4px; }
+.note { background: #fff6ec; border-left: 4px solid #f0a35a; padding: 8px 12px; margin: 10px 0; border-radius: 0 6px 6px 0; }
+.toc { columns: 2; font-size: 10pt; }
+.toc div { margin: 2px 0; }
+.page { page-break-before: always; }
+"""
+
+T = {
+ "en": dict(
+  title="User Manual", tag="Forge your Markdown. See it like GitHub.", lang="en",
+  toc="Contents",
+  sections=[
+   ("What is Quillforge", f"""
+<p><b>Quillforge</b> is a Markdown viewer and editor for Windows. You format text with buttons — headings, bold, lists,
+tables, code — and Quillforge writes the Markdown tags behind the scenes. Every document is shown exactly the way
+GitHub displays it, in light or dark theme.</p>
+<p>It is designed for <code>README.md</code> files, notes, documentation and any <code>.md</code> file you want to read or edit
+without memorising syntax.</p>
+<figure><img src="{img('visual_light_en.png')}"><figcaption>Visual editor: format with the toolbar, no tags in sight.</figcaption></figure>
+"""),
+   ("Installation", """
+<p>Run <code>Quillforge-Setup-{v}.exe</code>. The installer is available in English and Spanish and does <b>not</b> need
+administrator rights: it installs for the current user in <code>%LOCALAPPDATA%\\Programs\\Quillforge</code>.</p>
+<table><tr><th>Option</th><th>What it does</th></tr>
+<tr><td>Desktop shortcut</td><td>Adds a Quillforge icon to the desktop.</td></tr>
+<tr><td>Open .md files with Quillforge</td><td>Adds Quillforge to <i>Open with</i> for .md / .markdown files, and makes it the handler for those files for the current user.</td></tr></table>
+<p>Requirements: Windows 10 or 11 (64-bit) and Microsoft Edge WebView2 Runtime, which is already part of Windows 11.
+The .NET runtime is included; nothing else has to be installed.</p>
+<p>To uninstall: <i>Settings → Apps → Installed apps → Quillforge → Uninstall</i>. Your settings in
+<code>%APPDATA%\\Quillforge</code> are kept.</p>
+"""),
+   ("The window", """
+<table><tr><th>Part</th><th>Use</th></tr>
+<tr><td>Menu bar</td><td>File, Edit, Format, View, Language and Help. All menus are available in English and Spanish.</td></tr>
+<tr><td>Toolbar</td><td>The formatting buttons (see below). Hidden in GitHub preview, which is read-only.</td></tr>
+<tr><td>Document</td><td>The page itself, laid out with the same column width, fonts and spacing as github.com.</td></tr>
+<tr><td>Status bar</td><td>File path, word count, current mode, and whether there are unsaved changes.</td></tr></table>
+<p>The title bar shows the file name; a <b>●</b> in front of it means there are unsaved changes.</p>
+"""),
+   ("Three ways to see a document", f"""
+<table><tr><th>Mode</th><th>Shortcut</th><th>What you see</th></tr>
+<tr><td><b>Visual editor</b></td><td><kbd>Ctrl</kbd>+<kbd>1</kbd></td><td>The formatted document. Type and use the buttons; the Markdown is generated for you.</td></tr>
+<tr><td><b>Markdown source</b></td><td><kbd>Ctrl</kbd>+<kbd>2</kbd></td><td>The raw Markdown on the left and a live preview on the right. For when you want to see or touch the tags.</td></tr>
+<tr><td><b>GitHub preview</b></td><td><kbd>Ctrl</kbd>+<kbd>3</kbd></td><td>Read-only page rendered like GitHub, with syntax highlighting, task lists and clickable links.</td></tr></table>
+<figure><img src="{img('source_light_en.png')}"><figcaption>Markdown source with live preview.</figcaption></figure>
+<figure><img src="{img('preview_light_en.png')}"><figcaption>GitHub preview (light theme).</figcaption></figure>
+"""),
+   ("Formatting toolbar", """
+<table><tr><th>Button</th><th>Action</th><th>Markdown it writes</th></tr>
+<tr><td>H</td><td>Heading 1–6 or normal paragraph</td><td><code># Title</code> … <code>###### Title</code></td></tr>
+<tr><td><b>B</b></td><td>Bold</td><td><code>**text**</code></td></tr>
+<tr><td><i>I</i></td><td>Italic</td><td><code>*text*</code></td></tr>
+<tr><td><s>S</s></td><td>Strikethrough</td><td><code>~~text~~</code></td></tr>
+<tr><td>—</td><td>Horizontal rule</td><td><code>***</code></td></tr>
+<tr><td>❝</td><td>Quote</td><td><code>&gt; text</code></td></tr>
+<tr><td>• list / 1. list</td><td>Bulleted / numbered list</td><td><code>- item</code> / <code>1. item</code></td></tr>
+<tr><td>☑</td><td>Task list</td><td><code>- [ ] task</code></td></tr>
+<tr><td>→ / ←</td><td>Indent / outdent list item</td><td>nested list</td></tr>
+<tr><td>Table</td><td>Insert table (choose rows × columns)</td><td><code>| a | b |</code></td></tr>
+<tr><td>Image</td><td>Insert image from URL or file name</td><td><code>![alt](file.png)</code></td></tr>
+<tr><td>Link</td><td>Insert link</td><td><code>[text](https://…)</code></td></tr>
+<tr><td>&lt;/&gt;</td><td>Inline code</td><td><code>`code`</code></td></tr>
+<tr><td>CB</td><td>Code block (choose language for colouring)</td><td><code>```python</code></td></tr></table>
+<p>The same actions are in the <b>Format</b> menu. Right-click inside a table to add or delete rows and columns, or to align a column.</p>
+"""),
+   ("Files", """
+<table><tr><th>Action</th><th>How</th></tr>
+<tr><td>Open</td><td><i>File → Open</i> (<kbd>Ctrl</kbd>+<kbd>O</kbd>), double-click a .md file, or drag a file onto the window.</td></tr>
+<tr><td>Recent files</td><td><i>File → Open recent</i> keeps the last 12 files.</td></tr>
+<tr><td>Save / Save as</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. Files are saved as UTF-8 without BOM, the same as GitHub.</td></tr>
+<tr><td>New / New window</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> starts an empty document; <i>New window</i> opens a second Quillforge.</td></tr>
+<tr><td>Show in folder</td><td>Opens Explorer with the file selected.</td></tr></table>
+<p>If you close a document with unsaved changes, Quillforge asks whether to save them.</p>
+<h3>Images and links</h3>
+<p>Relative paths work as on GitHub: <code>![diagram](img/diagram.png)</code> shows the image stored next to the .md file.
+In GitHub preview, links to web pages open in your browser, links to other <code>.md</code> files open in Quillforge, and
+<code>#heading</code> links jump inside the document.</p>
+"""),
+   ("Export and print", """
+<p><b>Export to HTML</b> saves a single, self-contained HTML page with the GitHub style embedded — ready to e-mail or publish.</p>
+<p><b>Print / PDF</b> (<kbd>Ctrl</kbd>+<kbd>P</kbd>) prints the GitHub-style page. Choose <i>Save as PDF</i> as the printer to create a PDF.</p>
+"""),
+   ("Language, theme and zoom", f"""
+<p><b>Language</b> menu: English or Español. It changes the menus, the toolbar tooltips and dialogs immediately.
+The first time, Quillforge follows the Windows language.</p>
+<p><b>View → Dark theme</b> switches between GitHub light and GitHub dark. Zoom with <kbd>Ctrl</kbd>+<kbd>+</kbd>,
+<kbd>Ctrl</kbd>+<kbd>-</kbd> and <kbd>Ctrl</kbd>+<kbd>0</kbd>. Language, theme, mode, zoom and window size are remembered.</p>
+<figure><img src="{img('preview_dark_es.png')}"><figcaption>GitHub dark theme.</figcaption></figure>
+"""),
+   ("Keyboard shortcuts", """
+<table><tr><th>Keys</th><th>Action</th><th>Keys</th><th>Action</th></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>N</kbd></td><td>New</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td><td>Bold</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Open</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td><td>Italic</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Save</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td><td>Undo / Redo</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Save as</td><td><kbd>Ctrl</kbd>+<kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd></td><td>Visual / Source / GitHub</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>P</kbd></td><td>Print / PDF</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>-</kbd> / <kbd>0</kbd></td><td>Zoom</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Close window</td><td><kbd>F1</kbd></td><td>This manual</td></tr></table>
+"""),
+   ("Technical information", """
+<table><tr><th>Item</th><th>Detail</th></tr>
+<tr><td>Version</td><td>{v}</td></tr>
+<tr><td>Platform</td><td>.NET 8 (WPF, self-contained) + Microsoft Edge WebView2</td></tr>
+<tr><td>Editor</td><td>TOAST UI Editor 3.2 (MIT)</td></tr>
+<tr><td>GitHub rendering</td><td>marked (GitHub Flavored Markdown), highlight.js, github-markdown-css (MIT)</td></tr>
+<tr><td>Settings</td><td><code>%APPDATA%\\Quillforge\\settings.json</code></td></tr>
+<tr><td>Source code</td><td><code>src/</code> in the project folder; build with <code>build.ps1</code>.</td></tr></table>
+<div class="note">The visual editor normalises some details when it writes Markdown (for example, <code>*</code> lists become
+<code>-</code>). The text and the way GitHub displays it do not change.</div>
+"""),
+  ]),
+ "es": dict(
+  title="Manual de usuario", tag="Forjá tu Markdown. Miralo como en GitHub.", lang="es",
+  toc="Contenido",
+  sections=[
+   ("Qué es Quillforge", f"""
+<p><b>Quillforge</b> es un visor y editor de Markdown para Windows. Das formato con botones —títulos, negrita, listas,
+tablas, código— y Quillforge escribe por detrás las etiquetas de Markdown. Cada documento se ve exactamente como
+lo muestra GitHub, con tema claro u oscuro.</p>
+<p>Está pensado para archivos <code>README.md</code>, notas, documentación y cualquier <code>.md</code> que quieras leer o editar
+sin aprenderte la sintaxis.</p>
+<figure><img src="{img('visual_light_es.png')}"><figcaption>Editor visual: formato con la barra de herramientas, sin etiquetas a la vista.</figcaption></figure>
+"""),
+   ("Instalación", """
+<p>Ejecutá <code>Quillforge-Setup-{v}.exe</code>. El instalador está en inglés y en español y <b>no</b> pide permisos de
+administrador: instala para el usuario actual en <code>%LOCALAPPDATA%\\Programs\\Quillforge</code>.</p>
+<table><tr><th>Opción</th><th>Qué hace</th></tr>
+<tr><td>Acceso directo en el escritorio</td><td>Pone el ícono de Quillforge en el escritorio.</td></tr>
+<tr><td>Abrir los .md con Quillforge</td><td>Agrega Quillforge a <i>Abrir con</i> para los .md / .markdown y lo deja como programa para esos archivos en el usuario actual.</td></tr></table>
+<p>Requisitos: Windows 10 u 11 de 64 bits y Microsoft Edge WebView2 Runtime, que ya viene con Windows 11.
+El runtime de .NET va incluido; no hay que instalar nada más.</p>
+<p>Para desinstalar: <i>Configuración → Aplicaciones → Aplicaciones instaladas → Quillforge → Desinstalar</i>. La
+configuración en <code>%APPDATA%\\Quillforge</code> se conserva.</p>
+"""),
+   ("La ventana", """
+<table><tr><th>Parte</th><th>Para qué sirve</th></tr>
+<tr><td>Menú</td><td>Archivo, Edición, Formato, Ver, Idioma y Ayuda. Todos los menús están en inglés y en español.</td></tr>
+<tr><td>Barra de herramientas</td><td>Los botones de formato (ver más abajo). No aparece en la vista GitHub, que es de solo lectura.</td></tr>
+<tr><td>Documento</td><td>La página, con el mismo ancho de columna, letras y espaciado que github.com.</td></tr>
+<tr><td>Barra de estado</td><td>Ruta del archivo, cantidad de palabras, modo actual y si hay cambios sin guardar.</td></tr></table>
+<p>La barra de título muestra el nombre del archivo; un <b>●</b> delante indica que hay cambios sin guardar.</p>
+"""),
+   ("Tres formas de ver un documento", f"""
+<table><tr><th>Modo</th><th>Atajo</th><th>Qué ves</th></tr>
+<tr><td><b>Editor visual</b></td><td><kbd>Ctrl</kbd>+<kbd>1</kbd></td><td>El documento con formato. Escribís y usás los botones; el Markdown se genera solo.</td></tr>
+<tr><td><b>Código Markdown</b></td><td><kbd>Ctrl</kbd>+<kbd>2</kbd></td><td>El Markdown a la izquierda y la vista previa en vivo a la derecha. Para ver o tocar las etiquetas.</td></tr>
+<tr><td><b>Vista GitHub</b></td><td><kbd>Ctrl</kbd>+<kbd>3</kbd></td><td>Página de solo lectura igual a GitHub, con colores de código, listas de tareas y enlaces que funcionan.</td></tr></table>
+<figure><img src="{img('source_light_en.png')}"><figcaption>Código Markdown con vista previa en vivo.</figcaption></figure>
+<figure><img src="{img('preview_light_en.png')}"><figcaption>Vista GitHub (tema claro).</figcaption></figure>
+"""),
+   ("Barra de formato", """
+<table><tr><th>Botón</th><th>Acción</th><th>Markdown que escribe</th></tr>
+<tr><td>H</td><td>Título 1 a 6 o párrafo normal</td><td><code># Título</code> … <code>###### Título</code></td></tr>
+<tr><td><b>B</b></td><td>Negrita</td><td><code>**texto**</code></td></tr>
+<tr><td><i>I</i></td><td>Cursiva</td><td><code>*texto*</code></td></tr>
+<tr><td><s>S</s></td><td>Tachado</td><td><code>~~texto~~</code></td></tr>
+<tr><td>—</td><td>Línea horizontal</td><td><code>***</code></td></tr>
+<tr><td>❝</td><td>Cita</td><td><code>&gt; texto</code></td></tr>
+<tr><td>• lista / 1. lista</td><td>Lista con viñetas / numerada</td><td><code>- ítem</code> / <code>1. ítem</code></td></tr>
+<tr><td>☑</td><td>Lista de tareas</td><td><code>- [ ] tarea</code></td></tr>
+<tr><td>→ / ←</td><td>Aumentar / reducir sangría</td><td>lista anidada</td></tr>
+<tr><td>Tabla</td><td>Insertar tabla (elegís filas × columnas)</td><td><code>| a | b |</code></td></tr>
+<tr><td>Imagen</td><td>Insertar imagen por URL o nombre de archivo</td><td><code>![alt](archivo.png)</code></td></tr>
+<tr><td>Enlace</td><td>Insertar enlace</td><td><code>[texto](https://…)</code></td></tr>
+<tr><td>&lt;/&gt;</td><td>Código en línea</td><td><code>`código`</code></td></tr>
+<tr><td>CB</td><td>Bloque de código (elegís el lenguaje para los colores)</td><td><code>```python</code></td></tr></table>
+<p>Las mismas acciones están en el menú <b>Formato</b>. Con clic derecho dentro de una tabla se agregan o borran filas y columnas, o se alinea una columna.</p>
+"""),
+   ("Archivos", """
+<table><tr><th>Acción</th><th>Cómo</th></tr>
+<tr><td>Abrir</td><td><i>Archivo → Abrir</i> (<kbd>Ctrl</kbd>+<kbd>O</kbd>), doble clic en un .md, o arrastrar el archivo a la ventana.</td></tr>
+<tr><td>Recientes</td><td><i>Archivo → Abrir reciente</i> guarda los últimos 12.</td></tr>
+<tr><td>Guardar / Guardar como</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. Se guarda en UTF-8 sin BOM, igual que GitHub.</td></tr>
+<tr><td>Nuevo / Nueva ventana</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> empieza un documento vacío; <i>Nueva ventana</i> abre otro Quillforge.</td></tr>
+<tr><td>Mostrar en la carpeta</td><td>Abre el Explorador con el archivo seleccionado.</td></tr></table>
+<p>Si cerrás un documento con cambios sin guardar, Quillforge pregunta si querés guardarlos.</p>
+<h3>Imágenes y enlaces</h3>
+<p>Las rutas relativas funcionan como en GitHub: <code>![diagrama](img/diagrama.png)</code> muestra la imagen que está junto al .md.
+En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otros <code>.md</code> se abren en Quillforge y los
+<code>#título</code> saltan dentro del documento.</p>
+"""),
+   ("Exportar e imprimir", """
+<p><b>Exportar a HTML</b> guarda una sola página HTML autónoma con el estilo de GitHub adentro, lista para mandar por mail o publicar.</p>
+<p><b>Imprimir / PDF</b> (<kbd>Ctrl</kbd>+<kbd>P</kbd>) imprime la página con estilo GitHub. Elegí <i>Guardar como PDF</i> como impresora para sacar un PDF.</p>
+"""),
+   ("Idioma, tema y zoom", f"""
+<p>Menú <b>Idioma</b>: English o Español. Cambia al instante los menús, las ayudas de la barra y los diálogos.
+La primera vez, Quillforge toma el idioma de Windows.</p>
+<p><b>Ver → Tema oscuro</b> alterna entre GitHub claro y GitHub oscuro. Zoom con <kbd>Ctrl</kbd>+<kbd>+</kbd>,
+<kbd>Ctrl</kbd>+<kbd>-</kbd> y <kbd>Ctrl</kbd>+<kbd>0</kbd>. Idioma, tema, modo, zoom y tamaño de ventana quedan recordados.</p>
+<figure><img src="{img('preview_dark_es.png')}"><figcaption>Tema oscuro de GitHub.</figcaption></figure>
+"""),
+   ("Atajos de teclado", """
+<table><tr><th>Teclas</th><th>Acción</th><th>Teclas</th><th>Acción</th></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>N</kbd></td><td>Nuevo</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td><td>Negrita</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Abrir</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td><td>Cursiva</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Guardar</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td><td>Deshacer / Rehacer</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Guardar como</td><td><kbd>Ctrl</kbd>+<kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd></td><td>Visual / Código / GitHub</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>P</kbd></td><td>Imprimir / PDF</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>-</kbd> / <kbd>0</kbd></td><td>Zoom</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Cerrar ventana</td><td><kbd>F1</kbd></td><td>Este manual</td></tr></table>
+"""),
+   ("Información técnica", """
+<table><tr><th>Ítem</th><th>Detalle</th></tr>
+<tr><td>Versión</td><td>{v}</td></tr>
+<tr><td>Plataforma</td><td>.NET 8 (WPF, autónomo) + Microsoft Edge WebView2</td></tr>
+<tr><td>Editor</td><td>TOAST UI Editor 3.2 (MIT)</td></tr>
+<tr><td>Render GitHub</td><td>marked (GitHub Flavored Markdown), highlight.js, github-markdown-css (MIT)</td></tr>
+<tr><td>Configuración</td><td><code>%APPDATA%\\Quillforge\\settings.json</code></td></tr>
+<tr><td>Código fuente</td><td><code>src/</code> en la carpeta del proyecto; se compila con <code>build.ps1</code>.</td></tr></table>
+<div class="note">El editor visual normaliza algunos detalles al escribir el Markdown (por ejemplo, las listas con <code>*</code>
+pasan a <code>-</code>). El texto y cómo lo muestra GitHub no cambian.</div>
+"""),
+  ]),
+}
+
+for code, d in T.items():
+    toc = "".join(f"<div>{i}. {name}</div>" for i, (name, _) in enumerate(d["sections"], 1))
+    body = "".join(f"<h2>{i}. {name}</h2>{html.replace('{v}', version)}" for i, (name, html) in enumerate(d["sections"], 1))
+    page = f"""<!doctype html><html lang="{d['lang']}"><head><meta charset="utf-8"><title>Quillforge — {d['title']}</title><style>{CSS}</style></head>
+<body>
+<div class="cover"><img src="{icon}"><h1>Quillforge</h1><div class="tag">{d['tag']}</div>
+<div class="meta">{d['title']} · v{version}<br>© 2026 Gabriel Castiglia</div></div>
+<h2>{d['toc']}</h2><div class="toc">{toc}</div>
+{body}
+</body></html>"""
+    (docs / f"Quillforge_Manual_{code.upper()}.html").write_text(page, encoding="utf-8")
+print("ok")
