@@ -133,6 +133,19 @@ js = """
     await new Promise(r => setTimeout(r, 200));
     out.reload_itself_not_dirty = window.__dirty === 0;
     window.chrome.webview.postMessage = realHost;
+    // dark visual view: lists and table headers as light as the rest (1.8.0 left them almost black)
+    mdApp.setTheme('dark'); mdApp.load(ORIG, null); mdApp.setMode('visual');
+    await new Promise(r => setTimeout(r, 300));
+    const root = document.querySelector('.toastui-editor-ww-container .toastui-editor-contents');
+    const dim = [];
+    for (const t of ['p', 'li', 'th', 'td', 'h1']) {
+      const el = root && root.querySelector(t);
+      if (!el) { dim.push(t + ' missing'); continue; }
+      const c = getComputedStyle(el).color.match(/[0-9.]+/g).map(Number);
+      if ((0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255 < 0.6) dim.push(t + ' ' + getComputedStyle(el).color);
+    }
+    out.dark_text_light = dim.length === 0;
+    if (dim.length) out.dark_dim = dim.join(', ');
   } catch (e) { out.err = String(e && e.stack || e); }
   document.getElementById('out').textContent = JSON.stringify(out);
 })();

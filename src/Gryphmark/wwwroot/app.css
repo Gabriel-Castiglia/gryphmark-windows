@@ -69,6 +69,9 @@ body.dark ::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,.18); }
 /* Toast's own colours lose to GitHub's inside documents */
 .toastui-editor-contents.markdown-body p,
 .toastui-editor-contents.markdown-body li,
+.toastui-editor-contents.markdown-body ul,
+.toastui-editor-contents.markdown-body ol,
+.toastui-editor-contents.markdown-body table,
 .toastui-editor-contents.markdown-body td { color: inherit; }
 .toastui-editor-contents.markdown-body h1,
 .toastui-editor-contents.markdown-body h2 { border-bottom: 1px solid var(--borderColor-muted, #d1d9e0b3); }
@@ -82,11 +85,16 @@ body.dark ::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,.18); }
 .toastui-editor-contents.markdown-body blockquote p { color: inherit; }
 .toastui-editor-contents.markdown-body table td,
 .toastui-editor-contents.markdown-body table th { border: 1px solid var(--borderColor-default, #d1d9e0); padding: 6px 13px; }
-.toastui-editor-contents.markdown-body table th { background: transparent; color: inherit; font-weight: 600; }
+.toastui-editor-contents.markdown-body table th,
+.toastui-editor-contents.markdown-body table th p { background: transparent; color: inherit; font-weight: 600; }
 .toastui-editor-contents.markdown-body code { background: var(--bgColor-neutral-muted, #818b981f); color: inherit; border-radius: 6px; padding: .2em .4em; font-size: 85%; }
 .toastui-editor-contents.markdown-body pre { background: var(--bgColor-muted, #f6f8fa); border-radius: 6px; padding: 16px; font-size: 13.6px; line-height: 1.45; }
 .toastui-editor-contents.markdown-body pre code { background: transparent; padding: 0; font-size: 100%; }
-body.dark .toastui-editor-contents.markdown-body { background: #0d1117; }
+/* The document's text colour, which lists and tables inherit. Toast colours lists and tables a
+   dark grey that its dark theme does not change, so in the dark visual view list items and table
+   headers stayed almost black on the dark page. */
+.toastui-editor-contents.markdown-body { color: #1f2328; }
+body.dark .toastui-editor-contents.markdown-body { background: #0d1117; color: #f0f6fc; }
 body.dark .toastui-editor-dark .toastui-editor-ww-container,
 body.dark .toastui-editor-dark .toastui-editor-md-container { background: #0d1117; }
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.1 — 2026-11-10
+
+- In the dark theme, list items and table headers in the visual view were almost black on the dark page; they now
+  have the colour of the rest of the text.
+
 ## 1.8.0 — 2026-11-10
 
 - **Safer documents:** the HTML inside a Markdown file is cleaned (DOMPurify) before the GitHub view and the HTML

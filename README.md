@@ -108,7 +108,7 @@ Las versiones con que se compiló la versión publicada están abajo, en *Build 
 
 ## Build tools / Herramientas de compilación
 
-Gryphmark 1.8.0 was built and tested with / se compiló y probó con:
+Gryphmark 1.8.1 was built and tested with / se compiló y probó con:
 
 | Tool | Version |
 |---|---|
