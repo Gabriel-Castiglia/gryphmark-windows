@@ -170,7 +170,7 @@ In GitHub preview, links to web pages open in your browser, links to other <code
 <p><b>Language</b> menu: English or Español. It changes the menus, the toolbar tooltips and dialogs immediately.
 The first time, Gryphmark follows the Windows language.</p>
 <p><b>View → Theme…</b> opens the theme window. <b>Appearance</b>: <i>Light</i>, <i>Dark</i> or <i>Automatic</i>, which follows Windows
-(Settings → Personalisation → Colours) and switches by itself when Windows does. <b>Colour</b>: a catalogue of eleven colours for
+(Settings → Personalisation → Colours) and switches by itself when Windows does. <b>Colour</b>: a catalogue of twelve colours for
 the icon and the highlights. The chosen colour becomes the background of the icon everywhere — window, taskbar, desktop and
 Start-menu shortcuts, <code>.md</code> files — and colours the folders of the Files panel, the check marks and the selected item.
 The default is dark gold. Shortcuts you made with an icon of your own are not changed.</p>
@@ -337,7 +337,7 @@ diagramas <code>```mermaid</code>, fórmulas (<code>$E=mc^2$</code> y <code>$$ �
 <p>Menú <b>Idioma</b>: English o Español. Cambia al instante los menús, las ayudas de la barra y los diálogos.
 La primera vez, Gryphmark toma el idioma de Windows.</p>
 <p><b>Ver → Tema…</b> abre la ventana de tema. <b>Apariencia</b>: <i>Claro</i>, <i>Oscuro</i> o <i>Automático</i>, que sigue a Windows
-(Configuración → Personalización → Colores) y cambia solo cuando Windows cambia. <b>Color</b>: un catálogo de once colores para
+(Configuración → Personalización → Colores) y cambia solo cuando Windows cambia. <b>Color</b>: un catálogo de doce colores para
 el ícono y el resaltado. El color elegido pasa a ser el fondo del ícono en todos lados — ventana, barra de tareas, accesos del
 escritorio y del menú Inicio, archivos <code>.md</code> — y colorea las carpetas del panel de archivos, las marcas de verificación y el elemento seleccionado.
 El color por defecto es el dorado oscuro. Los accesos directos que armaste con un ícono propio no se tocan.</p>

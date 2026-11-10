@@ -20,6 +20,7 @@ Gryphmark writes the Markdown tags for you. Documents are rendered exactly like 
 - **Files panel**: open a whole folder and browse its Markdown files in a tree beside the document, like VS Code or Obsidian (`Ctrl+Shift+E`); several folders at once, each with its own colour, pinning, sorting and a choice of what opens at start
 - **Read only**: the *Edit | Read only* switch in the toolbar locks the text so nothing changes by mistake (`Ctrl+Shift+L`)
 - **Themes**: light, dark or automatic (follows Windows), and a colour catalogue that changes the icon everywhere in Windows and the highlights of the app (*View → Theme…*)
+- **Zoom bar** in the status bar (also `Ctrl` + mouse wheel); on a narrow window the buttons that do not fit go into a ⋯ menu
 - Find & replace, outline sidebar, spell check
 - Keeps your formatting: only edited lines change on save (CRLF/BOM preserved)
 - Reloads files changed outside, crash recovery, single instance, update check
@@ -50,6 +51,7 @@ tema claro u oscuro.
 - **Panel de archivos**: abrís una carpeta entera y recorrés sus archivos Markdown en un árbol al costado del documento, como en VS Code u Obsidian (`Ctrl+Shift+E`); varias carpetas a la vez, cada una con su color, fijado, orden y qué se abre al iniciar
 - **Solo lectura**: el selector *Editar | Solo lectura* de la barra bloquea el texto para que nada cambie por error (`Ctrl+Shift+L`)
 - **Temas**: claro, oscuro o automático (sigue a Windows), y un catálogo de colores que cambia el ícono en todo Windows y el resaltado de la app (*Ver → Tema…*)
+- **Barra de zoom** en la barra de estado (también `Ctrl` + rueda del mouse); con la ventana angosta, los botones que no entran van a un menú ⋯
 - Buscar y reemplazar, esquema lateral, revisión ortográfica
 - Respeta tu formato: al guardar sólo cambian las líneas editadas (conserva CRLF/BOM)
 - Recarga archivos cambiados afuera, recuperación ante cierres, instancia única, aviso de actualizaciones
