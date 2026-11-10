@@ -134,6 +134,7 @@ The first time, Quillforge follows the Windows language.</p>
 <tr><td>Platform</td><td>.NET 8 (WPF, self-contained) + Microsoft Edge WebView2</td></tr>
 <tr><td>Editor</td><td>TOAST UI Editor 3.2 (MIT)</td></tr>
 <tr><td>GitHub rendering</td><td>marked (GitHub Flavored Markdown), highlight.js, github-markdown-css (MIT)</td></tr>
+<tr><td>Icon</td><td>Griffin from Martin Schongauer's engraving (c. 1485), The Metropolitan Museum of Art, CC0; quill added.</td></tr>
 <tr><td>Settings</td><td><code>%APPDATA%\\Quillforge\\settings.json</code></td></tr>
 <tr><td>Source code</td><td><code>src/</code> in the project folder; build with <code>build.ps1</code>.</td></tr></table>
 <div class="note">The visual editor normalises some details when it writes Markdown (for example, <code>*</code> lists become
@@ -236,6 +237,7 @@ La primera vez, Quillforge toma el idioma de Windows.</p>
 <tr><td>Plataforma</td><td>.NET 8 (WPF, autónomo) + Microsoft Edge WebView2</td></tr>
 <tr><td>Editor</td><td>TOAST UI Editor 3.2 (MIT)</td></tr>
 <tr><td>Render GitHub</td><td>marked (GitHub Flavored Markdown), highlight.js, github-markdown-css (MIT)</td></tr>
+<tr><td>Ícono</td><td>Grifo del grabado de Martin Schongauer (c. 1485), Museo Metropolitano de Arte, CC0; pluma agregada.</td></tr>
 <tr><td>Configuración</td><td><code>%APPDATA%\\Quillforge\\settings.json</code></td></tr>
 <tr><td>Código fuente</td><td><code>src/</code> en la carpeta del proyecto; se compila con <code>build.ps1</code>.</td></tr></table>
 <div class="note">El editor visual normaliza algunos detalles al escribir el Markdown (por ejemplo, las listas con <code>*</code>

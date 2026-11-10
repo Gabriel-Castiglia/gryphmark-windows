@@ -58,4 +58,5 @@ powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.0.0
 ## Credits / Créditos
 
 TOAST UI Editor, marked, highlight.js, github-markdown-css — MIT License.
+Icon / ícono: griffin from Martin Schongauer's engraving (c. 1485), The Metropolitan Museum of Art, CC0 — quill added.
 © 2026 Gabriel Castiglia.
