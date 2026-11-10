@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.1 — 2026-11-10
+
+- The theme colour now reaches the desktop and Start-menu shortcuts at once: Windows caches icons by file
+  path, so each colour has its own icon file and the shortcuts and file-type entries are pointed at it.
+
 ## 1.5.0 — 2026-11-10
 
 - **Themes** (*View → Theme…*): **Light**, **Dark** or **Automatic** (follows the Windows app mode and switches

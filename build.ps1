@@ -1,6 +1,6 @@
 ﻿# Gryphmark — full build: web bundle, icon, manuals (PDF), self-contained publish, installer.
 # Usage:  powershell -ExecutionPolicy Bypass -File build.ps1 [-Version 1.0.0] [-SkipNpm]
-param([string]$Version = "1.5.0", [switch]$SkipNpm)
+param([string]$Version = "1.5.1", [switch]$SkipNpm)
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
 $out = Join-Path $root "out"

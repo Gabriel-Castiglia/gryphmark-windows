@@ -9,7 +9,7 @@
     <ApplicationIcon>Gryphmark.ico</ApplicationIcon>
     <AssemblyName>Gryphmark</AssemblyName>
     <RootNamespace>Gryphmark</RootNamespace>
-    <Version>1.5.0</Version>
+    <Version>1.5.1</Version>
     <Product>Gryphmark</Product>
     <Company>Gabriel Castiglia</Company>
     <Copyright>© 2026 Gabriel Castiglia</Copyright>

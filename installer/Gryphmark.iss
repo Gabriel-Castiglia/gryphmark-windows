@@ -69,6 +69,10 @@ Source: "..\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"; Flags: ignoreve
 ; Sample document (Help → Sample document). Hidden, so it is not deleted by accident.
 Source: "..\samples\sample_*.md"; DestDir: "{app}\samples"; Attribs: hidden; Flags: ignoreversion
 
+[UninstallDelete]
+; icon files written by View -> Theme
+Type: filesandordirs; Name: "{app}\theme"
+
 [Dirs]
 Name: "{app}\samples"; Attribs: hidden
 

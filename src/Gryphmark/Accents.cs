@@ -59,15 +59,18 @@ public static class Accents
     }
 
     /// <summary>
-    /// Makes the chosen colour the icon Windows shows: the installer points the Start-menu and desktop
-    /// shortcuts, the .md file type and the folder menu at {app}\Gryphmark.ico, so that file is replaced and
-    /// the shell is told to refresh. Only for an installed copy (next to the uninstaller); runs off the UI thread.
-    /// Shortcuts that use their own icon file are not touched.
+    /// Makes the chosen colour the icon Windows shows. Explorer caches icons by file path, so rewriting one
+    /// file is not enough: each colour gets its own file ({app}\theme\gryphmark_&lt;key&gt;.ico) and the app points
+    /// at it the shortcuts that open Gryphmark (desktop, Start menu, pinned taskbar) and the registry entries the
+    /// installer wrote (.md file type, folder menu). Only shortcuts whose icon already comes from {app} are
+    /// changed — one made with an icon of its own (for example a shortcut to a folder) is left alone.
+    /// Only for an installed copy (next to the uninstaller); runs off the UI thread and never throws.
     /// </summary>
     public static void ApplyToSystem(string key)
     {
-        var dir = AppContext.BaseDirectory;
+        var dir = AppContext.BaseDirectory.TrimEnd('\\');
         if (!File.Exists(Path.Combine(dir, "unins000.exe"))) return;
+        key = Get(key).Key;
         byte[] bytes;
         try
         {
@@ -79,15 +82,82 @@ public static class Accents
         {
             try
             {
-                var target = Path.Combine(dir, "Gryphmark.ico");
-                if (File.Exists(target) && File.ReadAllBytes(target).AsSpan().SequenceEqual(bytes)) return;
-                File.WriteAllBytes(target, bytes);
-                SHChangeNotify(0x08000000, 0, IntPtr.Zero, IntPtr.Zero);          // SHCNE_ASSOCCHANGED
-                var ie4 = Path.Combine(Environment.SystemDirectory, "ie4uinit.exe");  // refreshes the icon cache
-                if (File.Exists(ie4)) Process.Start(new ProcessStartInfo(ie4, "-show") { CreateNoWindow = true, UseShellExecute = false })?.WaitForExit(10000);
+                var themeDir = Path.Combine(dir, "theme");
+                Directory.CreateDirectory(themeDir);
+                var icon = Path.Combine(themeDir, $"gryphmark_{key}.ico");
+                if (!File.Exists(icon) || !File.ReadAllBytes(icon).AsSpan().SequenceEqual(bytes)) File.WriteAllBytes(icon, bytes);
+                try { File.WriteAllBytes(Path.Combine(dir, "Gryphmark.ico"), bytes); } catch { }   // uninstaller icon
+                bool changed = UpdateShortcuts(dir, icon) | UpdateRegistry(dir, icon);
+                foreach (var old in Directory.GetFiles(themeDir, "gryphmark_*.ico"))
+                    if (!old.Equals(icon, StringComparison.OrdinalIgnoreCase)) try { File.Delete(old); } catch { }
+                if (changed) SHChangeNotify(0x08000000, 0, IntPtr.Zero, IntPtr.Zero);   // SHCNE_ASSOCCHANGED
             }
             catch { }
         });
+    }
+
+    private static bool OurIcon(string? location, string dir) =>
+        string.IsNullOrEmpty(location) || location.StartsWith(",") ||
+        Environment.ExpandEnvironmentVariables(location).StartsWith(dir + "\\", StringComparison.OrdinalIgnoreCase);
+
+    private static bool UpdateShortcuts(string dir, string icon)
+    {
+        bool changed = false;
+        var exe = Path.Combine(dir, "Gryphmark.exe");
+        var folders = new[]
+        {
+            Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
+            Environment.GetFolderPath(Environment.SpecialFolder.Programs),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar"),
+        };
+        Type? t = Type.GetTypeFromProgID("WScript.Shell");
+        if (t == null) return false;
+        dynamic shell = Activator.CreateInstance(t)!;
+        foreach (var folder in folders.Where(Directory.Exists))
+        {
+            IEnumerable<string> links;
+            try { links = Directory.EnumerateFiles(folder, "*.lnk", SearchOption.AllDirectories).ToList(); } catch { continue; }
+            foreach (var path in links)
+            {
+                try
+                {
+                    dynamic lnk = shell.CreateShortcut(path);
+                    string target = lnk.TargetPath ?? "";
+                    if (!target.Equals(exe, StringComparison.OrdinalIgnoreCase)) continue;
+                    string loc = lnk.IconLocation ?? "";
+                    string locPath = loc.Contains(',') ? loc[..loc.LastIndexOf(',')] : loc;
+                    if (!OurIcon(locPath, dir) && !locPath.Equals(exe, StringComparison.OrdinalIgnoreCase)) continue;
+                    if (locPath.Equals(icon, StringComparison.OrdinalIgnoreCase)) continue;
+                    lnk.IconLocation = icon + ",0";
+                    lnk.Save();
+                    changed = true;
+                }
+                catch { }
+            }
+        }
+        return changed;
+    }
+
+    private static bool UpdateRegistry(string dir, string icon)
+    {
+        bool changed = false;
+        foreach (var (sub, name) in new[]
+        {
+            (@"Software\Classes\Gryphmark.md\DefaultIcon", ""),
+            (@"Software\Classes\Directory\shell\Gryphmark", "Icon"),
+            (@"Software\Classes\Directory\Background\shell\Gryphmark", "Icon"),
+        })
+        {
+            try
+            {
+                using var k = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(sub, writable: true);
+                if (k?.GetValue(name) is not string v || !OurIcon(v, dir) || v.Equals(icon, StringComparison.OrdinalIgnoreCase)) continue;
+                k.SetValue(name, icon);
+                changed = true;
+            }
+            catch { }
+        }
+        return changed;
     }
 
     [DllImport("shell32.dll")]
