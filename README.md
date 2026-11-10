@@ -17,7 +17,7 @@ Gryphmark writes the Markdown tags for you. Documents are rendered exactly like 
 - English and Spanish interface, switchable at runtime
 - Relative images and links, `.md` links open in Gryphmark
 - GitHub alerts, Mermaid diagrams, math, footnotes and emoji
-- **Files panel**: open a whole folder and browse its Markdown files in a tree beside the document, like VS Code or Obsidian (`Ctrl+Shift+E`)
+- **Files panel**: open a whole folder and browse its Markdown files in a tree beside the document, like VS Code or Obsidian (`Ctrl+Shift+E`); several folders at once, each with its own colour, pinning, sorting and a choice of what opens at start
 - **Read only**: the *Edit | Read only* switch in the toolbar locks the text so nothing changes by mistake (`Ctrl+Shift+L`)
 - **Themes**: light, dark or automatic (follows Windows), and a colour catalogue that changes the icon everywhere in Windows and the highlights of the app (*View → Theme…*)
 - Find & replace, outline sidebar, spell check
@@ -30,8 +30,8 @@ Gryphmark writes the Markdown tags for you. Documents are rendered exactly like 
 **Build:** Windows, .NET 8 SDK, Node.js, Python 3 + Pillow/numpy/scipy/opencv, Inno Setup 6, Microsoft Edge.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.5.1
-# -> out/Gryphmark-Setup-1.5.1.exe
+powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.6.0
+# -> out/Gryphmark-Setup-1.6.0.exe
 ```
 
 ## Español
@@ -47,7 +47,7 @@ tema claro u oscuro.
 - Interfaz en inglés y en español, se cambia sin reiniciar
 - Imágenes y enlaces relativos; los enlaces a `.md` se abren en Gryphmark
 - Avisos de GitHub, diagramas Mermaid, fórmulas, notas al pie y emojis
-- **Panel de archivos**: abrís una carpeta entera y recorrés sus archivos Markdown en un árbol al costado del documento, como en VS Code u Obsidian (`Ctrl+Shift+E`)
+- **Panel de archivos**: abrís una carpeta entera y recorrés sus archivos Markdown en un árbol al costado del documento, como en VS Code u Obsidian (`Ctrl+Shift+E`); varias carpetas a la vez, cada una con su color, fijado, orden y qué se abre al iniciar
 - **Solo lectura**: el selector *Editar | Solo lectura* de la barra bloquea el texto para que nada cambie por error (`Ctrl+Shift+L`)
 - **Temas**: claro, oscuro o automático (sigue a Windows), y un catálogo de colores que cambia el ícono en todo Windows y el resaltado de la app (*Ver → Tema…*)
 - Buscar y reemplazar, esquema lateral, revisión ortográfica
@@ -60,8 +60,8 @@ tema claro u oscuro.
 **Compilar:** Windows, SDK de .NET 8, Node.js, Python 3 + Pillow/numpy/scipy/opencv, Inno Setup 6, Microsoft Edge.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.5.1
-# -> out/Gryphmark-Setup-1.5.1.exe
+powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.6.0
+# -> out/Gryphmark-Setup-1.6.0.exe
 ```
 
 ## Project layout / Estructura

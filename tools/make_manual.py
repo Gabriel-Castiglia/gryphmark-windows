@@ -87,19 +87,33 @@ the task boxes do nothing, and the formatting buttons are greyed out. You can st
 If you type, the status bar reminds you how to unlock it. Choose <b>Edit</b> to write again; Gryphmark remembers your choice.</p>
 """),
    ("Folders: the Files panel", f"""
-<p>Like VS Code or Obsidian, Gryphmark can open a whole folder and show its tree on the left: subfolders and
-Markdown files (<code>.md</code>, <code>.markdown</code>). Click a file and it opens beside the tree.</p>
-<figure><img src="{img('files_panel_light.png')}" style="width:260px"><figcaption>The Files panel with a folder open; the open file is marked.</figcaption></figure>
+<p>Like VS Code or Obsidian, Gryphmark shows folders as trees on the left: subfolders and Markdown files
+(<code>.md</code>, <code>.markdown</code>). You can have <b>several folders open at once</b>; each one is a block with its own
+pastel colour and a stripe on its left edge, so you see at a glance where one tree ends and the next begins. Click a file and it opens beside the trees.</p>
+<figure><img src="{img('files_panel_light.png')}" style="width:260px"><figcaption>Two folders open; the open file is marked.</figcaption></figure>
 <table><tr><th>Action</th><th>How</th></tr>
-<tr><td>Open a folder</td><td><i>File → Open folder…</i>, the <b>Open folder…</b> button of the empty panel, dropping a folder on the window, or right-clicking a folder in Explorer → <i>Open with Gryphmark</i> (installer option; in Windows 11 it is under <i>Show more options</i>).</td></tr>
+<tr><td>Open a folder</td><td>The <b>+</b> button of the panel, <i>File → Open folder…</i>, the <b>Open folder…</b> button of the empty panel, dropping a folder on the window, or right-clicking a folder in Explorer → <i>Open with Gryphmark</i> (installer option; in Windows 11 it is under <i>Show more options</i>). Each new folder is added below the others.</td></tr>
 <tr><td>Show / hide the panel</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>, the folder button at the left of the toolbar, or <i>View → Files panel</i>. Drag its right edge to make it wider.</td></tr>
 <tr><td>Browse</td><td>Click a folder to open or close it; click a file to open it. <kbd>Enter</kbd> does the same on the selected row.</td></tr>
-<tr><td>Right-click</td><td>On a file: open, open in a new window, show in folder, copy path. On a folder: show in folder, copy path, refresh.</td></tr>
-<tr><td>Panel buttons</td><td>Refresh, collapse all, close folder.</td></tr></table>
-<p>The panel follows the disk: files and folders created, renamed or deleted by other programs appear at once.
-The open file is marked in the tree. Hidden folders and tool folders (<code>.git</code>, <code>node_modules</code>,
-<code>bin</code>, <code>obj</code>…) are left out. The folder is reopened the next time Gryphmark starts, and recent
-folders are listed in <i>File → Open recent</i>.</p>
+<tr><td>Right-click a folder's title</td><td><b>Pin to top</b> / <b>Unpin</b>, <b>Close this folder</b>, <b>Colour</b> (twelve pastel colours or <i>Automatic</i>), <b>Move up</b> / <b>Move down</b> (in opening order), show in folder, copy path, refresh.</td></tr>
+<tr><td>Right-click inside a tree</td><td>On a file: open, open in a new window, show in folder, copy path. On a folder: show in folder, copy path, refresh.</td></tr>
+<tr><td>Panel buttons</td><td><b>+</b> add folder, refresh, collapse all, and <b>⋯</b>: the order, the colours and what opens at start.</td></tr></table>
+<h3>Order, colours and pins</h3>
+<p>The <b>⋯</b> button of the panel sorts the folders: <i>Order opened</i> (the default), <i>Name A → Z</i>, <i>Name Z → A</i> or
+<i>Recently modified first</i>. <b>Pinned</b> folders (📌) always stay on top, in the order you pinned them. Colours: <i>Tones of the theme colour</i>
+(the default: shades of the colour chosen in <i>View → Theme…</i>), <i>Multicolour</i> (a different hue for each folder) or <i>No colour</i>;
+a single folder can get its own colour from its right-click menu.</p>
+<h3>What opens when Gryphmark starts</h3>
+<p>Choose it in <i>File → Folders at start</i> or in the <b>⋯</b> button of the panel:</p>
+<table><tr><th>Option</th><th>What happens</th></tr>
+<tr><td>Reopen the folders of the last session</td><td>The panel comes back exactly as you left it (the default).</td></tr>
+<tr><td>Start clean, with no folders</td><td>Every start begins with an empty panel.</td></tr>
+<tr><td>Start clean, only with the pinned folders</td><td>Every start shows just the folders you pinned — for example the one or two projects you always work on.</td></tr></table>
+<p>The panel follows the disk: files and folders created, renamed or deleted by other programs (for example in Explorer)
+appear or disappear at once. If a whole open folder is deleted, or a network drive goes away, its block stays with the note
+<i>not available</i> and comes back by itself when the folder does; clicking a file that was deleted meanwhile just refreshes the panel.
+Hidden folders and tool folders (<code>.git</code>, <code>node_modules</code>, <code>bin</code>, <code>obj</code>…) are left out.
+Recent folders are listed in <i>File → Open recent</i>.</p>
 """),
    ("Formatting toolbar", """
 <table><tr><th>Button</th><th>Action</th><th>Markdown it writes</th></tr>
@@ -159,9 +173,9 @@ The first time, Gryphmark follows the Windows language.</p>
 (Settings → Personalisation → Colours) and switches by itself when Windows does. <b>Colour</b>: a catalogue of eleven colours for
 the icon and the highlights. The chosen colour becomes the background of the icon everywhere — window, taskbar, desktop and
 Start-menu shortcuts, <code>.md</code> files — and colours the folders of the Files panel, the check marks and the selected item.
-The default is Advent purple. Shortcuts you made with an icon of your own are not changed.</p>
+The default is dark gold. Shortcuts you made with an icon of your own are not changed.</p>
 <figure><img src="{img('theme_en_light.png')}" style="width:520px"><figcaption>The theme window.</figcaption></figure>
-<p>Zoom with <kbd>Ctrl</kbd>+<kbd>+</kbd>,
+<p>Zoom with the <b>zoom bar</b> at the right of the status bar (−, slider, +; click the percentage to go back to 100 %), <kbd>Ctrl</kbd> + mouse wheel, <kbd>Ctrl</kbd>+<kbd>+</kbd>,
 <kbd>Ctrl</kbd>+<kbd>-</kbd> and <kbd>Ctrl</kbd>+<kbd>0</kbd>. Language, theme, mode, zoom and window size are remembered.</p>
 <figure><img src="{img('preview_dark_es.png')}"><figcaption>GitHub dark theme.</figcaption></figure>
 """),
@@ -240,19 +254,33 @@ y las casillas de tareas no hacen nada, y los botones de formato quedan en gris.
 Si escribís, la barra de estado te recuerda cómo desbloquearlo. Elegí <b>Editar</b> para volver a escribir; Gryphmark recuerda tu elección.</p>
 """),
    ("Carpetas: el panel de archivos", f"""
-<p>Como VS Code u Obsidian, Gryphmark puede abrir una carpeta entera y mostrar su árbol a la izquierda: subcarpetas y
-archivos Markdown (<code>.md</code>, <code>.markdown</code>). Hacés clic en un archivo y se abre al costado del árbol.</p>
-<figure><img src="{img('files_panel_light.png')}" style="width:260px"><figcaption>El panel de archivos con una carpeta abierta; el archivo abierto queda marcado.</figcaption></figure>
+<p>Como VS Code u Obsidian, Gryphmark muestra carpetas como árboles a la izquierda: subcarpetas y archivos Markdown
+(<code>.md</code>, <code>.markdown</code>). Podés tener <b>varias carpetas abiertas a la vez</b>; cada una es un bloque con su propio
+color pastel y una franja en el borde izquierdo, así ves de un vistazo dónde termina un árbol y empieza el siguiente. Hacés clic en un archivo y se abre al costado.</p>
+<figure><img src="{img('files_panel_light.png')}" style="width:260px"><figcaption>Dos carpetas abiertas; el archivo abierto queda marcado.</figcaption></figure>
 <table><tr><th>Acción</th><th>Cómo</th></tr>
-<tr><td>Abrir una carpeta</td><td><i>Archivo → Abrir carpeta…</i>, el botón <b>Abrir carpeta…</b> del panel vacío, arrastrando una carpeta a la ventana, o con clic derecho sobre una carpeta en el Explorador → <i>Abrir con Gryphmark</i> (opción del instalador; en Windows 11 está en <i>Mostrar más opciones</i>).</td></tr>
+<tr><td>Abrir una carpeta</td><td>El botón <b>+</b> del panel, <i>Archivo → Abrir carpeta…</i>, el botón <b>Abrir carpeta…</b> del panel vacío, arrastrando una carpeta a la ventana, o con clic derecho sobre una carpeta en el Explorador → <i>Abrir con Gryphmark</i> (opción del instalador; en Windows 11 está en <i>Mostrar más opciones</i>). Cada carpeta nueva se agrega debajo de las otras.</td></tr>
 <tr><td>Mostrar / ocultar el panel</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>E</kbd>, el botón de carpeta a la izquierda de la barra, o <i>Ver → Panel de archivos</i>. Arrastrando su borde derecho se ensancha.</td></tr>
 <tr><td>Recorrer</td><td>Clic en una carpeta la abre o la cierra; clic en un archivo lo abre. <kbd>Enter</kbd> hace lo mismo sobre la fila seleccionada.</td></tr>
-<tr><td>Clic derecho</td><td>Sobre un archivo: abrir, abrir en otra ventana, mostrar en la carpeta, copiar ruta. Sobre una carpeta: mostrar en la carpeta, copiar ruta, actualizar.</td></tr>
-<tr><td>Botones del panel</td><td>Actualizar, contraer todo, cerrar carpeta.</td></tr></table>
-<p>El panel sigue al disco: los archivos y carpetas que otros programas crean, renombran o borran aparecen enseguida.
-El archivo abierto queda marcado en el árbol. Las carpetas ocultas y las de herramientas (<code>.git</code>,
-<code>node_modules</code>, <code>bin</code>, <code>obj</code>…) no se muestran. La carpeta se vuelve a abrir la próxima vez
-que arranca Gryphmark, y las carpetas recientes aparecen en <i>Archivo → Abrir reciente</i>.</p>
+<tr><td>Clic derecho en el título de una carpeta</td><td><b>Fijar arriba</b> / <b>Desfijar</b>, <b>Cerrar esta carpeta</b>, <b>Color</b> (doce colores pastel o <i>Automático</i>), <b>Subir</b> / <b>Bajar</b> (en orden de apertura), mostrar en la carpeta, copiar ruta, actualizar.</td></tr>
+<tr><td>Clic derecho dentro de un árbol</td><td>Sobre un archivo: abrir, abrir en otra ventana, mostrar en la carpeta, copiar ruta. Sobre una carpeta: mostrar en la carpeta, copiar ruta, actualizar.</td></tr>
+<tr><td>Botones del panel</td><td><b>+</b> agregar carpeta, actualizar, contraer todo, y <b>⋯</b>: el orden, los colores y qué se abre al iniciar.</td></tr></table>
+<h3>Orden, colores y fijadas</h3>
+<p>El botón <b>⋯</b> del panel ordena las carpetas: <i>Orden de apertura</i> (por defecto), <i>Nombre A → Z</i>, <i>Nombre Z → A</i> o
+<i>Modificadas recientemente primero</i>. Las carpetas <b>fijadas</b> (📌) quedan siempre arriba, en el orden en que las fijaste. Colores: <i>Tonos del color del tema</i>
+(por defecto: matices del color elegido en <i>Ver → Tema…</i>), <i>Multicolor</i> (un tono distinto por carpeta) o <i>Sin color</i>;
+una carpeta puede tener su propio color desde su menú de clic derecho.</p>
+<h3>Qué se abre al iniciar Gryphmark</h3>
+<p>Se elige en <i>Archivo → Carpetas al iniciar</i> o en el botón <b>⋯</b> del panel:</p>
+<table><tr><th>Opción</th><th>Qué pasa</th></tr>
+<tr><td>Reabrir las carpetas de la última sesión</td><td>El panel vuelve tal como lo dejaste (por defecto).</td></tr>
+<tr><td>Empezar limpio, sin carpetas</td><td>Cada arranque empieza con el panel vacío.</td></tr>
+<tr><td>Empezar limpio, solo con las carpetas fijadas</td><td>Cada arranque muestra solo las carpetas que fijaste; por ejemplo, los uno o dos proyectos con los que siempre trabajás.</td></tr></table>
+<p>El panel sigue al disco: los archivos y carpetas que otros programas crean, renombran o borran (por ejemplo desde el Explorador)
+aparecen o desaparecen enseguida. Si se borra una carpeta abierta entera, o se desconecta una unidad de red, su bloque queda con la nota
+<i>no disponible</i> y vuelve solo cuando la carpeta vuelve; si hacés clic en un archivo que se borró mientras tanto, el panel simplemente se actualiza.
+Las carpetas ocultas y las de herramientas (<code>.git</code>, <code>node_modules</code>, <code>bin</code>, <code>obj</code>…) no se muestran.
+Las carpetas recientes aparecen en <i>Archivo → Abrir reciente</i>.</p>
 """),
    ("Barra de formato", """
 <table><tr><th>Botón</th><th>Acción</th><th>Markdown que escribe</th></tr>
@@ -312,9 +340,9 @@ La primera vez, Gryphmark toma el idioma de Windows.</p>
 (Configuración → Personalización → Colores) y cambia solo cuando Windows cambia. <b>Color</b>: un catálogo de once colores para
 el ícono y el resaltado. El color elegido pasa a ser el fondo del ícono en todos lados — ventana, barra de tareas, accesos del
 escritorio y del menú Inicio, archivos <code>.md</code> — y colorea las carpetas del panel de archivos, las marcas de verificación y el elemento seleccionado.
-El color por defecto es el morado de Adviento. Los accesos directos que armaste con un ícono propio no se tocan.</p>
+El color por defecto es el dorado oscuro. Los accesos directos que armaste con un ícono propio no se tocan.</p>
 <figure><img src="{img('theme_es_light.png')}" style="width:520px"><figcaption>La ventana de tema.</figcaption></figure>
-<p>Zoom con <kbd>Ctrl</kbd>+<kbd>+</kbd>,
+<p>Zoom con la <b>barra de zoom</b> a la derecha de la barra de estado (−, deslizador, +; clic en el porcentaje vuelve a 100 %), <kbd>Ctrl</kbd> + rueda del mouse, <kbd>Ctrl</kbd>+<kbd>+</kbd>,
 <kbd>Ctrl</kbd>+<kbd>-</kbd> y <kbd>Ctrl</kbd>+<kbd>0</kbd>. Idioma, tema, modo, zoom y tamaño de ventana quedan recordados.</p>
 <figure><img src="{img('preview_dark_es.png')}"><figcaption>Tema oscuro de GitHub.</figcaption></figure>
 """),

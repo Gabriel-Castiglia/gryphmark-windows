@@ -19,11 +19,12 @@ public static class Accents
         public string Name => Strings.Lang == "es" ? Es : En;
     }
 
-    public const string Default = "purple";
+    public const string Default = "gold";
 
     public static readonly Accent[] All =
     {
-        new("purple", "Purple",   "Morado",        "#5B2A86", "#B392E0"),   // Advent purple, the default
+        new("gold",   "Gold",     "Dorado",        "#9A6F00", "#E2B84C"),   // dark gold, the default
+        new("purple", "Purple",   "Morado",        "#5B2A86", "#B392E0"),   // Advent purple
         new("sky",    "Sky blue", "Celeste",       "#1A8CD8", "#5CB8F0"),
         new("ember",  "Orange",   "Naranja",       "#D9652F", "#F08A5D"),
         new("red",    "Red",      "Rojo",          "#C8102E", "#F2545B"),

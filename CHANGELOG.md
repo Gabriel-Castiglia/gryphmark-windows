@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.6.0 — 2026-11-10
+
+- **Several folders at once** in the Files panel, one tree per folder, added in the order they are opened. Each
+  folder is a block with its own pastel colour and a stripe on the left: by default tones of the theme colour,
+  or *Multicolour*, or *No colour*, and any folder can get its own colour from its right-click menu.
+- **Order** from the panel's ⋯ button: order opened (default), name A → Z, name Z → A, recently modified first;
+  *Move up / Move down* in the right-click menu.
+- **Pin to top**: pinned folders always stay first.
+- **Folders at start** (*File → Folders at start*, also in the ⋯ button): reopen the last session's folders
+  (default), start clean, or start clean with only the pinned folders.
+- **Sturdier when things disappear**: a deleted open folder or a lost network drive is shown as *not available*
+  and comes back by itself; a file deleted in Explorer leaves the tree at once, and clicking a stale entry just
+  refreshes the panel. Watcher errors and buffer overflows trigger a refresh instead of being lost.
+- **Narrow windows**: the formatting buttons that do not fit go into a ⋯ menu instead of sliding under the view
+  and read-only switches.
+- **Zoom bar** in the status bar: −, slider, +, and the percentage (click it for 100 %); Ctrl + mouse wheel works
+  over the whole window.
+- The default theme colour is now **dark gold**. A colour saved by 1.5 without being chosen gives way to it.
+
 ## 1.5.1 — 2026-11-10
 
 - The theme colour now reaches the desktop and Start-menu shortcuts at once: Windows caches icons by file
@@ -11,7 +30,7 @@
   live), plus a catalogue of eleven colours. The colour is the background of the icon — window, taskbar,
   desktop and Start-menu shortcuts, `.md` files and the folder menu — and the highlight of the app (folders in
   the Files panel, check marks, the selected item). Shortcuts with an icon of their own are left alone.
-- The default colour is now **Advent purple**; the original orange is in the catalogue. New installs start in
+- The default colour became Advent purple (1.6.0 changes it to dark gold); the original orange is in the catalogue. New installs start in
   Automatic; existing ones keep their light or dark choice.
 
 ## 1.4.0 — 2026-11-10

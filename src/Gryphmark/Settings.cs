@@ -9,12 +9,26 @@ public sealed class Settings
     public string Lang { get; set; } = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "es" ? "es" : "en";
     public string Theme { get; set; } = "auto";      // light | dark | auto (follows Windows)
     public string Accent { get; set; } = Accents.Default;
+    /// <summary>True once the colour was chosen in View → Theme; until then the default colour applies.</summary>
+    public bool AccentChosen { get; set; }
     public string Mode { get; set; } = "visual";
     public bool ReadOnly { get; set; }
     public double Zoom { get; set; } = 1.0;
     public List<string> Recent { get; set; } = new();
-    /// <summary>Folder shown in the Files panel (reopened on the next start).</summary>
+    /// <summary>1.4 and earlier: the single folder of the Files panel (moved into <see cref="Folders"/>).</summary>
     public string? Folder { get; set; }
+    /// <summary>Folders open in the Files panel, in the order they were opened.</summary>
+    public List<string> Folders { get; set; } = new();
+    /// <summary>Folders pinned to the top of the panel (and opened at start in "pinned" mode).</summary>
+    public List<string> PinnedFolders { get; set; } = new();
+    /// <summary>At start: "restore" (last session's folders), "clean" (none) or "pinned" (only the pinned ones).</summary>
+    public string StartupFolders { get; set; } = "restore";
+    /// <summary>Order of the folders: "opened", "az", "za" or "modified".</summary>
+    public string FolderSort { get; set; } = "opened";
+    /// <summary>Folder colours: "theme" (tones of the theme colour), "multi" or "none".</summary>
+    public string FolderColors { get; set; } = "theme";
+    /// <summary>Colour chosen by hand for a folder: path → hue in degrees.</summary>
+    public Dictionary<string, string> FolderColorMap { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public List<string> RecentFolders { get; set; } = new();
     public bool FilesPanel { get; set; }
     public double FilesWidth { get; set; } = 260;

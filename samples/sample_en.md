@@ -63,7 +63,7 @@ $$
 
 ## Folders
 
-Open a whole folder with **File → Open folder…** and its Markdown files appear in a tree on the left, like in VS Code or Obsidian. Click a file to open it; `Ctrl+Shift+E` shows or hides the panel.
+Open a whole folder with **File → Open folder…** and its Markdown files appear in a tree on the left, like in VS Code or Obsidian. You can open several folders; each one gets its own colour, and the **⋯** button of the panel sorts them, changes the colours and chooses what opens at start. Click a file to open it; `Ctrl+Shift+E` shows or hides the panel.
 
 ---
 

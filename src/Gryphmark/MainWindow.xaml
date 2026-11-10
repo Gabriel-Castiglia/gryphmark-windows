@@ -9,22 +9,32 @@
     <DockPanel>
         <Menu x:Name="MainMenu" DockPanel.Dock="Top" />
         <Border x:Name="ToolBarHost" DockPanel.Dock="Top" Style="{DynamicResource Gm.ToolBar}">
-            <DockPanel LastChildFill="False">
-                <Border DockPanel.Dock="Right" Style="{DynamicResource Gm.SegmentHost}" VerticalAlignment="Center">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <!-- formatting buttons: the ones that do not fit go into the ⋯ menu (MainWindow.Fit.cs) -->
+                <Border x:Name="ToolsHost" Grid.Column="0" ClipToBounds="True">
+                    <StackPanel x:Name="Tools" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                </Border>
+                <Button x:Name="ToolsMore" Grid.Column="1" Style="{DynamicResource Gm.ToolButton}" Content="&#xE712;" Visibility="Collapsed" Margin="0,0,8,0" />
+                <Border Grid.Column="3" Style="{DynamicResource Gm.SegmentHost}" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton x:Name="SegVisual" Style="{DynamicResource Gm.Segment}" GroupName="mode" />
                         <RadioButton x:Name="SegSource" Style="{DynamicResource Gm.Segment}" GroupName="mode" />
                         <RadioButton x:Name="SegPreview" Style="{DynamicResource Gm.Segment}" GroupName="mode" />
                     </StackPanel>
                 </Border>
-                <Border DockPanel.Dock="Right" Style="{DynamicResource Gm.SegmentHost}" VerticalAlignment="Center" Margin="0,0,8,0">
+                <Border Grid.Column="2" Style="{DynamicResource Gm.SegmentHost}" VerticalAlignment="Center" Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton x:Name="SegEdit" Style="{DynamicResource Gm.Segment}" GroupName="lock" />
                         <RadioButton x:Name="SegRead" Style="{DynamicResource Gm.Segment}" GroupName="lock" />
                     </StackPanel>
                 </Border>
-                <StackPanel x:Name="Tools" DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center" />
-            </DockPanel>
+            </Grid>
         </Border>
         <StatusBar x:Name="Status" DockPanel.Dock="Bottom">
             <StatusBarItem>
@@ -34,7 +44,12 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock x:Name="StatusWords" Margin="0,0,18,0" />
                     <TextBlock x:Name="StatusMode" Margin="0,0,18,0" />
-                    <TextBlock x:Name="StatusState" />
+                    <TextBlock x:Name="StatusState" Margin="0,0,14,0" />
+                    <!-- zoom bar -->
+                    <Button x:Name="ZoomOutBtn" Style="{DynamicResource Gm.ToolButton}" Content="&#xE738;" FontSize="10" Width="22" Height="20" />
+                    <Slider x:Name="ZoomSlider" Style="{DynamicResource Gm.ZoomSlider}" Width="110" VerticalAlignment="Center" Value="100" />
+                    <Button x:Name="ZoomInBtn" Style="{DynamicResource Gm.ToolButton}" Content="&#xE710;" FontSize="10" Width="22" Height="20" />
+                    <Button x:Name="ZoomPct" Style="{DynamicResource Gm.ZoomPct}" Content="100 %" />
                 </StackPanel>
             </StatusBarItem>
         </StatusBar>
@@ -50,9 +65,10 @@
                 <DockPanel>
                     <DockPanel DockPanel.Dock="Top" Margin="18,8,6,4" MinHeight="30">
                         <StackPanel x:Name="FilesHeaderButtons" DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button x:Name="FilesAdd" Style="{DynamicResource Gm.ToolButton}" Content="&#xE710;" FontSize="12" />
                             <Button x:Name="FilesRefresh" Style="{DynamicResource Gm.ToolButton}" Content="&#xE72C;" FontSize="12" />
                             <Button x:Name="FilesCollapse" Style="{DynamicResource Gm.ToolButton}" Content="&#xF165;" FontSize="12" />
-                            <Button x:Name="FilesClose" Style="{DynamicResource Gm.ToolButton}" Content="&#xE711;" FontSize="11" />
+                            <Button x:Name="FilesOptions" Style="{DynamicResource Gm.ToolButton}" Content="&#xE712;" FontSize="12" />
                         </StackPanel>
                         <TextBlock x:Name="FilesTitle" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
                                    Foreground="{DynamicResource Gm.TextMuted}" FontFamily="{DynamicResource Gm.Font}" />

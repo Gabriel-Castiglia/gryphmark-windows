@@ -22,6 +22,15 @@ public static class SelfTest
             var menu = (Menu)w.FindName("MainMenu");
             Save(menu, Path.Combine(dir, $"menubar_{(dark ? "dark" : "light")}.png"));
             Save((FrameworkElement)w.FindName("ToolBarHost"), Path.Combine(dir, $"toolbar_{(dark ? "dark" : "light")}.png"));
+            // narrow window: the buttons that do not fit go into the overflow menu instead of overlapping
+            var bar = (FrameworkElement)w.FindName("ToolBarHost");
+            double keepW = bar.Width;
+            foreach (var narrow in new[] { 760.0, 560.0 })
+            {
+                bar.Width = narrow; bar.UpdateLayout(); w.FitToolbarForTest(); bar.UpdateLayout();
+                Save(bar, Path.Combine(dir, $"toolbar_{narrow}_{(dark ? "dark" : "light")}.png"));
+            }
+            bar.Width = keepW; bar.UpdateLayout(); w.FitToolbarForTest();
             int i = 0;
             foreach (MenuItem top in menu.Items)
             {
@@ -71,15 +80,17 @@ public static class SelfTest
 
                 // Files panel: empty, then a small folder with one file selected
                 var pane = (FrameworkElement)w.FindName("FilesPane");
-                w.TestFolder(null, null);
+                w.TestFolder(null);
                 w.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
                 Save(pane, Path.Combine(dir, $"files_empty_{sfx}.png"));
                 var demo = DemoFolder();
-                w.TestFolder(demo, Path.Combine(demo, "Notes", "Projects", "Plan.md"));
+                var second = Path.Combine(Path.GetDirectoryName(demo)!, "Website");
+                foreach (var f in new[] { "index.md", "docs/setup.md" }) { var p = Path.Combine(second, f); Directory.CreateDirectory(Path.GetDirectoryName(p)!); if (!File.Exists(p)) File.WriteAllText(p, "# x"); }
+                w.TestFolder(Path.Combine(demo, "Notes", "Projects", "Plan.md"), demo, second);
                 w.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
                 w.UpdateLayout();
                 Save(pane, Path.Combine(dir, $"files_tree_{sfx}.png"));
-                w.TestFolder(null, null);
+                w.TestFolder(null);
             }
             Strings.Lang = keepLang;
         }

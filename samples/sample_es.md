@@ -63,7 +63,7 @@ $$
 
 ## Carpetas
 
-Abrí una carpeta entera con **Archivo → Abrir carpeta…** y sus archivos Markdown aparecen en un árbol a la izquierda, como en VS Code u Obsidian. Clic en un archivo para abrirlo; `Ctrl+Shift+E` muestra u oculta el panel.
+Abrí una carpeta entera con **Archivo → Abrir carpeta…** y sus archivos Markdown aparecen en un árbol a la izquierda, como en VS Code u Obsidian. Podés abrir varias carpetas; cada una tiene su color, y el botón **⋯** del panel las ordena, cambia los colores y elige qué se abre al iniciar. Clic en un archivo para abrirlo; `Ctrl+Shift+E` muestra u oculta el panel.
 
 ---
 

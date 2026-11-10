@@ -5,7 +5,7 @@ Each pixel's weight is its saturation (the background is the only saturated area
 the original pixel's brightness, so anti-aliased edges and texture survive.
 
 Output: src/Gryphmark/icons/gryphmark_<key>.ico (16-256 px), docs/img/theme_icons.png (contact sheet), and
-src/Gryphmark/Gryphmark.ico = the default (purple) variant: exe, installer and shortcuts.
+src/Gryphmark/Gryphmark.ico = the default (gold) variant: exe, installer and shortcuts.
 Keep the keys and colours in sync with Accents.cs.
 """
 import pathlib
@@ -18,7 +18,8 @@ out = root / "src" / "Gryphmark" / "icons"
 out.mkdir(exist_ok=True)
 
 ACCENTS = {               # key: icon background
-    "purple": "#5B2A86",  # Advent purple: the default since 1.5.0
+    "gold":   "#C8961E",  # dark gold: the default since 1.6.0
+    "purple": "#5B2A86",  # Advent purple (default in 1.5)
     "sky":    "#3FA9E6",  # celeste
     "ember":  "#E8602C",  # the original orange (until 1.4.0)
     "red":    "#C8102E",
@@ -52,7 +53,7 @@ for key, hexc in ACCENTS.items():
     print("ok", key)
 
 import shutil
-shutil.copyfile(out / "gryphmark_purple.ico", root / "src" / "Gryphmark" / "Gryphmark.ico")
+shutil.copyfile(out / "gryphmark_gold.ico", root / "src" / "Gryphmark" / "Gryphmark.ico")
 
 sheet = Image.new("RGBA", (len(tiles) * 176 + 16, 192), (128, 128, 128, 255))
 for i, t in enumerate(tiles):

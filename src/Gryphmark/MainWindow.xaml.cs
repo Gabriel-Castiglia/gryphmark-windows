@@ -33,6 +33,7 @@ public partial class MainWindow : Window
         _pendingOpen = startPath;
         Width = _settings.Width; Height = _settings.Height;
         if (_settings.Maximized) WindowState = WindowState.Maximized;
+        if (!_settings.AccentChosen) _settings.Accent = Accents.Default;
         ThemeManager.Apply(this, IsDark, _settings.Accent);
         Icon = Accents.WindowIcon(_settings.Accent) ?? Icon;
         // page colour from the first frame, so there is no white/black flash while the editor loads
@@ -47,6 +48,7 @@ public partial class MainWindow : Window
         Closing += OnClosing;
         Closed += (_, _) => CloseTrace.Log("window closed");
         InitFeatures();
+        InitFit();
         InitFolder(startFolder);
         PreviewKeyDown += OnKey;
         Drop += (_, e) =>
@@ -445,13 +447,14 @@ public partial class MainWindow : Window
         Web.DefaultBackgroundColor = dark ? System.Drawing.Color.FromArgb(13, 17, 23) : System.Drawing.Color.White;
         if (_ready && dark != _appliedDark) await Js($"mdApp.setTheme({Q(dark ? "dark" : "light")})");
         _appliedDark = dark;
+        if (_folderInit) RefreshTree();   // folder colours follow the theme
     }
 
     private void ShowThemeDialog()
     {
         var dlg = new ThemeDialog(this, _settings.Theme, _settings.Accent,
             async mode => { _settings.Theme = mode; _settings.Save(); await ApplyThemeAsync(); },
-            async key => { _settings.Accent = key; _settings.Save(); await ApplyThemeAsync(); Accents.ApplyToSystem(key); });
+            async key => { _settings.Accent = key; _settings.AccentChosen = true; _settings.Save(); await ApplyThemeAsync(); Accents.ApplyToSystem(key); });
         dlg.ShowDialog();
     }
 
@@ -580,7 +583,10 @@ public partial class MainWindow : Window
             recent.Items.Add(Item("RecentClear", null, () => { _settings.Recent.Clear(); _settings.RecentFolders.Clear(); _settings.Save(); BuildMenu(); return Task.CompletedTask; }));
         }
         file.Items.Add(recent);
-        file.Items.Add(Item("CloseDir", null, () => { CloseFolder(); return Task.CompletedTask; }, enabled: _folder != null));
+        file.Items.Add(Item("CloseDir", null, () => { CloseAllFolders(); return Task.CompletedTask; }, enabled: _roots.Count > 0));
+        var startup = new MenuItem { Header = Strings.Get("StartupMenu") };
+        foreach (var mi in StartupItems()) startup.Items.Add(mi);
+        file.Items.Add(startup);
         file.Items.Add(new Separator());
         file.Items.Add(Item("Save", ctrl + "S", () => RunCommand("save")));
         file.Items.Add(Item("SaveAs", ctrl + "Shift+S", () => RunCommand("saveas")));
@@ -711,7 +717,8 @@ public partial class MainWindow : Window
         var h = Tool("", "Heading", null, () => Task.CompletedTask);
         h.Click += (_, _) =>
         {
-            var cm = new ContextMenu { PlacementTarget = h, Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom };
+            // from the ⋯ menu the button is hidden: open at the mouse instead
+            var cm = new ContextMenu { PlacementTarget = h, Placement = h.IsVisible ? System.Windows.Controls.Primitives.PlacementMode.Bottom : System.Windows.Controls.Primitives.PlacementMode.MousePoint };
             for (int lv = 1; lv <= 6; lv++)
             {
                 int level = lv;
@@ -752,6 +759,8 @@ public partial class MainWindow : Window
         SegVisual.ToolTip = SegTip("ModeVisual", "TipVisual", "Ctrl+1");
         SegSource.ToolTip = SegTip("ModeSource", "TipSource", "Ctrl+2");
         SegPreview.ToolTip = SegTip("ModePreview", "TipPreview", "Ctrl+3");
+        if (ZoomSlider != null && ToolsMore.ToolTip != null) LocalizeFit();
+        Dispatcher.BeginInvoke(FitToolbar);
         SegEdit.Content = SegLabel("\uE70F", "SegEdit");
         SegRead.Content = SegLabel("\uE72E", "SegRead");
         SegEdit.ToolTip = SegTip("SegEdit", "TipEdit", "Ctrl+Shift+L");

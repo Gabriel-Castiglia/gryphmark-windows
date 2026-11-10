@@ -1,9 +1,9 @@
-"""Inno Setup wizard bitmaps from the icon: big side panel (gradient to the default Advent purple) and small top-right logo."""
+"""Inno Setup wizard bitmaps from the icon: big side panel (gradient to the default dark gold) and small top-right logo."""
 import pathlib
 from PIL import Image, ImageDraw, ImageFont
 
 root = pathlib.Path(__file__).resolve().parents[1]
-ico = Image.open(root / "src" / "Gryphmark" / "icons" / "gryphmark_purple.ico")  # default theme colour
+ico = Image.open(root / "src" / "Gryphmark" / "icons" / "gryphmark_gold.ico")  # default theme colour
 ico.size = (256, 256)
 icon = ico.convert("RGBA")
 
@@ -11,7 +11,7 @@ def gradient(w, h):
     im = Image.new("RGB", (w, h)); px = im.load()
     for y in range(h):
         t = y / h
-        c = tuple(int(a + (b - a) * t) for a, b in zip((21, 23, 42), (70, 30, 110)))
+        c = tuple(int(a + (b - a) * t) for a, b in zip((21, 23, 42), (120, 86, 14)))
         for x in range(w): px[x, y] = c
     return im
 
@@ -26,7 +26,7 @@ try:
     f2 = ImageFont.truetype("C:/Windows/Fonts/segoeui.ttf", 20)
 except OSError:
     f = f2 = ImageFont.load_default()
-for text, font, y, col in (("Gryphmark", f, 400, (255, 255, 255)), ("Markdown · GitHub", f2, 462, (214, 196, 240))):
+for text, font, y, col in (("Gryphmark", f, 400, (255, 255, 255)), ("Markdown · GitHub", f2, 462, (240, 214, 140))):
     w = d.textlength(text, font=font)
     d.text(((W - w) / 2, y), text, font=font, fill=col)
 big.save(root / "installer" / "wizard.bmp")

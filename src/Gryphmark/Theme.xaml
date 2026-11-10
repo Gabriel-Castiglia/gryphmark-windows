@@ -10,10 +10,10 @@
     <SolidColorBrush x:Key="Gm.TextMuted" Color="#86868B" />
     <SolidColorBrush x:Key="Gm.Hover" Color="#EBEBF0" />
     <SolidColorBrush x:Key="Gm.Pressed" Color="#E1E1E6" />
-    <SolidColorBrush x:Key="Gm.Accent" Color="#5B2A86" />
+    <SolidColorBrush x:Key="Gm.Accent" Color="#9A6F00" />
     <SolidColorBrush x:Key="Gm.Separator" Color="#E8E8ED" />
-    <SolidColorBrush x:Key="Gm.FolderIcon" Color="#5B2A86" />
-    <SolidColorBrush x:Key="Gm.Selected" Color="#2E5B2A86" />
+    <SolidColorBrush x:Key="Gm.FolderIcon" Color="#9A6F00" />
+    <SolidColorBrush x:Key="Gm.Selected" Color="#2E9A6F00" />
 
     <FontFamily x:Key="Gm.Font">Segoe UI Variable Display, Segoe UI Variable Text, Segoe UI</FontFamily>
     <FontFamily x:Key="Gm.Icons">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
@@ -227,6 +227,128 @@
 
     <!-- Outline list: indented headings, soft hover pill -->
     <!-- Files panel: folder tree -->
+    <!-- Zoom bar in the status bar -->
+    <Style x:Key="Gm.ZoomSlider" TargetType="Slider">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsMoveToPointEnabled" Value="True" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Slider">
+                    <Grid Height="18" Background="Transparent">
+                        <Border Height="3" CornerRadius="1.5" Background="{DynamicResource Gm.Separator}" VerticalAlignment="Center" Margin="6,0" />
+                        <Track x:Name="PART_Track">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="Slider.DecreaseLarge" Focusable="False">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border Height="3" CornerRadius="1.5" Margin="6,0,0,0" Background="{DynamicResource Gm.Accent}" VerticalAlignment="Center" />
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="Slider.IncreaseLarge" Focusable="False">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border Background="Transparent" />
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.IncreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb>
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Ellipse Width="12" Height="12" Fill="{DynamicResource Gm.Popup}" Stroke="{DynamicResource Gm.Accent}" StrokeThickness="2" />
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Gm.ZoomPct" TargetType="Button">
+        <Setter Property="Foreground" Value="{DynamicResource Gm.TextMuted}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Gm.Font}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="MinWidth" Value="46" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bg" CornerRadius="5" Padding="6,1" Background="Transparent">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Hover}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Gm.FilesRoot" TargetType="TreeViewItem">
+        <Setter Property="Foreground" Value="{DynamicResource Gm.Text}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Gm.Font}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TreeViewItem">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="3,0,0,0"
+                            CornerRadius="7" Margin="0,0,0,6" Padding="2,2,2,3">
+                        <StackPanel>
+                            <Border x:Name="Bg" CornerRadius="6" Padding="2,5,6,5" Background="Transparent">
+                                <DockPanel>
+                                    <ToggleButton x:Name="Expander" DockPanel.Dock="Left" Width="18" Focusable="False" ClickMode="Press"
+                                                  IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="Transparent">
+                                                    <TextBlock x:Name="Chevron" Text="&#xE76C;" FontFamily="{DynamicResource Gm.Icons}" FontSize="9"
+                                                               Foreground="{DynamicResource Gm.TextMuted}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsChecked" Value="True">
+                                                        <Setter TargetName="Chevron" Property="Text" Value="&#xE70D;" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                    <ContentPresenter ContentSource="Header" />
+                                </DockPanel>
+                            </Border>
+                            <ItemsPresenter x:Name="ItemsHost" Margin="8,0,0,0" Visibility="Collapsed" />
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Setter TargetName="ItemsHost" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="HasItems" Value="False">
+                            <Setter TargetName="Expander" Property="Visibility" Value="Hidden" />
+                        </Trigger>
+                        <Trigger SourceName="Bg" Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Hover}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Selected}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="Gm.FilesItem" TargetType="TreeViewItem">
         <Setter Property="Foreground" Value="{DynamicResource Gm.Text}" />
         <Setter Property="FontFamily" Value="{DynamicResource Gm.Font}" />
