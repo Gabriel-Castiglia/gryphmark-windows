@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.7.0 — 2026-11-10
+
+- **Dedicated instances:** a file or folder can open in its own Gryphmark, always separate from the main window,
+  with its own settings, open folders, recent files and window (`--profile "Name"`, kept under
+  `%APPDATA%\Gryphmark\profiles\Name`; a new one starts with the main language, theme and colour). Opening it
+  again brings that window to the front instead of starting another. Right-click a file or a folder title in the
+  Files panel → *Open in a dedicated instance* or *Desktop shortcut (dedicated instance)*. The title bar shows the
+  instance name.
+- **Several windows done right:** an extra window (*Open in a new window*) no longer writes over the main
+  window's session (open folders, window size); it only saves preference changes. Crash-recovery drafts of a
+  window that is still running are never offered to another one.
+
 ## 1.6.0 — 2026-11-10
 
 - **Several folders at once** in the Files panel, one tree per folder, added in the order they are opened. Each

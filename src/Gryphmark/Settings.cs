@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Gryphmark;
 
@@ -43,15 +44,41 @@ public sealed class Settings
     public bool SampleHidden { get; set; }
     public DateTime LastUpdateCheck { get; set; }
 
-    public static string Dir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Gryphmark");
+    // ------------------------------------------------------------------ instances
+    // Main instance: %APPDATA%\Gryphmark. A dedicated instance (--profile "Name") has its own folder under
+    // profiles\, so its folders, window and recent files never mix with the main one; it starts with the
+    // main instance's preferences (language, theme, colour…). A plain extra window (--new-window) shares the
+    // main settings but only writes back preferences, never the session (open folders, window size…).
+
+    /// <summary>Name of the dedicated instance, or null for the main one (set once at start-up).</summary>
+    public static string? Profile { get; set; }
+    /// <summary>True for an extra window of the main instance (another one already owns the session).</summary>
+    public static bool IsSecondary { get; set; }
+
+    public static string BaseDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Gryphmark");
+    public static string Dir => Profile == null ? BaseDir : Path.Combine(BaseDir, "profiles", SafeName(Profile));
     private static string FilePath => Path.Combine(Dir, "settings.json");
+
+    public static string SafeName(string name)
+    {
+        var bad = Path.GetInvalidFileNameChars();
+        var s = new string(name.Trim().Select(c => bad.Contains(c) ? '_' : c).ToArray());
+        return string.IsNullOrWhiteSpace(s) ? "profile" : s;
+    }
+
+    /// <summary>The session of one window: what an extra window must not write over.</summary>
+    private static readonly HashSet<string> SessionKeys = new()
+    {
+        nameof(Folder), nameof(Folders), nameof(PinnedFolders), nameof(Width), nameof(Height), nameof(Maximized),
+        nameof(FilesPanel), nameof(FilesWidth), nameof(SampleShown),
+    };
 
     /// <summary>Gryphmark was called Quillforge up to 1.1.1: copy its settings, recent files and recovery
     /// drafts the first time. The old folder is left untouched; its WebView2 cache is not copied (rebuilt on start).</summary>
     private static void MigrateFromQuillforge()
     {
         var old = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Quill" + "forge");
-        if (Directory.Exists(Dir) || !Directory.Exists(old)) return;
+        if (Directory.Exists(BaseDir) || !Directory.Exists(old)) return;
         Directory.CreateDirectory(Dir);
         try { if (File.Exists(Path.Combine(old, "settings.json"))) File.Copy(Path.Combine(old, "settings.json"), FilePath, false); }
         catch { /* best effort: start with defaults */ }
@@ -71,22 +98,42 @@ public sealed class Settings
 
     public static Settings Load()
     {
-        MigrateFromQuillforge();
+        if (Profile == null) MigrateFromQuillforge();
         try
         {
             if (File.Exists(FilePath))
                 return JsonSerializer.Deserialize<Settings>(File.ReadAllText(FilePath)) ?? new Settings();
+            if (Profile != null)   // new dedicated instance: the main preferences, an empty session
+            {
+                var main = Path.Combine(BaseDir, "settings.json");
+                var s = File.Exists(main) ? JsonSerializer.Deserialize<Settings>(File.ReadAllText(main)) ?? new Settings() : new Settings();
+                s.Folder = null; s.Folders = new(); s.PinnedFolders = new(); s.Recent = new(); s.RecentFolders = new();
+                s.FilesPanel = false; s.SampleShown = true; s.StartupFolders = "restore";
+                return s;
+            }
         }
         catch { /* corrupt settings: start fresh */ }
         return new Settings();
     }
+
+    private static readonly JsonSerializerOptions Indented = new() { WriteIndented = true };
 
     public void Save()
     {
         try
         {
             Directory.CreateDirectory(Dir);
-            File.WriteAllText(FilePath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+            if (IsSecondary && File.Exists(FilePath))
+            {
+                // extra window: keep the owner's session, take this window's preferences
+                var disk = JsonNode.Parse(File.ReadAllText(FilePath)) as JsonObject ?? new JsonObject();
+                var mine = JsonSerializer.SerializeToNode(this)!.AsObject();
+                foreach (var (k, v) in mine)
+                    if (!SessionKeys.Contains(k)) disk[k] = v?.DeepClone();
+                File.WriteAllText(FilePath, disk.ToJsonString(Indented));
+                return;
+            }
+            File.WriteAllText(FilePath, JsonSerializer.Serialize(this, Indented));
         }
         catch { /* settings are a convenience */ }
     }

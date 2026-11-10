@@ -6,8 +6,21 @@ namespace Gryphmark;
 
 public partial class App : Application
 {
-    private static readonly string PipeName = "Gryphmark-" + Environment.UserName;
+    // One running instance per profile: the main one, and each dedicated instance (--profile "Name").
+    private static string PipeName => "Gryphmark-" + Environment.UserName + (Settings.Profile == null ? "" : "-p-" + Settings.SafeName(Settings.Profile).ToLowerInvariant());
     private Mutex? _mutex;
+
+    /// <summary>--profile "Name" or --profile=Name: a dedicated instance with its own settings and session.</summary>
+    private static string? ProfileArg(string[] args, out int skip)
+    {
+        skip = -1;
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (args[i].StartsWith("--profile=", StringComparison.OrdinalIgnoreCase)) return args[i][10..].Trim('"');
+            if (args[i].Equals("--profile", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length) { skip = i + 1; return args[i + 1]; }
+        }
+        return null;
+    }
 
     private void OnStartup(object sender, StartupEventArgs e)
     {
@@ -20,17 +33,20 @@ public partial class App : Application
             Shutdown();
             return;
         }
-        var path = e.Args.FirstOrDefault(a => !a.StartsWith('-'));
-        if (path != null) path = Path.GetFullPath(path);
+        var profile = ProfileArg(e.Args, out int skip);
+        if (!string.IsNullOrWhiteSpace(profile)) Settings.Profile = profile.Trim();
+        var path = e.Args.Where((a, i) => i != skip && !a.StartsWith('-')).FirstOrDefault();
+        try { if (path != null) path = Path.GetFullPath(path); } catch { path = null; }
         bool newWindow = e.Args.Contains("--new-window");
 
-        // Single instance: hand the file to the running Gryphmark and leave
+        // Single instance per profile: hand the file to the running one and leave
         _mutex = new Mutex(true, "Local\\" + PipeName, out bool first);
         if (!first && !newWindow && TrySend(path ?? ""))
         {
             Shutdown();
             return;
         }
+        Settings.IsSecondary = !first;   // an extra window: the session belongs to the first one
         var main = new MainWindow(path);
         main.Show();
         if (first) StartServer(main);

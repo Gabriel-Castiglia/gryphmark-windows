@@ -441,6 +441,8 @@ public partial class MainWindow
         {
             MenuEntry(Strings.Plain("FileOpen"), () => { if (!File.Exists(path)) { Flash(Strings.Get("ItemGone")); RefreshTree(); } else if (!string.Equals(path, _path, StringComparison.OrdinalIgnoreCase)) OpenPath(path); }),
             MenuEntry(Strings.Get("OpenNewWindow"), () => StartSelf("--new-window", path)),
+            MenuEntry(Strings.Get("OpenDedicated"), () => OpenDedicated(path)),
+            MenuEntry(Strings.Get("DedicatedShortcut"), () => DedicatedShortcut(path)),
             new Separator(),
             MenuEntry(Strings.Plain("OpenFolder"), () => ShowInExplorer(path, true)),
             MenuEntry(Strings.Get("CopyPath"), () => Clipboard.SetText(path)),
@@ -486,6 +488,9 @@ public partial class MainWindow
                 MenuEntry(Strings.Get("FolderUp"), () => MoveRoot(dir, -1), enabled: manual && i > 0),
                 MenuEntry(Strings.Get("FolderDown"), () => MoveRoot(dir, +1), enabled: manual && i >= 0 && i < _roots.Count - 1),
                 new Separator(),
+                MenuEntry(Strings.Get("OpenDedicated"), () => OpenDedicated(dir), enabled: !_missing.Contains(dir)),
+                MenuEntry(Strings.Get("DedicatedShortcut"), () => DedicatedShortcut(dir)),
+                new Separator(),
                 MenuEntry(Strings.Plain("OpenFolder"), () => ShowInExplorer(dir, false), enabled: !_missing.Contains(dir)),
                 MenuEntry(Strings.Get("CopyPath"), () => Clipboard.SetText(dir)),
                 MenuEntry(Strings.Get("Refresh"), RefreshTree),
@@ -523,6 +528,37 @@ public partial class MainWindow
             mi.ToolTip = Strings.Get(tip);
             yield return mi;
         }
+    }
+
+    // ------------------------------------------------------------------ dedicated instances
+    /// <summary>Profile name for a file or folder: its name without extension.</summary>
+    private static string DedicatedName(string path) =>
+        Directory.Exists(path) ? FolderLabel(path) : Path.GetFileNameWithoutExtension(path);
+
+    /// <summary>Opens the file or folder in its own Gryphmark (separate window, settings and session).
+    /// Opening it again brings that window to the front.</summary>
+    private static void OpenDedicated(string path) => StartSelf("--profile", DedicatedName(path), path);
+
+    /// <summary>Desktop shortcut that always opens this file or folder in its dedicated Gryphmark.</summary>
+    private void DedicatedShortcut(string path)
+    {
+        try
+        {
+            var name = DedicatedName(path);
+            var lnk = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), Settings.SafeName(name) + " (Gryphmark).lnk");
+            Type t = Type.GetTypeFromProgID("WScript.Shell")!;
+            dynamic shell = Activator.CreateInstance(t)!;
+            dynamic l = shell.CreateShortcut(lnk);
+            l.TargetPath = Environment.ProcessPath!;
+            l.Arguments = $"--profile \"{name}\" \"{path}\"";
+            l.WorkingDirectory = Directory.Exists(path) ? path : Path.GetDirectoryName(path);
+            l.IconLocation = Environment.ProcessPath! + ",0";   // follows the theme colour (View → Theme)
+            l.Description = "Gryphmark — " + name;
+            l.Save();
+            Accents.ApplyToSystem(_settings.Accent);
+            Flash(string.Format(Strings.Get("DedicatedDone"), Path.GetFileName(lnk)));
+        }
+        catch { Flash(Strings.Get("DedicatedFail")); }
     }
 
     private static void StartSelf(params string[] args)

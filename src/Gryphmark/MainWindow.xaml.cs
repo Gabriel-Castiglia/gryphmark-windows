@@ -887,7 +887,7 @@ public partial class MainWindow : Window
     private void UpdateTitle()
     {
         var name = _path != null ? Path.GetFileName(_path) : Strings.Get(_isSample ? "SampleTitle" : "Untitled");
-        Title = $"{(_dirty ? "● " : "")}{name} — Gryphmark";
+        Title = $"{(_dirty ? "● " : "")}{name} — Gryphmark" + (Settings.Profile != null ? $"  [{Settings.Profile}]" : "");
         RevealCurrent();   // the Files panel follows the open file
     }
 

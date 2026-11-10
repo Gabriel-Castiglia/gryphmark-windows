@@ -103,6 +103,15 @@ pastel colour and a stripe on its left edge, so you see at a glance where one tr
 <i>Recently modified first</i>. <b>Pinned</b> folders (📌) always stay on top, in the order you pinned them. Colours: <i>Tones of the theme colour</i>
 (the default: shades of the colour chosen in <i>View → Theme…</i>), <i>Multicolour</i> (a different hue for each folder) or <i>No colour</i>;
 a single folder can get its own colour from its right-click menu.</p>
+<h3>Dedicated instances</h3>
+<p>Some files or folders deserve a Gryphmark of their own — a to-do list, a wiki — so they never get mixed with your other work.
+Right-click a file, or the title of a folder, and choose <b>Open in a dedicated instance</b>, or <b>Desktop shortcut (dedicated instance)</b>
+to get a shortcut that always opens it that way. A dedicated instance is a separate window with its own settings, open folders,
+recent files and size; its name is shown in the title bar. Opening it again brings that window to the front instead of starting another one.
+It starts with the language, theme and colour of the main window. (Technically: <code>Gryphmark.exe --profile "Name" "path"</code>;
+its settings live in <code>%APPDATA%\\Gryphmark\\profiles\\Name</code>.)</p>
+<p><i>Open in a new window</i> is different: it is an extra window of the main Gryphmark. It can be used freely, and it never writes over the
+main window's open folders or size.</p>
 <h3>What opens when Gryphmark starts</h3>
 <p>Choose it in <i>File → Folders at start</i> or in the <b>⋯</b> button of the panel:</p>
 <table><tr><th>Option</th><th>What happens</th></tr>
@@ -270,6 +279,15 @@ color pastel y una franja en el borde izquierdo, así ves de un vistazo dónde t
 <i>Modificadas recientemente primero</i>. Las carpetas <b>fijadas</b> (📌) quedan siempre arriba, en el orden en que las fijaste. Colores: <i>Tonos del color del tema</i>
 (por defecto: matices del color elegido en <i>Ver → Tema…</i>), <i>Multicolor</i> (un tono distinto por carpeta) o <i>Sin color</i>;
 una carpeta puede tener su propio color desde su menú de clic derecho.</p>
+<h3>Instancias dedicadas</h3>
+<p>Algunos archivos o carpetas merecen un Gryphmark propio —una lista de pendientes, una wiki— para que nunca se mezclen con el resto.
+Hacé clic derecho sobre un archivo, o sobre el título de una carpeta, y elegí <b>Abrir en una instancia dedicada</b>, o
+<b>Acceso directo en el escritorio (instancia dedicada)</b> para tener un acceso que siempre lo abre así. Una instancia dedicada es una ventana
+aparte con su propia configuración, carpetas abiertas, recientes y tamaño; su nombre aparece en la barra de título. Si la abrís de nuevo, se trae
+al frente esa ventana en lugar de abrir otra. Arranca con el idioma, el tema y el color de la ventana principal. (Técnicamente:
+<code>Gryphmark.exe --profile "Nombre" "ruta"</code>; su configuración está en <code>%APPDATA%\\Gryphmark\\profiles\\Nombre</code>.)</p>
+<p><i>Abrir en otra ventana</i> es distinto: es una ventana extra del Gryphmark principal. Se puede usar sin problema y nunca pisa las
+carpetas abiertas ni el tamaño de la ventana principal.</p>
 <h3>Qué se abre al iniciar Gryphmark</h3>
 <p>Se elige en <i>Archivo → Carpetas al iniciar</i> o en el botón <b>⋯</b> del panel:</p>
 <table><tr><th>Opción</th><th>Qué pasa</th></tr>
