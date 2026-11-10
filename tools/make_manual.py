@@ -166,7 +166,7 @@ In GitHub preview, links to web pages open in your browser, links to other <code
 <tr><td>Your formatting is kept</td><td>Only the lines you change are rewritten when you save: list markers, <code>__bold__</code>, table alignment, line endings (CRLF/LF) and BOM stay as they were.</td></tr>
 <tr><td>Changed outside</td><td>If another program modifies the open file, Gryphmark reloads it (or asks first if you have unsaved changes).</td></tr>
 <tr><td>Crash recovery</td><td>Unsaved work is backed up every 20 seconds. If Gryphmark or Windows stops unexpectedly, the next start offers to recover it.</td></tr>
-<tr><td>Spell check</td><td><i>View → Spell check</i> underlines misspelled words (Windows dictionaries).</td></tr>
+<tr><td>Spell check</td><td><i>View → Spell check</i> underlines misspelled words, in the interface language (Windows dictionaries).</td></tr>
 <tr><td>One window per file</td><td>Opening a .md while Gryphmark is running brings the existing window forward instead of starting a second copy. <i>File → New window</i> still opens another one.</td></tr>
 <tr><td>Updates</td><td>Gryphmark checks once a day for a new version; <i>Help → Check for updates</i> does it on demand.</td></tr>
 <tr><td>About</td><td><i>Help → About Gryphmark</i> shows the version, author, license and credits. <i>Copy info</i> copies the version details, handy for reporting a problem.</td></tr>
@@ -342,7 +342,7 @@ En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otro
 <tr><td>Se respeta tu formato</td><td>Al guardar sólo se reescriben las líneas que cambiaste: viñetas, <code>__negrita__</code>, alineación de tablas, finales de línea (CRLF/LF) y BOM quedan como estaban.</td></tr>
 <tr><td>Cambios externos</td><td>Si otro programa modifica el archivo abierto, Gryphmark lo recarga (o pregunta antes si tenés cambios sin guardar).</td></tr>
 <tr><td>Recuperación</td><td>Lo no guardado se respalda cada 20 segundos. Si Gryphmark o Windows se cierran de golpe, al volver a abrir ofrece recuperarlo.</td></tr>
-<tr><td>Ortografía</td><td><i>Ver → Revisar ortografía</i> subraya las palabras mal escritas (diccionarios de Windows).</td></tr>
+<tr><td>Ortografía</td><td><i>Ver → Corrector ortográfico</i> subraya las palabras mal escritas, en el idioma de la interfaz (diccionarios de Windows).</td></tr>
 <tr><td>Una sola ventana</td><td>Abrir un .md con Gryphmark ya abierto trae al frente la ventana existente en vez de abrir otra copia. <i>Archivo → Nueva ventana</i> sigue abriendo otra.</td></tr>
 <tr><td>Actualizaciones</td><td>Gryphmark busca una versión nueva una vez por día; <i>Ayuda → Buscar actualizaciones</i> lo hace en el momento.</td></tr>
 <tr><td>Acerca de</td><td><i>Ayuda → Acerca de Gryphmark</i> muestra la versión, el autor, la licencia y los créditos. <i>Copiar info</i> copia los datos de versión, útil para reportar un problema.</td></tr>

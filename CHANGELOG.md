@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.2 — 2026-11-10
+
+- **Spell check follows the interface language:** switching between English and Spanish now also switches
+  the spell check dictionary (English: en-US, Spanish: es-419); the open document, its unsaved changes and the
+  zoom are kept. Before, the dictionary chosen the first time Gryphmark ran stayed for good.
+
 ## 1.7.1 — 2026-11-10
 
 - **Task lists in the GitHub view:** check boxes are now clear, GitHub-style boxes (green with a white tick when done,

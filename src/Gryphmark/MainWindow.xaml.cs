@@ -58,11 +58,39 @@ public partial class MainWindow : Window
     }
 
     // ------------------------------------------------------------------ WebView
+    // Spell check dictionary of each interface language (Windows spell checker tags).
+    private static string SpellLang(string lang) => lang == "es" ? "es-419" : "en-US";
+    private string? _webSpell;                         // dictionary the running browser was started with
+    private (string Text, bool Dirty)? _restore;       // document carried over a browser restart
+
+    // The browser keeps its spell check languages in its own profile and only reads them at
+    // start-up, so each dictionary gets its own profile folder, seeded before the browser starts.
+    private static string WebProfile(string spell)
+    {
+        var dir = Path.Combine(Settings.Dir, "WebView2", spell);
+        try
+        {
+            var prefsFile = Path.Combine(dir, "EBWebView", "Default", "Preferences");
+            Directory.CreateDirectory(Path.GetDirectoryName(prefsFile)!);
+            var prefs = (File.Exists(prefsFile) ? System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(prefsFile)) as System.Text.Json.Nodes.JsonObject : null)
+                        ?? new System.Text.Json.Nodes.JsonObject();
+            prefs["spellcheck"] ??= new System.Text.Json.Nodes.JsonObject();
+            prefs["spellcheck"]!["dictionaries"] = new System.Text.Json.Nodes.JsonArray(spell);
+            prefs["intl"] ??= new System.Text.Json.Nodes.JsonObject();
+            prefs["intl"]!["selected_languages"] = spell;
+            File.WriteAllText(prefsFile, prefs.ToJsonString());
+        }
+        catch { /* the browser then falls back to its own default */ }
+        return dir;
+    }
+
     private async Task InitWebAsync()
     {
         try
         {
-            var env = await CoreWebView2Environment.CreateAsync(null, Path.Combine(Settings.Dir, "WebView2"));
+            _webSpell = SpellLang(_settings.Lang);
+            var env = await CoreWebView2Environment.CreateAsync(null, WebProfile(_webSpell),
+                new CoreWebView2EnvironmentOptions { Language = _webSpell });
             await Web.EnsureCoreWebView2Async(env);
         }
         catch (Exception)
@@ -106,7 +134,8 @@ public partial class MainWindow : Window
             case "ready":
                 await Js($"mdApp.init({Q(_settings.Lang)},{Q(IsDark ? "dark" : "light")},{Q(_settings.Mode)},{(_settings.Spell ? "true" : "false")},{(_settings.ReadOnly ? "true" : "false")})");
                 _ready = true;
-                if (_pendingOpen != null) { var p = _pendingOpen; _pendingOpen = null; await LoadFileAsync(p); }
+                if (_restore is { } r) { _restore = null; await RestoreDocAsync(r.Text, r.Dirty); }
+                else if (_pendingOpen != null) { var p = _pendingOpen; _pendingOpen = null; await LoadFileAsync(p); }
                 else if (!_settings.SampleShown && SamplePath != null) { _settings.SampleShown = true; _settings.Save(); await LoadSampleAsync(); }
                 else UpdateStatus();
                 await OfferRecoveryAsync();
@@ -877,10 +906,41 @@ public partial class MainWindow : Window
     private async Task SetLanguage(string code)
     {
         _settings.Lang = code; Strings.Lang = code; _settings.Save();
-        if (_ready) await Js($"mdApp.setLang({Q(code)})");
         BuildMenu(); UpdateTitle(); UpdateStatus(); LocalizeFeatures();
+        // a new spell check language needs a new browser; the document is carried over
+        if (_ready && SpellLang(code) != _webSpell) { await RestartWebAsync(); return; }
+        if (_ready) await Js($"mdApp.setLang({Q(code)})");
         // the sample follows the interface language (unless it was edited: those changes are kept)
         if (_ready && _isSample && _path == null && !_dirty) await LoadSampleAsync();
+    }
+
+    private async Task RestartWebAsync()
+    {
+        var text = JsonSerializer.Deserialize<string>(await Js("mdApp.getMarkdownPreserving()")) ?? "";
+        _restore = (text, _dirty);
+        _settings.Zoom = Web.ZoomFactor;
+        _ready = false;
+        var host = (Panel)Web.Parent;
+        int at = host.Children.IndexOf(Web);
+        var old = Web;
+        host.Children.Remove(old);
+        old.Dispose();
+        Web = new Microsoft.Web.WebView2.Wpf.WebView2 { DefaultBackgroundColor = old.DefaultBackgroundColor };
+        Grid.SetRow(Web, 1);
+        host.Children.Insert(at, Web);
+        Web.ZoomFactorChanged += (_, _) => SyncZoom();
+        await InitWebAsync();
+    }
+
+    private async Task RestoreDocAsync(string text, bool dirty)
+    {
+        if (_isSample && _path == null && !dirty) { await LoadSampleAsync(); return; }
+        if (_path != null)
+            Web.CoreWebView2.SetVirtualHostNameToFolderMapping("doc.local", Path.GetDirectoryName(_path)!, CoreWebView2HostResourceAccessKind.Allow);
+        await Js($"mdApp.load({Q(text)},{(_path != null ? "'https://doc.local/'" : "null")})");
+        _dirty = dirty;
+        _words = int.TryParse(await Js("mdApp.words()"), out var n) ? n : 0;
+        UpdateTitle(); UpdateStatus();
     }
 
     // ------------------------------------------------------------------ Chrome
