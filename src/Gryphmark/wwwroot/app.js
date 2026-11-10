@@ -1,4 +1,4 @@
-/* Quillforge — editor page. Talks to the WPF host through chrome.webview. */
+/* Gryphmark — editor page. Talks to the WPF host through chrome.webview. */
 (function () {
   'use strict';
   const host = window.chrome && window.chrome.webview;
@@ -245,8 +245,8 @@
     CSS.highlights.clear();
     const all = [], cur = [];
     find.matches.forEach((m, i) => { try { (i === find.cur ? cur : all).push(toRange(m)); } catch (e) { } });
-    CSS.highlights.set('qf-find', new Highlight(...all));
-    CSS.highlights.set('qf-cur', new Highlight(...cur));
+    CSS.highlights.set('gm-find', new Highlight(...all));
+    CSS.highlights.set('gm-cur', new Highlight(...cur));
     if (find.cur >= 0 && cur[0]) {
       const el = cur[0].startContainer.nodeType === 1 ? cur[0].startContainer : cur[0].startContainer.parentElement;
       if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });

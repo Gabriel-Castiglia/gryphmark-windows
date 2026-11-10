@@ -2,31 +2,31 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- Colours are replaced at runtime by ThemeManager (light / dark) -->
-    <SolidColorBrush x:Key="Qf.Chrome" Color="#F5F5F7" />
-    <SolidColorBrush x:Key="Qf.ChromeBorder" Color="#E3E3E8" />
-    <SolidColorBrush x:Key="Qf.Popup" Color="#FCFCFD" />
-    <SolidColorBrush x:Key="Qf.PopupBorder" Color="#E0E0E5" />
-    <SolidColorBrush x:Key="Qf.Text" Color="#1D1D1F" />
-    <SolidColorBrush x:Key="Qf.TextMuted" Color="#86868B" />
-    <SolidColorBrush x:Key="Qf.Hover" Color="#EBEBF0" />
-    <SolidColorBrush x:Key="Qf.Pressed" Color="#E1E1E6" />
-    <SolidColorBrush x:Key="Qf.Accent" Color="#1D1D1F" />
-    <SolidColorBrush x:Key="Qf.Separator" Color="#E8E8ED" />
+    <SolidColorBrush x:Key="Gm.Chrome" Color="#F5F5F7" />
+    <SolidColorBrush x:Key="Gm.ChromeBorder" Color="#E3E3E8" />
+    <SolidColorBrush x:Key="Gm.Popup" Color="#FCFCFD" />
+    <SolidColorBrush x:Key="Gm.PopupBorder" Color="#E0E0E5" />
+    <SolidColorBrush x:Key="Gm.Text" Color="#1D1D1F" />
+    <SolidColorBrush x:Key="Gm.TextMuted" Color="#86868B" />
+    <SolidColorBrush x:Key="Gm.Hover" Color="#EBEBF0" />
+    <SolidColorBrush x:Key="Gm.Pressed" Color="#E1E1E6" />
+    <SolidColorBrush x:Key="Gm.Accent" Color="#1D1D1F" />
+    <SolidColorBrush x:Key="Gm.Separator" Color="#E8E8ED" />
 
-    <FontFamily x:Key="Qf.Font">Segoe UI Variable Display, Segoe UI Variable Text, Segoe UI</FontFamily>
-    <FontFamily x:Key="Qf.Icons">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+    <FontFamily x:Key="Gm.Font">Segoe UI Variable Display, Segoe UI Variable Text, Segoe UI</FontFamily>
+    <FontFamily x:Key="Gm.Icons">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 
     <!-- Top bar -->
     <Style TargetType="Menu">
-        <Setter Property="Background" Value="{DynamicResource Qf.Chrome}" />
-        <Setter Property="Foreground" Value="{DynamicResource Qf.Text}" />
-        <Setter Property="FontFamily" Value="{DynamicResource Qf.Font}" />
+        <Setter Property="Background" Value="{DynamicResource Gm.Chrome}" />
+        <Setter Property="Foreground" Value="{DynamicResource Gm.Text}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Gm.Font}" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="Padding" Value="6,4" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Menu">
-                    <Border Background="{TemplateBinding Background}" BorderBrush="{DynamicResource Qf.ChromeBorder}"
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{DynamicResource Gm.ChromeBorder}"
                             BorderThickness="0" Padding="{TemplateBinding Padding}">
                         <ItemsPresenter SnapsToDevicePixels="True" />
                     </Border>
@@ -39,15 +39,15 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Separator">
-                    <Border Height="1" Margin="14,5" Background="{DynamicResource Qf.Separator}" />
+                    <Border Height="1" Margin="14,5" Background="{DynamicResource Gm.Separator}" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
     <Style TargetType="MenuItem">
-        <Setter Property="Foreground" Value="{DynamicResource Qf.Text}" />
-        <Setter Property="FontFamily" Value="{DynamicResource Qf.Font}" />
+        <Setter Property="Foreground" Value="{DynamicResource Gm.Text}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Gm.Font}" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="Template">
@@ -64,20 +64,20 @@
                                     <ColumnDefinition Width="18" />
                                 </Grid.ColumnDefinitions>
                                 <ContentPresenter x:Name="IconHost" ContentSource="Icon" VerticalAlignment="Center" HorizontalAlignment="Left"
-                                                  TextElement.Foreground="{DynamicResource Qf.TextMuted}" />
-                                <TextBlock x:Name="Check" Text="&#xE73E;" FontFamily="{DynamicResource Qf.Icons}" FontSize="12"
-                                           Foreground="{DynamicResource Qf.Accent}" VerticalAlignment="Center" Visibility="Collapsed" />
+                                                  TextElement.Foreground="{DynamicResource Gm.TextMuted}" />
+                                <TextBlock x:Name="Check" Text="&#xE73E;" FontFamily="{DynamicResource Gm.Icons}" FontSize="12"
+                                           Foreground="{DynamicResource Gm.Accent}" VerticalAlignment="Center" Visibility="Collapsed" />
                                 <ContentPresenter Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="28,0,0,0"
-                                           Foreground="{DynamicResource Qf.TextMuted}" FontSize="12" VerticalAlignment="Center" />
-                                <TextBlock x:Name="Arrow" Grid.Column="3" Text="&#xE76C;" FontFamily="{DynamicResource Qf.Icons}" FontSize="10"
-                                           Foreground="{DynamicResource Qf.TextMuted}" HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed" />
+                                           Foreground="{DynamicResource Gm.TextMuted}" FontSize="12" VerticalAlignment="Center" />
+                                <TextBlock x:Name="Arrow" Grid.Column="3" Text="&#xE76C;" FontFamily="{DynamicResource Gm.Icons}" FontSize="10"
+                                           Foreground="{DynamicResource Gm.TextMuted}" HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed" />
                             </Grid>
                         </Border>
                         <Popup x:Name="PART_Popup" Placement="Right" HorizontalOffset="-2" VerticalOffset="-6"
                                IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
                                AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                            <Border Style="{DynamicResource Qf.PopupFrame}">
+                            <Border Style="{DynamicResource Gm.PopupFrame}">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                     <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
                                 </ScrollViewer>
@@ -93,7 +93,7 @@
                             <Setter TargetName="IconHost" Property="Visibility" Value="Collapsed" />
                         </Trigger>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Hover}" />
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Hover}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.45" />
@@ -115,7 +115,7 @@
                                 <Popup x:Name="PART_Popup" Placement="Bottom" VerticalOffset="2" HorizontalOffset="-4"
                                        IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
                                        AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-                                    <Border Style="{DynamicResource Qf.PopupFrame}">
+                                    <Border Style="{DynamicResource Gm.PopupFrame}">
                                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                             <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
                                         </ScrollViewer>
@@ -124,10 +124,10 @@
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsHighlighted" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Hover}" />
+                                    <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Hover}" />
                                 </Trigger>
                                 <Trigger Property="IsSubmenuOpen" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Pressed}" />
+                                    <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Pressed}" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -137,9 +137,9 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="Qf.PopupFrame" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource Qf.Popup}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Qf.PopupBorder}" />
+    <Style x:Key="Gm.PopupFrame" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource Gm.Popup}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Gm.PopupBorder}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="12" />
         <Setter Property="Padding" Value="1,5" />
@@ -153,16 +153,16 @@
     </Style>
 
     <!-- Toolbar -->
-    <Style x:Key="Qf.ToolBar" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource Qf.Chrome}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Qf.ChromeBorder}" />
+    <Style x:Key="Gm.ToolBar" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource Gm.Chrome}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Gm.ChromeBorder}" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
         <Setter Property="Padding" Value="10,6" />
     </Style>
 
-    <Style x:Key="Qf.ToolButton" TargetType="Button">
-        <Setter Property="Foreground" Value="{DynamicResource Qf.Text}" />
-        <Setter Property="FontFamily" Value="{DynamicResource Qf.Icons}" />
+    <Style x:Key="Gm.ToolButton" TargetType="Button">
+        <Setter Property="Foreground" Value="{DynamicResource Gm.Text}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Gm.Icons}" />
         <Setter Property="FontSize" Value="15" />
         <Setter Property="Width" Value="34" />
         <Setter Property="Height" Value="30" />
@@ -178,11 +178,11 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Hover}" />
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Hover}" />
                             <Setter TargetName="C" Property="Opacity" Value="1" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Pressed}" />
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Pressed}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="C" Property="Opacity" Value="0.3" />
@@ -193,9 +193,9 @@
         </Setter>
     </Style>
 
-    <Style x:Key="Qf.ToolToggle" TargetType="ToggleButton">
-        <Setter Property="Foreground" Value="{DynamicResource Qf.Text}" />
-        <Setter Property="FontFamily" Value="{DynamicResource Qf.Font}" />
+    <Style x:Key="Gm.ToolToggle" TargetType="ToggleButton">
+        <Setter Property="Foreground" Value="{DynamicResource Gm.Text}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Gm.Font}" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Width" Value="34" />
@@ -211,10 +211,10 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Hover}" />
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Hover}" />
                         </Trigger>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Pressed}" />
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Pressed}" />
                             <Setter TargetName="C" Property="Opacity" Value="1" />
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -224,7 +224,7 @@
     </Style>
 
     <!-- Outline list: indented headings, soft hover pill -->
-    <Style x:Key="Qf.OutlineList" TargetType="ListBox">
+    <Style x:Key="Gm.OutlineList" TargetType="ListBox">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="6,0,6,10" />
@@ -232,8 +232,8 @@
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
                 <Style TargetType="ListBoxItem">
-                    <Setter Property="Foreground" Value="{DynamicResource Qf.Text}" />
-                    <Setter Property="FontFamily" Value="{DynamicResource Qf.Font}" />
+                    <Setter Property="Foreground" Value="{DynamicResource Gm.Text}" />
+                    <Setter Property="FontFamily" Value="{DynamicResource Gm.Font}" />
                     <Setter Property="FontSize" Value="13" />
                     <Setter Property="Cursor" Value="Hand" />
                     <Setter Property="Template">
@@ -244,10 +244,10 @@
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Hover}" />
+                                        <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Hover}" />
                                     </Trigger>
                                     <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Pressed}" />
+                                        <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Pressed}" />
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -258,22 +258,22 @@
         </Setter>
     </Style>
 
-    <Style x:Key="Qf.ToolSep" TargetType="Border">
+    <Style x:Key="Gm.ToolSep" TargetType="Border">
         <Setter Property="Width" Value="1" />
         <Setter Property="Height" Value="18" />
         <Setter Property="Margin" Value="8,0" />
-        <Setter Property="Background" Value="{DynamicResource Qf.Separator}" />
+        <Setter Property="Background" Value="{DynamicResource Gm.Separator}" />
     </Style>
 
     <!-- Segmented control (Visual | Markdown | GitHub) -->
-    <Style x:Key="Qf.SegmentHost" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource Qf.Hover}" />
+    <Style x:Key="Gm.SegmentHost" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource Gm.Hover}" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="Padding" Value="2" />
     </Style>
-    <Style x:Key="Qf.Segment" TargetType="RadioButton">
-        <Setter Property="Foreground" Value="{DynamicResource Qf.Text}" />
-        <Setter Property="FontFamily" Value="{DynamicResource Qf.Font}" />
+    <Style x:Key="Gm.Segment" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{DynamicResource Gm.Text}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Gm.Font}" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="Focusable" Value="False" />
         <Setter Property="Cursor" Value="Hand" />
@@ -285,7 +285,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Popup}" />
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Popup}" />
                             <Setter TargetName="Bg" Property="Effect">
                                 <Setter.Value>
                                     <DropShadowEffect BlurRadius="4" ShadowDepth="1" Direction="270" Opacity="0.12" />
@@ -308,12 +308,12 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToolTip">
-                    <Border Background="{DynamicResource Qf.Popup}" BorderBrush="{DynamicResource Qf.PopupBorder}" BorderThickness="1"
+                    <Border Background="{DynamicResource Gm.Popup}" BorderBrush="{DynamicResource Gm.PopupBorder}" BorderThickness="1"
                             CornerRadius="7" Padding="9,5" Margin="6,4,6,10">
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="12" ShadowDepth="2" Direction="270" Opacity="0.12" />
                         </Border.Effect>
-                        <ContentPresenter TextElement.Foreground="{DynamicResource Qf.Text}" TextElement.FontFamily="{DynamicResource Qf.Font}"
+                        <ContentPresenter TextElement.Foreground="{DynamicResource Gm.Text}" TextElement.FontFamily="{DynamicResource Gm.Font}"
                                           TextElement.FontSize="12" />
                     </Border>
                 </ControlTemplate>
@@ -328,7 +328,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ContextMenu">
-                    <Border Style="{DynamicResource Qf.PopupFrame}">
+                    <Border Style="{DynamicResource Gm.PopupFrame}">
                         <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
                     </Border>
                 </ControlTemplate>
@@ -337,18 +337,18 @@
     </Style>
 
     <!-- Dialog controls -->
-    <Style x:Key="Qf.Field" TargetType="TextBox">
-        <Setter Property="FontFamily" Value="{DynamicResource Qf.Font}" />
+    <Style x:Key="Gm.Field" TargetType="TextBox">
+        <Setter Property="FontFamily" Value="{DynamicResource Gm.Font}" />
         <Setter Property="FontSize" Value="13" />
-        <Setter Property="Foreground" Value="{DynamicResource Qf.Text}" />
-        <Setter Property="CaretBrush" Value="{DynamicResource Qf.Text}" />
+        <Setter Property="Foreground" Value="{DynamicResource Gm.Text}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource Gm.Text}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
-                    <Border x:Name="B" Background="{DynamicResource Qf.Popup}" BorderBrush="{DynamicResource Qf.PopupBorder}"
+                    <Border x:Name="B" Background="{DynamicResource Gm.Popup}" BorderBrush="{DynamicResource Gm.PopupBorder}"
                             BorderThickness="1" CornerRadius="7" Padding="8,6">
                         <Grid>
-                            <TextBlock x:Name="Ph" Text="{TemplateBinding Tag}" Foreground="{DynamicResource Qf.TextMuted}" Margin="2,0,0,0"
+                            <TextBlock x:Name="Ph" Text="{TemplateBinding Tag}" Foreground="{DynamicResource Gm.TextMuted}" Margin="2,0,0,0"
                                        VerticalAlignment="Center" IsHitTestVisible="False" Visibility="Collapsed" />
                             <ScrollViewer x:Name="PART_ContentHost" />
                         </Grid>
@@ -358,33 +358,33 @@
                             <Setter TargetName="Ph" Property="Visibility" Value="Visible" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="B" Property="BorderBrush" Value="{DynamicResource Qf.TextMuted}" />
+                            <Setter TargetName="B" Property="BorderBrush" Value="{DynamicResource Gm.TextMuted}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-    <Style x:Key="Qf.DialogButton" TargetType="Button">
-        <Setter Property="FontFamily" Value="{DynamicResource Qf.Font}" />
+    <Style x:Key="Gm.DialogButton" TargetType="Button">
+        <Setter Property="FontFamily" Value="{DynamicResource Gm.Font}" />
         <Setter Property="FontSize" Value="13" />
-        <Setter Property="Foreground" Value="{DynamicResource Qf.Text}" />
+        <Setter Property="Foreground" Value="{DynamicResource Gm.Text}" />
         <Setter Property="MinWidth" Value="88" />
         <Setter Property="Height" Value="30" />
         <Setter Property="Margin" Value="8,0,0,0" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Bg" CornerRadius="7" Background="{DynamicResource Qf.Hover}" Padding="14,0">
+                    <Border x:Name="Bg" CornerRadius="7" Background="{DynamicResource Gm.Hover}" Padding="14,0">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Pressed}" />
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Pressed}" />
                         </Trigger>
                         <Trigger Property="IsDefault" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Text}" />
-                            <Setter Property="Foreground" Value="{DynamicResource Qf.Popup}" />
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Text}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Gm.Popup}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -394,14 +394,14 @@
 
     <!-- Status bar -->
     <Style TargetType="StatusBar">
-        <Setter Property="Background" Value="{DynamicResource Qf.Chrome}" />
-        <Setter Property="Foreground" Value="{DynamicResource Qf.TextMuted}" />
-        <Setter Property="FontFamily" Value="{DynamicResource Qf.Font}" />
+        <Setter Property="Background" Value="{DynamicResource Gm.Chrome}" />
+        <Setter Property="Foreground" Value="{DynamicResource Gm.TextMuted}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Gm.Font}" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="StatusBar">
-                    <Border Background="{TemplateBinding Background}" BorderBrush="{DynamicResource Qf.ChromeBorder}" BorderThickness="0,1,0,0" Padding="10,3">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{DynamicResource Gm.ChromeBorder}" BorderThickness="0,1,0,0" Padding="10,3">
                         <ItemsPresenter />
                     </Border>
                 </ControlTemplate>
@@ -409,7 +409,7 @@
         </Setter>
     </Style>
     <Style TargetType="StatusBarItem">
-        <Setter Property="Foreground" Value="{DynamicResource Qf.TextMuted}" />
+        <Setter Property="Foreground" Value="{DynamicResource Gm.TextMuted}" />
         <Setter Property="Padding" Value="0" />
     </Style>
 </ResourceDictionary>

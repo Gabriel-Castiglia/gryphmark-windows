@@ -1,6 +1,6 @@
-# Quillforge
+# Gryphmark
 
-Forge your **Markdown** visually — *it writes the tags for you*. ~~No more syntax.~~
+Write your **Markdown** visually — *it writes the tags for you*. ~~No more syntax.~~
 
 ## Features
 
@@ -16,7 +16,7 @@ Forge your **Markdown** visually — *it writes the tags for you*. ~~No more syn
 | PROFINET | Lima | ⏳ |
 
 ```python
-def forge(md: str) -> str:
+def render(md: str) -> str:
     return md.upper()  # sparks
 ```
 

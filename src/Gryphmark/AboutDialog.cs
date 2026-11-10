@@ -8,7 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 
-namespace Quillforge;
+namespace Gryphmark;
 
 /// <summary>About window in the app's own style: icon, version, author, licence and credits (English/Spanish).</summary>
 public sealed class AboutDialog : Window
@@ -35,7 +35,7 @@ public sealed class AboutDialog : Window
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         ShowInTaskbar = false;
 
-        var font = (FontFamily)FindResource("Qf.Font");
+        var font = (FontFamily)FindResource("Gm.Font");
         TextBlock Text(string s, double size, string brush, FontWeight? w = null, double bottom = 0)
         {
             var t = new TextBlock { Text = s, FontSize = size, FontFamily = font, TextWrapping = TextWrapping.Wrap,
@@ -49,28 +49,28 @@ public sealed class AboutDialog : Window
         var icon = new Image { Width = 96, Height = 96, Margin = new Thickness(0, 4, 0, 10), Source = LoadIcon() };
         RenderOptions.SetBitmapScalingMode(icon, BitmapScalingMode.HighQuality);
         stack.Children.Add(icon);
-        stack.Children.Add(Text("Quillforge", 26, "Qf.Text", FontWeights.SemiBold));
-        stack.Children.Add(Text(string.Format(Strings.Get("AboutVersion"), version), 12.5, "Qf.TextMuted", null, 12));
-        stack.Children.Add(Text(Strings.Get("AboutTagline"), 13.5, "Qf.Text", null, 14));
-        stack.Children.Add(Text(Strings.Get("AboutBy"), 14, "Qf.Text", FontWeights.SemiBold));
-        stack.Children.Add(Text("© 2026 Gabriel Castiglia", 12.5, "Qf.TextMuted", null, 16));
+        stack.Children.Add(Text("Gryphmark", 26, "Gm.Text", FontWeights.SemiBold));
+        stack.Children.Add(Text(string.Format(Strings.Get("AboutVersion"), version), 12.5, "Gm.TextMuted", null, 12));
+        stack.Children.Add(Text(Strings.Get("AboutTagline"), 13.5, "Gm.Text", null, 14));
+        stack.Children.Add(Text(Strings.Get("AboutBy"), 14, "Gm.Text", FontWeights.SemiBold));
+        stack.Children.Add(Text("© 2026 Gabriel Castiglia", 12.5, "Gm.TextMuted", null, 16));
 
         var sep = new Border { Height = 1, Margin = new Thickness(0, 0, 0, 14) };
-        sep.SetResourceReference(Border.BackgroundProperty, "Qf.Separator");
+        sep.SetResourceReference(Border.BackgroundProperty, "Gm.Separator");
         stack.Children.Add(sep);
 
-        var lic = Text(Strings.Get("AboutLicense") + " ", 12.5, "Qf.Text", null, 12);
+        var lic = Text(Strings.Get("AboutLicense") + " ", 12.5, "Gm.Text", null, 12);
         var link = new Hyperlink(new Run(Strings.Get("AboutLicenseLink"))) { Cursor = Cursors.Hand };
-        link.SetResourceReference(TextElement.ForegroundProperty, "Qf.Text");
+        link.SetResourceReference(TextElement.ForegroundProperty, "Gm.Text");
         link.Click += (_, _) => OpenLicense();
         lic.Inlines.Add(link);
         stack.Children.Add(lic);
 
-        stack.Children.Add(Text(Strings.Get("AboutCreditsTitle"), 11, "Qf.TextMuted", FontWeights.SemiBold, 4));
-        stack.Children.Add(Text(Credits + "\n" + Strings.Get("AboutIcon"), 11, "Qf.TextMuted", null, 8));
+        stack.Children.Add(Text(Strings.Get("AboutCreditsTitle"), 11, "Gm.TextMuted", FontWeights.SemiBold, 4));
+        stack.Children.Add(Text(Credits + "\n" + Strings.Get("AboutIcon"), 11, "Gm.TextMuted", null, 8));
 
-        var copy = new Button { Content = Strings.Get("AboutCopy"), Style = (Style)FindResource("Qf.DialogButton") };
-        var ok = new Button { Content = "OK", IsDefault = true, IsCancel = true, Style = (Style)FindResource("Qf.DialogButton") };
+        var copy = new Button { Content = Strings.Get("AboutCopy"), Style = (Style)FindResource("Gm.DialogButton") };
+        var ok = new Button { Content = "OK", IsDefault = true, IsCancel = true, Style = (Style)FindResource("Gm.DialogButton") };
         copy.Click += (_, _) =>
         {
             try { Clipboard.SetText(Info()); copy.Content = Strings.Get("AboutCopied"); } catch { }
@@ -86,15 +86,15 @@ public sealed class AboutDialog : Window
             BorderThickness = new Thickness(1), Child = stack,
             Effect = new DropShadowEffect { BlurRadius = 36, ShadowDepth = 10, Direction = 270, Opacity = 0.18 },
         };
-        card.SetResourceReference(Border.BackgroundProperty, "Qf.Popup");
-        card.SetResourceReference(Border.BorderBrushProperty, "Qf.PopupBorder");
+        card.SetResourceReference(Border.BackgroundProperty, "Gm.Popup");
+        card.SetResourceReference(Border.BorderBrushProperty, "Gm.PopupBorder");
         card.MouseLeftButtonDown += (_, e) => { if (e.ButtonState == MouseButtonState.Pressed) DragMove(); };
         Card = card;
         Content = card;
     }
 
     private string Info() =>
-        $"Quillforge {_version} — © 2026 Gabriel Castiglia — GPL-2.0-only\n" +
+        $"Gryphmark {_version} — © 2026 Gabriel Castiglia — GPL-2.0-only\n" +
         $"Windows {Environment.OSVersion.Version} · .NET {Environment.Version} · {(Environment.Is64BitProcess ? "x64" : "x86")}\n" +
         $"WebView2 {WebView2Version()}";
 
@@ -108,7 +108,7 @@ public sealed class AboutDialog : Window
     {
         try
         {
-            var dec = BitmapDecoder.Create(new Uri("pack://application:,,,/Quillforge.ico"), BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+            var dec = BitmapDecoder.Create(new Uri("pack://application:,,,/Gryphmark.ico"), BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
             return dec.Frames.OrderByDescending(f => f.PixelWidth).First();
         }
         catch { return null; }

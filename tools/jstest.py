@@ -1,7 +1,7 @@
 """Headless check of app.js logic: formatting preservation, find, GitHub extras. Prints the JSON result."""
 import json, pathlib, subprocess, sys, tempfile
 root = pathlib.Path(__file__).resolve().parents[1]
-www = root / "src" / "Quillforge" / "wwwroot"
+www = root / "src" / "Gryphmark" / "wwwroot"
 edge = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 
 original = """# Title
@@ -49,7 +49,7 @@ def page(extra_js):
     fake = "<script>window.chrome={webview:{postMessage:(m)=>{if(m&&m.type==='find')window.__lastFind=m;}}};</script>"
     html = html.replace('<script src="' + www.as_uri() + '/lib/bundle.js"></script>', fake + '<script src="' + www.as_uri() + '/lib/bundle.js"></script>')
     html = html.replace('<script src="' + www.as_uri() + '/app.js"></script>', "<script>" + js + "</script><pre id='out'></pre>" + extra_js)
-    f = pathlib.Path(tempfile.gettempdir()) / "qf_jstest.html"
+    f = pathlib.Path(tempfile.gettempdir()) / "gm_jstest.html"
     f.write_text(html, encoding="utf-8")
     r = subprocess.run([edge, "--headless=new", "--disable-gpu", "--allow-file-access-from-files", "--virtual-time-budget=6000", "--dump-dom", f.as_uri()],
                        capture_output=True, text=True, encoding="utf-8", errors="replace")

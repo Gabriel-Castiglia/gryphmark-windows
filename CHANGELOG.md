@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0 — 2026-11-10
+
+- **Renamed from Quillforge to Gryphmark**, after the griffin in the icon. Program, installer, manuals,
+  settings folder (`%APPDATA%\Gryphmark`) and file association use the new name.
+- The installer removes a previous Quillforge install; settings, recent files and recovery drafts are
+  copied over on first start (the old folder is left untouched).
+
 ## 1.1.1 — 2026-11-10
 
 - New About window in the app style: icon, version, author, GPL-2.0 license with a link to the full text,

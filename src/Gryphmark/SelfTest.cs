@@ -7,9 +7,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
-namespace Quillforge;
+namespace Gryphmark;
 
-/// <summary>Quillforge.exe --render-chrome &lt;dir&gt;: renders the menu bar and every top-level popup to PNG (light and dark).</summary>
+/// <summary>Gryphmark.exe --render-chrome &lt;dir&gt;: renders the menu bar and every top-level popup to PNG (light and dark).</summary>
 public static class SelfTest
 {
     public static void RenderChrome(MainWindow w, string dir)
@@ -44,7 +44,7 @@ public static class SelfTest
             {
                 Strings.Lang = lang;
                 string sfx = $"{lang}_{(dark ? "dark" : "light")}";
-                var about = new AboutDialog(w, "1.1.1");
+                var about = new AboutDialog(w, "1.2.0");
                 Layout(about.Card);
                 Save(about.Card, Path.Combine(dir, $"about_{sfx}.png"), dark);
                 about.Close();
@@ -55,10 +55,10 @@ public static class SelfTest
                     var tt = new Border { CornerRadius = new CornerRadius(7), Padding = new Thickness(9, 5, 9, 5), Margin = new Thickness(6, 4, 6, 6),
                                           BorderThickness = new Thickness(1), Child = (UIElement)MainWindow.SegTip(n, t, g),
                                           HorizontalAlignment = HorizontalAlignment.Left };
-                    tt.SetResourceReference(Border.BackgroundProperty, "Qf.Popup");
-                    tt.SetResourceReference(Border.BorderBrushProperty, "Qf.PopupBorder");
-                    tt.SetResourceReference(TextElement.ForegroundProperty, "Qf.Text");
-                    tt.SetResourceReference(TextElement.FontFamilyProperty, "Qf.Font");
+                    tt.SetResourceReference(Border.BackgroundProperty, "Gm.Popup");
+                    tt.SetResourceReference(Border.BorderBrushProperty, "Gm.PopupBorder");
+                    tt.SetResourceReference(TextElement.ForegroundProperty, "Gm.Text");
+                    tt.SetResourceReference(TextElement.FontFamilyProperty, "Gm.Font");
                     TextElement.SetFontSize(tt, 12);
                     tips.Children.Add(tt);
                 }

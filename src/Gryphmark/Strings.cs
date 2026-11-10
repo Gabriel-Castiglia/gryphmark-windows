@@ -1,4 +1,4 @@
-namespace Quillforge;
+namespace Gryphmark;
 
 /// <summary>All user-visible text, English and Spanish.</summary>
 public static class Strings
@@ -46,7 +46,7 @@ public static class Strings
         ["Help"] = ("_Help", "Ay_uda"),
         ["Guide"] = ("Markdown _guide (GitHub)", "_Guía de Markdown (GitHub)"),
         ["Manual"] = ("User _manual", "_Manual de usuario"),
-        ["About"] = ("_About Quillforge", "_Acerca de Quillforge"),
+        ["About"] = ("_About Gryphmark", "_Acerca de Gryphmark"),
         ["Untitled"] = ("Untitled", "Sin título"),
         ["MdFilter"] = ("Markdown (*.md;*.markdown)|*.md;*.markdown;*.mdown;*.mkd|Text (*.txt)|*.txt|All files (*.*)|*.*",
                         "Markdown (*.md;*.markdown)|*.md;*.markdown;*.mdown;*.mkd|Texto (*.txt)|*.txt|Todos los archivos (*.*)|*.*"),
@@ -58,8 +58,8 @@ public static class Strings
         ["NoWebView"] = ("Microsoft Edge WebView2 Runtime is required.\nInstall it from https://go.microsoft.com/fwlink/p/?LinkId=2124703",
                          "Hace falta Microsoft Edge WebView2 Runtime.\nInstalalo desde https://go.microsoft.com/fwlink/p/?LinkId=2124703"),
         ["AboutVersion"] = ("Version {0}", "Versión {0}"),
-        ["AboutTagline"] = ("Forge your Markdown visually: Quillforge writes the tags for you\nand shows the result exactly like GitHub.",
-                            "Forjá tu Markdown en forma visual: Quillforge escribe las etiquetas\ny te muestra el resultado tal cual en GitHub."),
+        ["AboutTagline"] = ("Write Markdown visually: Gryphmark writes the tags for you\nand shows the result exactly like GitHub.",
+                            "Escribí Markdown en forma visual: Gryphmark escribe las etiquetas\ny te muestra el resultado tal cual en GitHub."),
         ["AboutBy"] = ("by Gabriel Castiglia", "por Gabriel Castiglia"),
         ["AboutLicense"] = ("Free software under the GNU General Public License, version 2 (GPL-2.0-only). It comes with no warranty.",
                             "Software libre bajo la Licencia Pública General GNU, versión 2 (GPL-2.0-only). Se entrega sin ninguna garantía."),
@@ -69,8 +69,8 @@ public static class Strings
                          "Ícono: Grifo, grabado de Martin Schongauer — The Met (CC0)"),
         ["AboutCopy"] = ("Copy info", "Copiar info"),
         ["AboutCopied"] = ("Copied ✓", "Copiado ✓"),
-        ["TipVisual"] = ("See the formatted document and write with the buttons.\nQuillforge writes the Markdown for you.",
-                         "Ves el documento con formato y escribís con los botones.\nQuillforge escribe el Markdown por vos."),
+        ["TipVisual"] = ("See the formatted document and write with the buttons.\nGryphmark writes the Markdown for you.",
+                         "Ves el documento con formato y escribís con los botones.\nGryphmark escribe el Markdown por vos."),
         ["TipSource"] = ("The Markdown text with its tags on the left,\nand a live preview on the right.",
                          "El texto Markdown con sus etiquetas a la izquierda\ny la vista previa en vivo a la derecha."),
         ["TipPreview"] = ("Read-only: the page exactly as GitHub will show it.",
@@ -111,13 +111,13 @@ public static class Strings
         ["OutlineEmpty"] = ("No headings yet. Use H to add one.", "Todavía no hay títulos. Usá H para agregar uno."),
         ["Spell"] = ("_Spell check", "_Corrector ortográfico"),
         ["CheckUpdates"] = ("Check for _updates…", "Buscar _actualizaciones…"),
-        ["UpToDate"] = ("Quillforge {0} is up to date.", "Quillforge {0} está actualizado."),
-        ["UpdateAvailable"] = ("Quillforge {0} is available (you have {1}).\nOpen the download page?", "Está disponible Quillforge {0} (tenés la {1}).\n¿Abrir la página de descarga?"),
+        ["UpToDate"] = ("Gryphmark {0} is up to date.", "Gryphmark {0} está actualizado."),
+        ["UpdateAvailable"] = ("Gryphmark {0} is available (you have {1}).\nOpen the download page?", "Está disponible Gryphmark {0} (tenés la {1}).\n¿Abrir la página de descarga?"),
         ["UpdateError"] = ("Could not check for updates.\n{0}", "No se pudo buscar actualizaciones.\n{0}"),
         ["ChangedOnDisk"] = ("“{0}” was changed by another program.\nReload it and lose your unsaved changes?", "Otro programa modificó «{0}».\n¿Recargarlo y perder los cambios sin guardar?"),
         ["Reloaded"] = ("Reloaded from disk", "Recargado desde el disco"),
         ["DeletedOnDisk"] = ("The file was deleted or moved", "El archivo fue borrado o movido"),
-        ["Recover"] = ("Quillforge closed without saving “{0}” ({1}).\nRecover those changes?", "Quillforge se cerró sin guardar «{0}» ({1}).\n¿Recuperar esos cambios?"),
+        ["Recover"] = ("Gryphmark closed without saving “{0}” ({1}).\nRecover those changes?", "Gryphmark se cerró sin guardar «{0}» ({1}).\n¿Recuperar esos cambios?"),
         ["Recovered"] = ("Recovered — save to keep it", "Recuperado — guardalo para conservarlo"),
         ["Modified"] = ("Modified", "Modificado"),
         ["Saved"] = ("Saved", "Guardado"),

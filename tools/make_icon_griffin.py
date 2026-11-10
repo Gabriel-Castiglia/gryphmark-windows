@@ -1,4 +1,4 @@
-"""Quillforge icon, engraving style: head of Martin Schongauer's Griffin (c. 1485, The Met, CC0)
+"""Gryphmark icon, engraving style: head of Martin Schongauer's Griffin (c. 1485, The Met, CC0)
 on a flat colour tile, with a quill held in the beak.
 Source: https://commons.wikimedia.org/wiki/File:Griffin_MET_DP820017.jpg
 usage: make_icon_griffin.py <source.jpg> <out.ico> <out.png> [R,G,B] [cx,cy,size]"""

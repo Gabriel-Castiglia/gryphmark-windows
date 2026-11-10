@@ -8,7 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 
-namespace Quillforge;
+namespace Gryphmark;
 
 /// <summary>Find/replace, outline, external-change watch, crash recovery and update check.</summary>
 public partial class MainWindow
@@ -20,7 +20,7 @@ public partial class MainWindow
     private readonly DispatcherTimer _statusTimer = new() { Interval = TimeSpan.FromSeconds(4) };
     private readonly string _recoveryId = Guid.NewGuid().ToString("N");
     private static string RecoveryDir => Path.Combine(Settings.Dir, "recovery");
-    public const string Repo = "Gabriel-Castiglia/quillforge";
+    public const string Repo = "Gabriel-Castiglia/gryphmark";
 
     private void InitFeatures()
     {
@@ -197,7 +197,7 @@ public partial class MainWindow
             if (!File.Exists(path)) return;
             if (_dirty)
             {
-                var r = MessageBox.Show(this, string.Format(Strings.Get("ChangedOnDisk"), Path.GetFileName(path)), "Quillforge",
+                var r = MessageBox.Show(this, string.Format(Strings.Get("ChangedOnDisk"), Path.GetFileName(path)), "Gryphmark",
                     MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (r != MessageBoxResult.Yes) return;
             }
@@ -230,7 +230,7 @@ public partial class MainWindow
         try { File.Delete(DraftPath); File.Delete(DraftMeta); } catch { }
     }
 
-    /// <summary>Called once the editor is ready: offer drafts left by a Quillforge that is no longer running.</summary>
+    /// <summary>Called once the editor is ready: offer drafts left by a Gryphmark that is no longer running.</summary>
     private async Task OfferRecoveryAsync()
     {
         if (!Directory.Exists(RecoveryDir)) return;
@@ -242,13 +242,13 @@ public partial class MainWindow
                 var r = doc.RootElement;
                 int pid = r.GetProperty("pid").GetInt32();
                 bool alive = false;
-                try { alive = Process.GetProcessById(pid).ProcessName.Equals("Quillforge", StringComparison.OrdinalIgnoreCase); } catch { }
+                try { alive = Process.GetProcessById(pid).ProcessName.Equals("Gryphmark", StringComparison.OrdinalIgnoreCase); } catch { }
                 if (alive) continue;
                 var draft = Path.ChangeExtension(meta, ".md");
                 string? orig = r.GetProperty("path").GetString();
                 var when = r.GetProperty("time").GetDateTime();
                 var name = orig != null ? Path.GetFileName(orig) : Strings.Get("Untitled");
-                var ans = MessageBox.Show(this, string.Format(Strings.Get("Recover"), name, when.ToString("g")), "Quillforge",
+                var ans = MessageBox.Show(this, string.Format(Strings.Get("Recover"), name, when.ToString("g")), "Gryphmark",
                     MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (ans == MessageBoxResult.Yes && File.Exists(draft))
                 {
@@ -271,7 +271,7 @@ public partial class MainWindow
         try
         {
             using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
-            http.DefaultRequestHeaders.UserAgent.ParseAdd($"Quillforge/{Version}");
+            http.DefaultRequestHeaders.UserAgent.ParseAdd($"Gryphmark/{Version}");
             var json = await http.GetStringAsync($"https://api.github.com/repos/{Repo}/releases/latest");
             using var doc = JsonDocument.Parse(json);
             var tag = (doc.RootElement.GetProperty("tag_name").GetString() ?? "").TrimStart('v', 'V');
@@ -279,20 +279,20 @@ public partial class MainWindow
             _settings.LastUpdateCheck = DateTime.UtcNow; _settings.Save();
             if (System.Version.TryParse(tag, out var latest) && System.Version.TryParse(Version, out var mine) && latest > mine)
             {
-                var r = MessageBox.Show(this, string.Format(Strings.Get("UpdateAvailable"), tag, Version), "Quillforge", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                var r = MessageBox.Show(this, string.Format(Strings.Get("UpdateAvailable"), tag, Version), "Gryphmark", MessageBoxButton.YesNo, MessageBoxImage.Information);
                 if (r == MessageBoxResult.Yes && url != null) OpenLink(url);
             }
             else if (interactive)
-                MessageBox.Show(this, string.Format(Strings.Get("UpToDate"), Version), "Quillforge", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(this, string.Format(Strings.Get("UpToDate"), Version), "Gryphmark", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            if (interactive) MessageBox.Show(this, string.Format(Strings.Get("UpdateError"), ex.Message), "Quillforge", MessageBoxButton.OK, MessageBoxImage.Warning);
+            if (interactive) MessageBox.Show(this, string.Format(Strings.Get("UpdateError"), ex.Message), "Gryphmark", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 
     // ------------------------------------------------------------------ single instance
-    /// <summary>A second Quillforge passed us a file (or just asked to be shown).</summary>
+    /// <summary>A second Gryphmark passed us a file (or just asked to be shown).</summary>
     public void ActivateFromOtherInstance(string? path)
     {
         if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;

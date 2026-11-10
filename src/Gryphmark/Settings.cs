@@ -2,7 +2,7 @@ using System.Globalization;
 using System.IO;
 using System.Text.Json;
 
-namespace Quillforge;
+namespace Gryphmark;
 
 public sealed class Settings
 {
@@ -18,11 +18,30 @@ public sealed class Settings
     public bool Spell { get; set; } = true;
     public DateTime LastUpdateCheck { get; set; }
 
-    public static string Dir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Quillforge");
+    public static string Dir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Gryphmark");
     private static string FilePath => Path.Combine(Dir, "settings.json");
+
+    /// <summary>Gryphmark was called Quillforge up to 1.1.1: copy its settings, recent files and recovery
+    /// drafts the first time. The old folder is left untouched.</summary>
+    private static void MigrateFromQuillforge()
+    {
+        var old = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Quill" + "forge");
+        if (Directory.Exists(Dir) || !Directory.Exists(old)) return;
+        try
+        {
+            foreach (var src in Directory.EnumerateFiles(old, "*", SearchOption.AllDirectories))
+            {
+                var dst = Path.Combine(Dir, Path.GetRelativePath(old, src));
+                Directory.CreateDirectory(Path.GetDirectoryName(dst)!);
+                File.Copy(src, dst, false);
+            }
+        }
+        catch { /* best effort: start with defaults */ }
+    }
 
     public static Settings Load()
     {
+        MigrateFromQuillforge();
         try
         {
             if (File.Exists(FilePath))

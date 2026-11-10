@@ -2,11 +2,11 @@ using System.IO;
 using System.IO.Pipes;
 using System.Windows;
 
-namespace Quillforge;
+namespace Gryphmark;
 
 public partial class App : Application
 {
-    private static readonly string PipeName = "Quillforge-" + Environment.UserName;
+    private static readonly string PipeName = "Gryphmark-" + Environment.UserName;
     private Mutex? _mutex;
 
     private void OnStartup(object sender, StartupEventArgs e)
@@ -24,7 +24,7 @@ public partial class App : Application
         if (path != null) path = Path.GetFullPath(path);
         bool newWindow = e.Args.Contains("--new-window");
 
-        // Single instance: hand the file to the running Quillforge and leave
+        // Single instance: hand the file to the running Gryphmark and leave
         _mutex = new Mutex(true, "Local\\" + PipeName, out bool first);
         if (!first && !newWindow && TrySend(path ?? ""))
         {

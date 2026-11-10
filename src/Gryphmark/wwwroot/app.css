@@ -24,9 +24,9 @@ body.mode-preview #previewHost { display: block; }
 body.dark .toastui-editor-context-menu { border-color: #3A3A3C !important; background: #2A2A2D !important; }
 
 /* Find highlights (CSS Custom Highlight API) */
-::highlight(qf-find) { background-color: rgba(255, 214, 10, .38); }
-::highlight(qf-cur)  { background-color: rgba(255, 159, 10, .85); color: #1d1d1f; }
-body.dark ::highlight(qf-find) { background-color: rgba(255, 214, 10, .28); }
+::highlight(gm-find) { background-color: rgba(255, 214, 10, .38); }
+::highlight(gm-cur)  { background-color: rgba(255, 159, 10, .85); color: #1d1d1f; }
+body.dark ::highlight(gm-find) { background-color: rgba(255, 214, 10, .28); }
 
 /* Mermaid diagrams centred like on GitHub */
 .markdown-body pre.mermaid { background: transparent; text-align: center; }

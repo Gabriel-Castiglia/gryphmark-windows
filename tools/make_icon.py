@@ -1,4 +1,4 @@
-"""Quillforge icon: a document page with the Markdown mark (M + down arrow) and a glowing quill writing on it."""
+"""Gryphmark icon: a document page with the Markdown mark (M + down arrow) and a glowing quill writing on it."""
 import math, sys
 from PIL import Image, ImageDraw, ImageFilter
 

@@ -9,7 +9,7 @@ using System.Windows.Media;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Win32;
 
-namespace Quillforge;
+namespace Gryphmark;
 
 public partial class MainWindow : Window
 {
@@ -57,7 +57,7 @@ public partial class MainWindow : Window
         }
         catch (Exception)
         {
-            MessageBox.Show(this, Strings.Get("NoWebView"), "Quillforge", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(this, Strings.Get("NoWebView"), "Gryphmark", MessageBoxButton.OK, MessageBoxImage.Error);
             Close();
             return;
         }
@@ -162,7 +162,7 @@ public partial class MainWindow : Window
             path = Path.GetFullPath(path);
             if (!File.Exists(path))
             {
-                MessageBox.Show(this, string.Format(Strings.Get("NotFound"), path), "Quillforge", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(this, string.Format(Strings.Get("NotFound"), path), "Gryphmark", MessageBoxButton.OK, MessageBoxImage.Warning);
                 _settings.Recent.Remove(path); BuildMenu();
                 return;
             }
@@ -182,7 +182,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, string.Format(Strings.Get("ErrOpen"), ex.Message), "Quillforge", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(this, string.Format(Strings.Get("ErrOpen"), ex.Message), "Gryphmark", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -224,7 +224,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, string.Format(Strings.Get("ErrSave"), ex.Message), "Quillforge", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(this, string.Format(Strings.Get("ErrSave"), ex.Message), "Gryphmark", MessageBoxButton.OK, MessageBoxImage.Error);
             return false;
         }
     }
@@ -233,7 +233,7 @@ public partial class MainWindow : Window
     {
         if (!_dirty) return true;
         var name = _path != null ? Path.GetFileName(_path) : Strings.Get("Untitled");
-        var r = MessageBox.Show(this, string.Format(Strings.Get("AskSave"), name), "Quillforge",
+        var r = MessageBox.Show(this, string.Format(Strings.Get("AskSave"), name), "Gryphmark",
             MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
         if (r == MessageBoxResult.Cancel) return false;
         if (r == MessageBoxResult.Yes) return await SaveAsync(false);
@@ -294,7 +294,7 @@ public partial class MainWindow : Window
             <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            <meta name="generator" content="Quillforge {{Version}}">
+            <meta name="generator" content="Gryphmark {{Version}}">
             <title>{{System.Net.WebUtility.HtmlEncode(title)}}</title>
             {{(math ? "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css\">" : "")}}
             <style>
@@ -313,7 +313,7 @@ public partial class MainWindow : Window
             </html>
             """;
         try { File.WriteAllText(file, html, new UTF8Encoding(false)); }
-        catch (Exception ex) { MessageBox.Show(this, string.Format(Strings.Get("ErrSave"), ex.Message), "Quillforge", MessageBoxButton.OK, MessageBoxImage.Error); }
+        catch (Exception ex) { MessageBox.Show(this, string.Format(Strings.Get("ErrSave"), ex.Message), "Gryphmark", MessageBoxButton.OK, MessageBoxImage.Error); }
     }
 
     // ------------------------------------------------------------------ Commands
@@ -401,7 +401,7 @@ public partial class MainWindow : Window
     };
 
     private static object? Glyph(string key) => Glyphs.TryGetValue(key, out var g)
-        ? new TextBlock { Text = g, FontFamily = (FontFamily)Application.Current.Resources["Qf.Icons"], FontSize = 14 }
+        ? new TextBlock { Text = g, FontFamily = (FontFamily)Application.Current.Resources["Gm.Icons"], FontSize = 14 }
         : null;
 
     private MenuItem Item(string key, string? gesture, Func<Task> action, bool? check = null, bool enabled = true)
@@ -549,7 +549,7 @@ public partial class MainWindow : Window
         var b = new Button
         {
             Content = glyph,
-            Style = (Style)FindResource("Qf.ToolButton"),
+            Style = (Style)FindResource("Gm.ToolButton"),
             ToolTip = Strings.Plain(tipKey) + (gesture != null ? "   " + gesture : ""),
         };
         b.Click += async (_, _) => { await action(); if (_ready) await Js("mdApp.focus()"); };
@@ -559,7 +559,7 @@ public partial class MainWindow : Window
     private void BuildToolbar()
     {
         Tools.Children.Clear();
-        void Sep() => Tools.Children.Add(new Border { Style = (Style)FindResource("Qf.ToolSep") });
+        void Sep() => Tools.Children.Add(new Border { Style = (Style)FindResource("Gm.ToolSep") });
         Tools.Children.Add(Tool("", "Outline", "Ctrl+Shift+O", () => { ToggleOutline(); return Task.CompletedTask; }));
         Sep();
 
@@ -655,7 +655,7 @@ public partial class MainWindow : Window
             (d, i) =>
             {
                 if (i != 0) return null;
-                var b = new Button { Content = Strings.Get("Browse"), Style = (Style)FindResource("Qf.DialogButton") };
+                var b = new Button { Content = Strings.Get("Browse"), Style = (Style)FindResource("Gm.DialogButton") };
                 b.Click += (_, _) =>
                 {
                     var ofd = new OpenFileDialog { Filter = Strings.Get("ImgFilter"), InitialDirectory = _path != null ? Path.GetDirectoryName(_path) : null };
@@ -698,7 +698,7 @@ public partial class MainWindow : Window
 
     private void OpenManual()
     {
-        var pdf = Path.Combine(AppDir, "docs", Strings.Lang == "es" ? "Quillforge_Manual_ES.pdf" : "Quillforge_Manual_EN.pdf");
+        var pdf = Path.Combine(AppDir, "docs", Strings.Lang == "es" ? "Gryphmark_Manual_ES.pdf" : "Gryphmark_Manual_EN.pdf");
         if (File.Exists(pdf)) Process.Start(new ProcessStartInfo(pdf) { UseShellExecute = true });
     }
 
@@ -713,7 +713,7 @@ public partial class MainWindow : Window
     private void UpdateTitle()
     {
         var name = _path != null ? Path.GetFileName(_path) : Strings.Get("Untitled");
-        Title = $"{(_dirty ? "● " : "")}{name} — Quillforge";
+        Title = $"{(_dirty ? "● " : "")}{name} — Gryphmark";
     }
 
     private void UpdateStatus()

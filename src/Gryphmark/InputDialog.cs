@@ -4,7 +4,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 
-namespace Quillforge;
+namespace Gryphmark;
 
 /// <summary>Small rounded dialog with labelled fields (link, image, table). Built in code to stay in one place.</summary>
 public sealed class InputDialog : Window
@@ -27,15 +27,15 @@ public sealed class InputDialog : Window
         var head = new TextBlock
         {
             Text = title, FontSize = 15, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 14),
-            FontFamily = (FontFamily)FindResource("Qf.Font"),
+            FontFamily = (FontFamily)FindResource("Gm.Font"),
         };
-        head.SetResourceReference(TextBlock.ForegroundProperty, "Qf.Text");
+        head.SetResourceReference(TextBlock.ForegroundProperty, "Gm.Text");
         stack.Children.Add(head);
         for (int i = 0; i < fields.Length; i++)
         {
-            var lbl = new TextBlock { Text = fields[i].Label, FontSize = 12, Margin = new Thickness(0, 0, 0, 5), FontFamily = (FontFamily)FindResource("Qf.Font") };
-            lbl.SetResourceReference(TextBlock.ForegroundProperty, "Qf.TextMuted");
-            var tb = new TextBox { Text = fields[i].Value, Style = (Style)FindResource("Qf.Field") };
+            var lbl = new TextBlock { Text = fields[i].Label, FontSize = 12, Margin = new Thickness(0, 0, 0, 5), FontFamily = (FontFamily)FindResource("Gm.Font") };
+            lbl.SetResourceReference(TextBlock.ForegroundProperty, "Gm.TextMuted");
+            var tb = new TextBox { Text = fields[i].Value, Style = (Style)FindResource("Gm.Field") };
             _fields.Add(tb);
             var row = new DockPanel { Margin = new Thickness(0, 0, 0, 12) };
             var extra = extraButton?.Invoke(this, i);
@@ -44,8 +44,8 @@ public sealed class InputDialog : Window
             stack.Children.Add(lbl);
             stack.Children.Add(row);
         }
-        var ok = new Button { Content = "OK", IsDefault = true, Style = (Style)FindResource("Qf.DialogButton") };
-        var cancel = new Button { Content = Strings.Get("Cancel"), IsCancel = true, Style = (Style)FindResource("Qf.DialogButton") };
+        var ok = new Button { Content = "OK", IsDefault = true, Style = (Style)FindResource("Gm.DialogButton") };
+        var cancel = new Button { Content = Strings.Get("Cancel"), IsCancel = true, Style = (Style)FindResource("Gm.DialogButton") };
         ok.Click += (_, _) => DialogResult = true;
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 6, 0, 0) };
         buttons.Children.Add(cancel); buttons.Children.Add(ok);
@@ -57,8 +57,8 @@ public sealed class InputDialog : Window
             BorderThickness = new Thickness(1), Child = stack,
             Effect = new DropShadowEffect { BlurRadius = 36, ShadowDepth = 10, Direction = 270, Opacity = 0.18 },
         };
-        card.SetResourceReference(Border.BackgroundProperty, "Qf.Popup");
-        card.SetResourceReference(Border.BorderBrushProperty, "Qf.PopupBorder");
+        card.SetResourceReference(Border.BackgroundProperty, "Gm.Popup");
+        card.SetResourceReference(Border.BorderBrushProperty, "Gm.PopupBorder");
         card.MouseLeftButtonDown += (_, e) => { if (e.ButtonState == MouseButtonState.Pressed) DragMove(); };
         Content = card;
         Loaded += (_, _) => { _fields.FirstOrDefault(f => f.Text.Length == 0)?.Focus(); (_fields.FirstOrDefault(f => f.IsFocused) ?? _fields.FirstOrDefault())?.Focus(); };

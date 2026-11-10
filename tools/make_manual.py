@@ -1,4 +1,4 @@
-"""Builds docs/Quillforge_Manual_EN.html and _ES.html; build.ps1 prints them to PDF with Edge."""
+"""Builds docs/Gryphmark_Manual_EN.html and _ES.html; build.ps1 prints them to PDF with Edge."""
 import pathlib, base64, sys
 
 root = pathlib.Path(__file__).resolve().parents[1]
@@ -8,7 +8,7 @@ version = sys.argv[1] if len(sys.argv) > 1 else "1.0.0"
 def img(name):
     return "data:image/png;base64," + base64.b64encode((docs / "img" / name).read_bytes()).decode()
 
-icon = "data:image/png;base64," + base64.b64encode((root / "assets" / "quillforge.png").read_bytes()).decode()
+icon = "data:image/png;base64," + base64.b64encode((root / "assets" / "gryphmark.png").read_bytes()).decode()
 
 CSS = """
 @page { size: A4; margin: 18mm 17mm 20mm; }
@@ -39,27 +39,29 @@ figcaption { font-size: 9pt; color: #59636e; margin-top: 4px; }
 
 T = {
  "en": dict(
-  title="User Manual", tag="Forge your Markdown. See it like GitHub.", lang="en",
+  title="User Manual", tag="Write Markdown visually. See it like GitHub.", lang="en",
   toc="Contents",
   sections=[
-   ("What is Quillforge", f"""
-<p><b>Quillforge</b> is a Markdown viewer and editor for Windows. You format text with buttons — headings, bold, lists,
-tables, code — and Quillforge writes the Markdown tags behind the scenes. Every document is shown exactly the way
+   ("What is Gryphmark", f"""
+<p><b>Gryphmark</b> is a Markdown viewer and editor for Windows. You format text with buttons — headings, bold, lists,
+tables, code — and Gryphmark writes the Markdown tags behind the scenes. Every document is shown exactly the way
 GitHub displays it, in light or dark theme.</p>
 <p>It is designed for <code>README.md</code> files, notes, documentation and any <code>.md</code> file you want to read or edit
 without memorising syntax.</p>
 <figure><img src="{img('visual_light_en.png')}"><figcaption>Visual editor: format with the toolbar, no tags in sight.</figcaption></figure>
 """),
    ("Installation", """
-<p>Run <code>Quillforge-Setup-{v}.exe</code>. The installer is available in English and Spanish and does <b>not</b> need
-administrator rights: it installs for the current user in <code>%LOCALAPPDATA%\\Programs\\Quillforge</code>.</p>
+<p>Run <code>Gryphmark-Setup-{v}.exe</code>. The installer is available in English and Spanish and does <b>not</b> need
+administrator rights: it installs for the current user in <code>%LOCALAPPDATA%\\Programs\\Gryphmark</code>.</p>
 <table><tr><th>Option</th><th>What it does</th></tr>
-<tr><td>Desktop shortcut</td><td>Adds a Quillforge icon to the desktop.</td></tr>
-<tr><td>Open .md files with Quillforge</td><td>Adds Quillforge to <i>Open with</i> for .md / .markdown files, and makes it the handler for those files for the current user.</td></tr></table>
+<tr><td>Desktop shortcut</td><td>Adds a Gryphmark icon to the desktop.</td></tr>
+<tr><td>Open .md files with Gryphmark</td><td>Adds Gryphmark to <i>Open with</i> for .md / .markdown files, and makes it the handler for those files for the current user.</td></tr></table>
 <p>Requirements: Windows 10 or 11 (64-bit) and Microsoft Edge WebView2 Runtime, which is already part of Windows 11.
 The .NET runtime is included; nothing else has to be installed.</p>
-<p>To uninstall: <i>Settings → Apps → Installed apps → Quillforge → Uninstall</i>. Your settings in
-<code>%APPDATA%\\Quillforge</code> are kept.</p>
+<p>Up to version 1.1.1 the program was called <b>Quillforge</b>. If that version is installed, the installer removes it,
+and Gryphmark copies its settings, recent files and recovery drafts on the first start.</p>
+<p>To uninstall: <i>Settings → Apps → Installed apps → Gryphmark → Uninstall</i>. Your settings in
+<code>%APPDATA%\\Gryphmark</code> are kept.</p>
 """),
    ("The window", """
 <table><tr><th>Part</th><th>Use</th></tr>
@@ -101,12 +103,12 @@ The .NET runtime is included; nothing else has to be installed.</p>
 <tr><td>Open</td><td><i>File → Open</i> (<kbd>Ctrl</kbd>+<kbd>O</kbd>), double-click a .md file, or drag a file onto the window.</td></tr>
 <tr><td>Recent files</td><td><i>File → Open recent</i> keeps the last 12 files.</td></tr>
 <tr><td>Save / Save as</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. New files are saved as UTF-8 without BOM, the same as GitHub; existing files keep their encoding and line endings.</td></tr>
-<tr><td>New / New window</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> starts an empty document; <i>New window</i> opens a second Quillforge.</td></tr>
+<tr><td>New / New window</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> starts an empty document; <i>New window</i> opens a second Gryphmark.</td></tr>
 <tr><td>Show in folder</td><td>Opens Explorer with the file selected.</td></tr></table>
-<p>If you close a document with unsaved changes, Quillforge asks whether to save them.</p>
+<p>If you close a document with unsaved changes, Gryphmark asks whether to save them.</p>
 <h3>Images and links</h3>
 <p>Relative paths work as on GitHub: <code>![diagram](img/diagram.png)</code> shows the image stored next to the .md file.
-In GitHub preview, links to web pages open in your browser, links to other <code>.md</code> files open in Quillforge, and
+In GitHub preview, links to web pages open in your browser, links to other <code>.md</code> files open in Gryphmark, and
 <code>#heading</code> links jump inside the document.</p>
 """),
    ("Export and print", """
@@ -118,19 +120,19 @@ In GitHub preview, links to web pages open in your browser, links to other <code
 <tr><td>Find / Replace</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> open a bar above the document. <kbd>F3</kbd> and <kbd>Shift</kbd>+<kbd>F3</kbd> jump between matches; <kbd>Esc</kbd> closes it. <i>Aa</i> matches case.</td></tr>
 <tr><td>Outline</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> or the first toolbar button shows the headings on the left; click one to jump to it.</td></tr>
 <tr><td>Your formatting is kept</td><td>Only the lines you change are rewritten when you save: list markers, <code>__bold__</code>, table alignment, line endings (CRLF/LF) and BOM stay as they were.</td></tr>
-<tr><td>Changed outside</td><td>If another program modifies the open file, Quillforge reloads it (or asks first if you have unsaved changes).</td></tr>
-<tr><td>Crash recovery</td><td>Unsaved work is backed up every 20 seconds. If Quillforge or Windows stops unexpectedly, the next start offers to recover it.</td></tr>
+<tr><td>Changed outside</td><td>If another program modifies the open file, Gryphmark reloads it (or asks first if you have unsaved changes).</td></tr>
+<tr><td>Crash recovery</td><td>Unsaved work is backed up every 20 seconds. If Gryphmark or Windows stops unexpectedly, the next start offers to recover it.</td></tr>
 <tr><td>Spell check</td><td><i>View → Spell check</i> underlines misspelled words (Windows dictionaries).</td></tr>
-<tr><td>One window per file</td><td>Opening a .md while Quillforge is running brings the existing window forward instead of starting a second copy. <i>File → New window</i> still opens another one.</td></tr>
-<tr><td>Updates</td><td>Quillforge checks once a day for a new version; <i>Help → Check for updates</i> does it on demand.</td></tr>
-<tr><td>About</td><td><i>Help → About Quillforge</i> shows the version, author, license and credits. <i>Copy info</i> copies the version details, handy for reporting a problem.</td></tr></table>
+<tr><td>One window per file</td><td>Opening a .md while Gryphmark is running brings the existing window forward instead of starting a second copy. <i>File → New window</i> still opens another one.</td></tr>
+<tr><td>Updates</td><td>Gryphmark checks once a day for a new version; <i>Help → Check for updates</i> does it on demand.</td></tr>
+<tr><td>About</td><td><i>Help → About Gryphmark</i> shows the version, author, license and credits. <i>Copy info</i> copies the version details, handy for reporting a problem.</td></tr></table>
 <h3>GitHub extras</h3>
 <p>Also rendered exactly like GitHub: alerts (<code>&gt; [!NOTE]</code>, <code>[!TIP]</code>, <code>[!IMPORTANT]</code>, <code>[!WARNING]</code>, <code>[!CAUTION]</code>),
 <code>```mermaid</code> diagrams, math (<code>$E=mc^2$</code> and <code>$$ … $$</code>), footnotes (<code>[^1]</code>) and emoji shortcodes (<code>:rocket:</code>).</p>
 """),
    ("Language, theme and zoom", f"""
 <p><b>Language</b> menu: English or Español. It changes the menus, the toolbar tooltips and dialogs immediately.
-The first time, Quillforge follows the Windows language.</p>
+The first time, Gryphmark follows the Windows language.</p>
 <p><b>View → Dark theme</b> switches between GitHub light and GitHub dark. Zoom with <kbd>Ctrl</kbd>+<kbd>+</kbd>,
 <kbd>Ctrl</kbd>+<kbd>-</kbd> and <kbd>Ctrl</kbd>+<kbd>0</kbd>. Language, theme, mode, zoom and window size are remembered.</p>
 <figure><img src="{img('preview_dark_es.png')}"><figcaption>GitHub dark theme.</figcaption></figure>
@@ -154,34 +156,36 @@ The first time, Quillforge follows the Windows language.</p>
 <tr><td>Editor</td><td>TOAST UI Editor 3.2 (MIT)</td></tr>
 <tr><td>GitHub rendering</td><td>marked (GitHub Flavored Markdown), highlight.js, github-markdown-css (MIT)</td></tr>
 <tr><td>Icon</td><td>Griffin from Martin Schongauer's engraving (c. 1485), The Metropolitan Museum of Art, CC0; quill added.</td></tr>
-<tr><td>Settings</td><td><code>%APPDATA%\\Quillforge\\settings.json</code></td></tr>
+<tr><td>Settings</td><td><code>%APPDATA%\\Gryphmark\\settings.json</code></td></tr>
 <tr><td>Source code</td><td><code>src/</code> in the project folder; build with <code>build.ps1</code>.</td></tr></table>
 <div class="note">The visual editor normalises some details when it writes Markdown (for example, <code>*</code> lists become
 <code>-</code>). The text and the way GitHub displays it do not change.</div>
 """),
   ]),
  "es": dict(
-  title="Manual de usuario", tag="Forjá tu Markdown. Miralo como en GitHub.", lang="es",
+  title="Manual de usuario", tag="Escribí Markdown en forma visual. Miralo como en GitHub.", lang="es",
   toc="Contenido",
   sections=[
-   ("Qué es Quillforge", f"""
-<p><b>Quillforge</b> es un visor y editor de Markdown para Windows. Das formato con botones —títulos, negrita, listas,
-tablas, código— y Quillforge escribe por detrás las etiquetas de Markdown. Cada documento se ve exactamente como
+   ("Qué es Gryphmark", f"""
+<p><b>Gryphmark</b> es un visor y editor de Markdown para Windows. Das formato con botones —títulos, negrita, listas,
+tablas, código— y Gryphmark escribe por detrás las etiquetas de Markdown. Cada documento se ve exactamente como
 lo muestra GitHub, con tema claro u oscuro.</p>
 <p>Está pensado para archivos <code>README.md</code>, notas, documentación y cualquier <code>.md</code> que quieras leer o editar
 sin aprenderte la sintaxis.</p>
 <figure><img src="{img('visual_light_es.png')}"><figcaption>Editor visual: formato con la barra de herramientas, sin etiquetas a la vista.</figcaption></figure>
 """),
    ("Instalación", """
-<p>Ejecutá <code>Quillforge-Setup-{v}.exe</code>. El instalador está en inglés y en español y <b>no</b> pide permisos de
-administrador: instala para el usuario actual en <code>%LOCALAPPDATA%\\Programs\\Quillforge</code>.</p>
+<p>Ejecutá <code>Gryphmark-Setup-{v}.exe</code>. El instalador está en inglés y en español y <b>no</b> pide permisos de
+administrador: instala para el usuario actual en <code>%LOCALAPPDATA%\\Programs\\Gryphmark</code>.</p>
 <table><tr><th>Opción</th><th>Qué hace</th></tr>
-<tr><td>Acceso directo en el escritorio</td><td>Pone el ícono de Quillforge en el escritorio.</td></tr>
-<tr><td>Abrir los .md con Quillforge</td><td>Agrega Quillforge a <i>Abrir con</i> para los .md / .markdown y lo deja como programa para esos archivos en el usuario actual.</td></tr></table>
+<tr><td>Acceso directo en el escritorio</td><td>Pone el ícono de Gryphmark en el escritorio.</td></tr>
+<tr><td>Abrir los .md con Gryphmark</td><td>Agrega Gryphmark a <i>Abrir con</i> para los .md / .markdown y lo deja como programa para esos archivos en el usuario actual.</td></tr></table>
 <p>Requisitos: Windows 10 u 11 de 64 bits y Microsoft Edge WebView2 Runtime, que ya viene con Windows 11.
 El runtime de .NET va incluido; no hay que instalar nada más.</p>
-<p>Para desinstalar: <i>Configuración → Aplicaciones → Aplicaciones instaladas → Quillforge → Desinstalar</i>. La
-configuración en <code>%APPDATA%\\Quillforge</code> se conserva.</p>
+<p>Hasta la versión 1.1.1 el programa se llamaba <b>Quillforge</b>. Si esa versión está instalada, el instalador la quita
+y Gryphmark copia su configuración, los recientes y los borradores de recuperación la primera vez que arranca.</p>
+<p>Para desinstalar: <i>Configuración → Aplicaciones → Aplicaciones instaladas → Gryphmark → Desinstalar</i>. La
+configuración en <code>%APPDATA%\\Gryphmark</code> se conserva.</p>
 """),
    ("La ventana", """
 <table><tr><th>Parte</th><th>Para qué sirve</th></tr>
@@ -223,12 +227,12 @@ configuración en <code>%APPDATA%\\Quillforge</code> se conserva.</p>
 <tr><td>Abrir</td><td><i>Archivo → Abrir</i> (<kbd>Ctrl</kbd>+<kbd>O</kbd>), doble clic en un .md, o arrastrar el archivo a la ventana.</td></tr>
 <tr><td>Recientes</td><td><i>Archivo → Abrir reciente</i> guarda los últimos 12.</td></tr>
 <tr><td>Guardar / Guardar como</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. Los archivos nuevos se guardan en UTF-8 sin BOM, igual que GitHub; los existentes conservan su codificación y finales de línea.</td></tr>
-<tr><td>Nuevo / Nueva ventana</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> empieza un documento vacío; <i>Nueva ventana</i> abre otro Quillforge.</td></tr>
+<tr><td>Nuevo / Nueva ventana</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> empieza un documento vacío; <i>Nueva ventana</i> abre otro Gryphmark.</td></tr>
 <tr><td>Mostrar en la carpeta</td><td>Abre el Explorador con el archivo seleccionado.</td></tr></table>
-<p>Si cerrás un documento con cambios sin guardar, Quillforge pregunta si querés guardarlos.</p>
+<p>Si cerrás un documento con cambios sin guardar, Gryphmark pregunta si querés guardarlos.</p>
 <h3>Imágenes y enlaces</h3>
 <p>Las rutas relativas funcionan como en GitHub: <code>![diagrama](img/diagrama.png)</code> muestra la imagen que está junto al .md.
-En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otros <code>.md</code> se abren en Quillforge y los
+En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otros <code>.md</code> se abren en Gryphmark y los
 <code>#título</code> saltan dentro del documento.</p>
 """),
    ("Exportar e imprimir", """
@@ -240,19 +244,19 @@ En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otro
 <tr><td>Buscar / Reemplazar</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> abren una barra sobre el documento. <kbd>F3</kbd> y <kbd>Mayús</kbd>+<kbd>F3</kbd> saltan entre coincidencias; <kbd>Esc</kbd> la cierra. <i>Aa</i> distingue mayúsculas.</td></tr>
 <tr><td>Esquema</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd> o el primer botón de la barra muestra los títulos a la izquierda; un clic salta a ese título.</td></tr>
 <tr><td>Se respeta tu formato</td><td>Al guardar sólo se reescriben las líneas que cambiaste: viñetas, <code>__negrita__</code>, alineación de tablas, finales de línea (CRLF/LF) y BOM quedan como estaban.</td></tr>
-<tr><td>Cambios externos</td><td>Si otro programa modifica el archivo abierto, Quillforge lo recarga (o pregunta antes si tenés cambios sin guardar).</td></tr>
-<tr><td>Recuperación</td><td>Lo no guardado se respalda cada 20 segundos. Si Quillforge o Windows se cierran de golpe, al volver a abrir ofrece recuperarlo.</td></tr>
+<tr><td>Cambios externos</td><td>Si otro programa modifica el archivo abierto, Gryphmark lo recarga (o pregunta antes si tenés cambios sin guardar).</td></tr>
+<tr><td>Recuperación</td><td>Lo no guardado se respalda cada 20 segundos. Si Gryphmark o Windows se cierran de golpe, al volver a abrir ofrece recuperarlo.</td></tr>
 <tr><td>Ortografía</td><td><i>Ver → Revisar ortografía</i> subraya las palabras mal escritas (diccionarios de Windows).</td></tr>
-<tr><td>Una sola ventana</td><td>Abrir un .md con Quillforge ya abierto trae al frente la ventana existente en vez de abrir otra copia. <i>Archivo → Nueva ventana</i> sigue abriendo otra.</td></tr>
-<tr><td>Actualizaciones</td><td>Quillforge busca una versión nueva una vez por día; <i>Ayuda → Buscar actualizaciones</i> lo hace en el momento.</td></tr>
-<tr><td>Acerca de</td><td><i>Ayuda → Acerca de Quillforge</i> muestra la versión, el autor, la licencia y los créditos. <i>Copiar info</i> copia los datos de versión, útil para reportar un problema.</td></tr></table>
+<tr><td>Una sola ventana</td><td>Abrir un .md con Gryphmark ya abierto trae al frente la ventana existente en vez de abrir otra copia. <i>Archivo → Nueva ventana</i> sigue abriendo otra.</td></tr>
+<tr><td>Actualizaciones</td><td>Gryphmark busca una versión nueva una vez por día; <i>Ayuda → Buscar actualizaciones</i> lo hace en el momento.</td></tr>
+<tr><td>Acerca de</td><td><i>Ayuda → Acerca de Gryphmark</i> muestra la versión, el autor, la licencia y los créditos. <i>Copiar info</i> copia los datos de versión, útil para reportar un problema.</td></tr></table>
 <h3>Extras de GitHub</h3>
 <p>También se muestran igual que en GitHub: avisos (<code>&gt; [!NOTE]</code>, <code>[!TIP]</code>, <code>[!IMPORTANT]</code>, <code>[!WARNING]</code>, <code>[!CAUTION]</code>),
 diagramas <code>```mermaid</code>, fórmulas (<code>$E=mc^2$</code> y <code>$$ … $$</code>), notas al pie (<code>[^1]</code>) y emojis por código (<code>:rocket:</code>).</p>
 """),
    ("Idioma, tema y zoom", f"""
 <p>Menú <b>Idioma</b>: English o Español. Cambia al instante los menús, las ayudas de la barra y los diálogos.
-La primera vez, Quillforge toma el idioma de Windows.</p>
+La primera vez, Gryphmark toma el idioma de Windows.</p>
 <p><b>Ver → Tema oscuro</b> alterna entre GitHub claro y GitHub oscuro. Zoom con <kbd>Ctrl</kbd>+<kbd>+</kbd>,
 <kbd>Ctrl</kbd>+<kbd>-</kbd> y <kbd>Ctrl</kbd>+<kbd>0</kbd>. Idioma, tema, modo, zoom y tamaño de ventana quedan recordados.</p>
 <figure><img src="{img('preview_dark_es.png')}"><figcaption>Tema oscuro de GitHub.</figcaption></figure>
@@ -276,7 +280,7 @@ La primera vez, Quillforge toma el idioma de Windows.</p>
 <tr><td>Editor</td><td>TOAST UI Editor 3.2 (MIT)</td></tr>
 <tr><td>Render GitHub</td><td>marked (GitHub Flavored Markdown), highlight.js, github-markdown-css (MIT)</td></tr>
 <tr><td>Ícono</td><td>Grifo del grabado de Martin Schongauer (c. 1485), Museo Metropolitano de Arte, CC0; pluma agregada.</td></tr>
-<tr><td>Configuración</td><td><code>%APPDATA%\\Quillforge\\settings.json</code></td></tr>
+<tr><td>Configuración</td><td><code>%APPDATA%\\Gryphmark\\settings.json</code></td></tr>
 <tr><td>Código fuente</td><td><code>src/</code> en la carpeta del proyecto; se compila con <code>build.ps1</code>.</td></tr></table>
 <div class="note">El editor visual normaliza algunos detalles al escribir el Markdown (por ejemplo, las listas con <code>*</code>
 pasan a <code>-</code>). El texto y cómo lo muestra GitHub no cambian.</div>
@@ -287,12 +291,12 @@ pasan a <code>-</code>). El texto y cómo lo muestra GitHub no cambian.</div>
 for code, d in T.items():
     toc = "".join(f"<div>{i}. {name}</div>" for i, (name, _) in enumerate(d["sections"], 1))
     body = "".join(f"<h2>{i}. {name}</h2>{html.replace('{v}', version)}" for i, (name, html) in enumerate(d["sections"], 1))
-    page = f"""<!doctype html><html lang="{d['lang']}"><head><meta charset="utf-8"><title>Quillforge — {d['title']}</title><style>{CSS}</style></head>
+    page = f"""<!doctype html><html lang="{d['lang']}"><head><meta charset="utf-8"><title>Gryphmark — {d['title']}</title><style>{CSS}</style></head>
 <body>
-<div class="cover"><img src="{icon}"><h1>Quillforge</h1><div class="tag">{d['tag']}</div>
+<div class="cover"><img src="{icon}"><h1>Gryphmark</h1><div class="tag">{d['tag']}</div>
 <div class="meta">{d['title']} · v{version}<br>© 2026 Gabriel Castiglia</div></div>
 <h2>{d['toc']}</h2><div class="toc">{toc}</div>
 {body}
 </body></html>"""
-    (docs / f"Quillforge_Manual_{code.upper()}.html").write_text(page, encoding="utf-8")
+    (docs / f"Gryphmark_Manual_{code.upper()}.html").write_text(page, encoding="utf-8")
 print("ok")

@@ -1,7 +1,7 @@
 """Builds a file:// test page from wwwroot so the editor can be screenshotted with headless Edge."""
 import sys, json, pathlib
 root = pathlib.Path(__file__).resolve().parents[1]
-www = root / "src" / "Quillforge" / "wwwroot"
+www = root / "src" / "Gryphmark" / "wwwroot"
 mode, theme, lang, out = sys.argv[1], sys.argv[2], sys.argv[3], pathlib.Path(sys.argv[4])
 html = (www / "index.html").read_text(encoding="utf-8").replace("https://app.local/", www.as_uri() + "/")
 js = (www / "app.js").read_text(encoding="utf-8").replace("https://app.local/", www.as_uri() + "/")
