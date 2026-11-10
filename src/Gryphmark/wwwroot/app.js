@@ -5,7 +5,7 @@
   const post = (msg) => host && host.postMessage(msg);
 
   let editor = null;
-  let state = { lang: 'en', theme: 'light', mode: 'visual', spell: true };
+  let state = { lang: 'en', theme: 'light', mode: 'visual', spell: true, locked: false };
   let suppressDirty = false;
   let original = '';        // text exactly as read from disk
   let baseline = '';        // the same text after the editor's normalisation (captured at load)
@@ -110,8 +110,37 @@
       },
     });
     markGithubClass();
+    applyLock();
     setTimeout(() => { suppressDirty = false; }, 50);
   }
+
+  // ------------------------------------------------------------------ read-only ("Read only" switch)
+  // Both ProseMirror views (visual and Markdown) stop accepting edits; selecting and copying still work.
+  function applyLock() {
+    document.body.classList.toggle('locked', state.locked);
+    if (!editor) return;
+    [editor.wwEditor, editor.mdEditor].forEach((m) => {
+      if (m && m.view) m.view.setProps({ editable: () => !state.locked });
+    });
+  }
+  // Task check boxes toggle on mousedown outside ProseMirror's editable check: stop them while locked.
+  ['mousedown', 'click'].forEach((t) => document.addEventListener(t, (e) => {
+    if (!state.locked) return;
+    const li = e.target.closest && e.target.closest('#editorHost li.task-list-item');
+    if (li && e.target === li) { e.preventDefault(); e.stopPropagation(); }
+  }, true));
+  let hintAt = 0;
+  document.addEventListener('keydown', (e) => {
+    if (!state.locked || state.mode === 'preview' || e.ctrlKey || e.altKey || e.metaKey) return;
+    if (!e.target.closest || !e.target.closest('#editorHost')) return;
+    if (e.key.length === 1 || e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Tab') {
+      e.preventDefault();
+      if (Date.now() - hintAt > 1500) { hintAt = Date.now(); post({ type: 'lockedHint' }); }
+    }
+  }, true);
+  document.addEventListener('paste', (e) => {
+    if (state.locked && e.target.closest && e.target.closest('#editorHost')) { e.preventDefault(); post({ type: 'lockedHint' }); }
+  }, true);
 
   function countWords() {
     const t = editor ? editor.getMarkdown().replace(/[#>*_`~\-\[\]()|]/g, ' ') : '';
@@ -137,7 +166,7 @@
       document.getElementById('previewHost').scrollTop = 0;
     } else {
       editor.changeMode(state.mode === 'source' ? 'markdown' : 'wysiwyg', true);
-      markGithubClass();
+      markGithubClass(); applyLock();
     }
     if (find.query) runFind(0);
   }
@@ -267,14 +296,14 @@
   function report() { post({ type: 'find', index: find.cur, total: find.matches.length }); }
 
   function replaceCurrent(repl) {
-    if (state.mode === 'preview' || find.cur < 0) return;
+    if (state.mode === 'preview' || state.locked || find.cur < 0) return;
     const v = pmView(); const m = find.matches[find.cur];
     v.dispatch(v.state.tr.insertText(repl, m.from, m.to));
     runFind(0, true);
   }
 
   function replaceAll(repl) {
-    if (state.mode === 'preview') return 0;
+    if (state.mode === 'preview' || state.locked) return 0;
     const v = pmView(); const ms = collectPm(v, find.query, find.cs);
     let tr = v.state.tr;
     for (let i = ms.length - 1; i >= 0; i--) tr = tr.insertText(repl, ms[i].from, ms[i].to);
@@ -330,9 +359,10 @@
     setTheme(theme) { const t = editor.getMarkdown(); state.theme = theme; applyTheme(); build(t); applyMode(); },
     setMode(mode) { state.mode = mode; applyMode(); },
     setSpell(on) { state.spell = !!on; applySpell(); },
-    init(lang, theme, mode, spell) { state = { lang, theme, mode, spell: spell !== false }; applyTheme(); build(''); applyMode(); },
-    exec(cmd, payload) { if (state.mode === 'preview') return; try { editor.exec(cmd, payload); } catch (e) { } editor.focus(); },
-    insertText(t) { editor.insertText(t); },
+    init(lang, theme, mode, spell, locked) { state = { lang, theme, mode, spell: spell !== false, locked: !!locked }; applyTheme(); build(''); applyMode(); },
+    setLocked(on) { state.locked = !!on; applyLock(); },
+    exec(cmd, payload) { if (state.mode === 'preview' || state.locked) return; try { editor.exec(cmd, payload); } catch (e) { } editor.focus(); },
+    insertText(t) { if (!state.locked) editor.insertText(t); },
     words() { return countWords(); },
     selectedText() { try { return editor.getSelectedText() || ''; } catch (e) { return ''; } },
     focus() { if (editor && state.mode !== 'preview') editor.focus(); },
@@ -363,6 +393,7 @@
     const map = { n: 'new', o: 'open', s: e.shiftKey ? 'saveas' : 'save', p: 'print', w: 'close', f: 'find', h: 'replace' };
     if (k === 'o' && e.shiftKey) { e.preventDefault(); post({ type: 'cmd', cmd: 'outline' }); return; }
     if (k === 'e' && e.shiftKey) { e.preventDefault(); post({ type: 'cmd', cmd: 'files' }); return; }
+    if (k === 'l' && e.shiftKey) { e.preventDefault(); post({ type: 'cmd', cmd: 'readonly' }); return; }
     if (map[k]) { e.preventDefault(); post({ type: 'cmd', cmd: map[k] }); }
     else if (k === '1' || k === '2' || k === '3') { e.preventDefault(); post({ type: 'cmd', cmd: 'mode' + k }); }
     else if (k === '=' || k === '+' || k === '-' || k === '0') { e.preventDefault(); post({ type: 'cmd', cmd: k === '0' ? 'zoom0' : (k === '-' ? 'zoom-' : 'zoom+') }); }
@@ -371,6 +402,7 @@
   // ------------------------------------------------------------------ drag & drop a file onto the window
   window.addEventListener('dragover', (e) => { e.preventDefault(); }, true);
   window.addEventListener('drop', (e) => {
+    if (state.locked && !(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length)) { e.preventDefault(); e.stopPropagation(); return; }
     if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
       e.preventDefault(); e.stopPropagation();
       if (host.postMessageWithAdditionalObjects) host.postMessageWithAdditionalObjects('drop', e.dataTransfer.files);

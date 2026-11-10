@@ -9,6 +9,7 @@ public sealed class Settings
     public string Lang { get; set; } = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "es" ? "es" : "en";
     public string Theme { get; set; } = "light";
     public string Mode { get; set; } = "visual";
+    public bool ReadOnly { get; set; }
     public double Zoom { get; set; } = 1.0;
     public List<string> Recent { get; set; } = new();
     /// <summary>Folder shown in the Files panel (reopened on the next start).</summary>

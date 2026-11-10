@@ -18,6 +18,7 @@ Gryphmark writes the Markdown tags for you. Documents are rendered exactly like 
 - Relative images and links, `.md` links open in Gryphmark
 - GitHub alerts, Mermaid diagrams, math, footnotes and emoji
 - **Files panel**: open a whole folder and browse its Markdown files in a tree beside the document, like VS Code or Obsidian (`Ctrl+Shift+E`)
+- **Read only**: the *Edit | Read only* switch in the toolbar locks the text so nothing changes by mistake (`Ctrl+Shift+L`)
 - Find & replace, outline sidebar, spell check
 - Keeps your formatting: only edited lines change on save (CRLF/BOM preserved)
 - Reloads files changed outside, crash recovery, single instance, update check
@@ -28,8 +29,8 @@ Gryphmark writes the Markdown tags for you. Documents are rendered exactly like 
 **Build:** Windows, .NET 8 SDK, Node.js, Python 3 + Pillow/numpy/scipy/opencv, Inno Setup 6, Microsoft Edge.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.3.0
-# -> out/Gryphmark-Setup-1.3.0.exe
+powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.4.0
+# -> out/Gryphmark-Setup-1.4.0.exe
 ```
 
 ## Español
@@ -46,6 +47,7 @@ tema claro u oscuro.
 - Imágenes y enlaces relativos; los enlaces a `.md` se abren en Gryphmark
 - Avisos de GitHub, diagramas Mermaid, fórmulas, notas al pie y emojis
 - **Panel de archivos**: abrís una carpeta entera y recorrés sus archivos Markdown en un árbol al costado del documento, como en VS Code u Obsidian (`Ctrl+Shift+E`)
+- **Solo lectura**: el selector *Editar | Solo lectura* de la barra bloquea el texto para que nada cambie por error (`Ctrl+Shift+L`)
 - Buscar y reemplazar, esquema lateral, revisión ortográfica
 - Respeta tu formato: al guardar sólo cambian las líneas editadas (conserva CRLF/BOM)
 - Recarga archivos cambiados afuera, recuperación ante cierres, instancia única, aviso de actualizaciones
@@ -56,8 +58,8 @@ tema claro u oscuro.
 **Compilar:** Windows, SDK de .NET 8, Node.js, Python 3 + Pillow/numpy/scipy/opencv, Inno Setup 6, Microsoft Edge.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.3.0
-# -> out/Gryphmark-Setup-1.3.0.exe
+powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.4.0
+# -> out/Gryphmark-Setup-1.4.0.exe
 ```
 
 ## Project layout / Estructura

@@ -3,7 +3,7 @@
 This is a **sample document**. Change it as much as you like: it opens as an untitled copy, so the original is never overwritten. Save it with **Save as** if you want to keep your version.
 
 > [!TIP]
-> Try the three buttons at the right end of the toolbar — **Visual · Markdown · GitHub** — or press `Ctrl+1`, `Ctrl+2` and `Ctrl+3`. It is the same document seen three ways.
+> Try the three buttons at the right end of the toolbar — **Visual · Markdown · GitHub** — or press `Ctrl+1`, `Ctrl+2` and `Ctrl+3`. It is the same document seen three ways. Just reading? Choose **Read only** next to them (`Ctrl+Shift+L`) and nothing can change by mistake.
 
 ## The three views
 
@@ -67,6 +67,6 @@ Open a whole folder with **File → Open folder…** and its Markdown files appe
 
 ---
 
-To stop showing this sample in **File → Open recent**, right-click it there and choose **Hide sample**. It is always available again from **Help → Sample document**.
+To stop showing this sample in **File → Open recent**, choose **Hide sample** right below it (or untick **Help → Show sample in Open recent**). It is always available again from **Help → Sample document**.
 
 [^1]: A footnote: it is listed at the end of the page in the GitHub view.

@@ -98,7 +98,7 @@ public partial class MainWindow : Window
         switch (root.GetProperty("type").GetString())
         {
             case "ready":
-                await Js($"mdApp.init({Q(_settings.Lang)},{Q(_settings.Theme)},{Q(_settings.Mode)},{(_settings.Spell ? "true" : "false")})");
+                await Js($"mdApp.init({Q(_settings.Lang)},{Q(_settings.Theme)},{Q(_settings.Mode)},{(_settings.Spell ? "true" : "false")},{(_settings.ReadOnly ? "true" : "false")})");
                 _ready = true;
                 if (_pendingOpen != null) { var p = _pendingOpen; _pendingOpen = null; await LoadFileAsync(p); }
                 else if (!_settings.SampleShown && SamplePath != null) { _settings.SampleShown = true; _settings.Save(); await LoadSampleAsync(); }
@@ -116,6 +116,9 @@ public partial class MainWindow : Window
                 if (root.TryGetProperty("words", out var w)) _words = w.GetInt32();
                 if (!_dirty) { _dirty = true; UpdateTitle(); }
                 UpdateStatus();
+                break;
+            case "lockedHint":
+                Flash(Strings.Get("LockedHint"));
                 break;
             case "cmd":
                 await RunCommand(root.GetProperty("cmd").GetString() ?? "");
@@ -401,6 +404,7 @@ public partial class MainWindow : Window
             case "findclose": await HideFind(); break;
             case "outline": ToggleOutline(); break;
             case "files": ToggleFiles(); break;
+            case "readonly": await SetReadOnly(!_settings.ReadOnly); break;
             case "opendir": PickFolder(); break;
             case "manual": OpenManual(); break;
             case "folder":
@@ -424,6 +428,15 @@ public partial class MainWindow : Window
         BuildMenu(); UpdateStatus();
     }
 
+    private async Task SetReadOnly(bool on)
+    {
+        _settings.ReadOnly = on; _settings.Save();
+        SyncSegments();
+        if (_ready) await Js($"mdApp.setLocked({(on ? "true" : "false")})");
+        BuildMenu(); UpdateStatus();
+        if (_ready && !on) await Js("mdApp.focus()");
+    }
+
     private async Task Exec(string cmd, string payload = "undefined")
     {
         if (_ready) await Js($"mdApp.exec({Q(cmd)},{payload})");
@@ -440,6 +453,7 @@ public partial class MainWindow : Window
             Key.S => Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) ? "saveas" : "save",
             Key.D1 => "mode1", Key.D2 => "mode2", Key.D3 => "mode3",
             Key.E when Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) => "files",
+            Key.L when Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) => "readonly",
             _ => null,
         };
         if (cmd != null) { e.Handled = true; await RunCommand(cmd); }
@@ -465,6 +479,13 @@ public partial class MainWindow : Window
         ? new TextBlock { Text = g, FontFamily = (FontFamily)Application.Current.Resources["Gm.Icons"], FontSize = 14 }
         : null;
 
+    private void SetSampleHidden(bool hidden)
+    {
+        _settings.SampleHidden = hidden;
+        _settings.Save();
+        BuildMenu();
+    }
+
     private MenuItem Item(string key, string? gesture, Func<Task> action, bool? check = null, bool enabled = true)
     {
         var mi = new MenuItem { Header = Strings.Get(key), InputGestureText = gesture ?? "", IsEnabled = enabled, Icon = Glyph(key) };
@@ -489,9 +510,12 @@ public partial class MainWindow : Window
             var smi = new MenuItem { Header = Strings.Get("SampleItem"), Icon = Glyph("Sample"), ToolTip = Strings.Get("SampleTip") };
             smi.Click += async (_, _) => await OpenSampleAsync();
             var hide = new MenuItem { Header = Strings.Get("SampleHide") };
-            hide.Click += (_, _) => { _settings.SampleHidden = true; _settings.Save(); BuildMenu(); };
+            hide.Click += (_, _) => SetSampleHidden(true);
             smi.ContextMenu = new ContextMenu { Items = { hide } };
             recent.Items.Add(smi);
+            var hideVisible = new MenuItem { Header = Strings.Get("SampleHide"), Icon = Glyph("CloseDir") };
+            hideVisible.Click += (_, _) => SetSampleHidden(true);
+            recent.Items.Add(hideVisible);
             recent.Items.Add(new Separator());
         }
         if (_settings.Recent.Count == 0 && _settings.RecentFolders.Count == 0) recent.Items.Add(new MenuItem { Header = Strings.Get("RecentEmpty"), IsEnabled = false });
@@ -575,6 +599,8 @@ public partial class MainWindow : Window
         view.Items.Add(Item("ModeSource", ctrl + "2", () => SetMode("source"), _settings.Mode == "source"));
         view.Items.Add(Item("ModePreview", ctrl + "3", () => SetMode("preview"), _settings.Mode == "preview"));
         view.Items.Add(new Separator());
+        view.Items.Add(Item("ReadOnly", ctrl + "Shift+L", () => SetReadOnly(!_settings.ReadOnly), _settings.ReadOnly));
+        view.Items.Add(new Separator());
         view.Items.Add(Item("Dark", null, async () =>
         {
             _settings.Theme = _settings.Theme == "dark" ? "light" : "dark"; _settings.Save();
@@ -609,6 +635,8 @@ public partial class MainWindow : Window
         var help = new MenuItem { Header = Strings.Get("Help") };
         help.Items.Add(Item("Manual", "F1", () => { OpenManual(); return Task.CompletedTask; }));
         help.Items.Add(Item("Sample", null, OpenSampleAsync, enabled: SamplePath != null));
+        help.Items.Add(Item("SampleInRecent", null, () => { SetSampleHidden(!_settings.SampleHidden); return Task.CompletedTask; },
+            check: !_settings.SampleHidden, enabled: SamplePath != null));
         help.Items.Add(Item("Guide", null, () =>
         {
             OpenLink(Strings.Lang == "es"
@@ -698,6 +726,10 @@ public partial class MainWindow : Window
         SegVisual.ToolTip = SegTip("ModeVisual", "TipVisual", "Ctrl+1");
         SegSource.ToolTip = SegTip("ModeSource", "TipSource", "Ctrl+2");
         SegPreview.ToolTip = SegTip("ModePreview", "TipPreview", "Ctrl+3");
+        SegEdit.Content = SegLabel("\uE70F", "SegEdit");
+        SegRead.Content = SegLabel("\uE72E", "SegRead");
+        SegEdit.ToolTip = SegTip("SegEdit", "TipEdit", "Ctrl+Shift+L");
+        SegRead.ToolTip = SegTip("SegRead", "TipRead", "Ctrl+Shift+L");
         SyncSegments();
         if (!_segWired)
         {
@@ -705,7 +737,17 @@ public partial class MainWindow : Window
             SegVisual.Checked += async (_, _) => { if (_settings.Mode != "visual") await SetMode("visual"); };
             SegSource.Checked += async (_, _) => { if (_settings.Mode != "source") await SetMode("source"); };
             SegPreview.Checked += async (_, _) => { if (_settings.Mode != "preview") await SetMode("preview"); };
+            SegEdit.Checked += async (_, _) => { if (_settings.ReadOnly) await SetReadOnly(false); };
+            SegRead.Checked += async (_, _) => { if (!_settings.ReadOnly) await SetReadOnly(true); };
         }
+    }
+
+    private static object SegLabel(string glyph, string key)
+    {
+        var p = new StackPanel { Orientation = Orientation.Horizontal };
+        p.Children.Add(new TextBlock { Text = glyph, FontFamily = new FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"), FontSize = 13, VerticalAlignment = VerticalAlignment.Center });
+        p.Children.Add(new TextBlock { Text = Strings.Get(key), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6, 0, 0, 0) });
+        return p;
     }
 
     /// <summary>Two-line tooltip for the mode buttons: name + shortcut in bold, then what the mode is for.</summary>
@@ -722,7 +764,11 @@ public partial class MainWindow : Window
         SegVisual.IsChecked = _settings.Mode == "visual";
         SegSource.IsChecked = _settings.Mode == "source";
         SegPreview.IsChecked = _settings.Mode == "preview";
-        Tools.IsEnabled = _settings.Mode != "preview";
+        SegEdit.IsChecked = !_settings.ReadOnly;
+        SegRead.IsChecked = _settings.ReadOnly;
+        foreach (var (seg, on) in new[] { (SegEdit, !_settings.ReadOnly), (SegRead, _settings.ReadOnly) })
+            if (seg.Content is StackPanel sp && sp.Children.Count == 2) sp.Children[1].Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+        Tools.IsEnabled = _settings.Mode != "preview" && !_settings.ReadOnly;
     }
 
     private async Task<string> SelectedTextAsync() =>
@@ -814,7 +860,8 @@ public partial class MainWindow : Window
     {
         StatusPath.Text = _path ?? Strings.Get(_isSample ? "SampleTitle" : "Untitled");
         StatusWords.Text = string.Format(Strings.Get("Words"), _words);
-        StatusMode.Text = Strings.Plain(_settings.Mode switch { "source" => "ModeSource", "preview" => "ModePreview", _ => "ModeVisual" });
+        StatusMode.Text = Strings.Plain(_settings.Mode switch { "source" => "ModeSource", "preview" => "ModePreview", _ => "ModeVisual" })
+            + (_settings.ReadOnly ? " · \U0001F512 " + Strings.Get("SegRead") : "");
         StatusState.Text = _dirty ? Strings.Get("Modified") : (_path != null ? Strings.Get("Saved") : "");
     }
 }

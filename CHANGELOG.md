@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.0 — 2026-11-10
+
+- **Read only:** a new *Edit | Read only* switch next to the view buttons (also *View → Read only*,
+  `Ctrl+Shift+L`) locks the text in the Visual and Markdown views, so a stray key, paste, drop or click on a
+  task box cannot change the document. Reading, selecting, copying, finding and switching views still work;
+  typing shows a hint in the status bar. The choice is remembered.
+- **Hiding the sample is now visible:** *File → Open recent* shows a **Hide sample** item right below it
+  (before, it was only a right-click inside the submenu), and *Help → Show sample in Open recent* turns it
+  off and on again.
+
 ## 1.3.0 — 2026-11-10
 
 - **Files panel** (`Ctrl+Shift+E`, the folder button, or *View → Files panel*): open a whole folder and

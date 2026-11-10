@@ -17,6 +17,12 @@
                         <RadioButton x:Name="SegPreview" Style="{DynamicResource Gm.Segment}" GroupName="mode" />
                     </StackPanel>
                 </Border>
+                <Border DockPanel.Dock="Right" Style="{DynamicResource Gm.SegmentHost}" VerticalAlignment="Center" Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton x:Name="SegEdit" Style="{DynamicResource Gm.Segment}" GroupName="lock" />
+                        <RadioButton x:Name="SegRead" Style="{DynamicResource Gm.Segment}" GroupName="lock" />
+                    </StackPanel>
+                </Border>
                 <StackPanel x:Name="Tools" DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center" />
             </DockPanel>
         </Border>

@@ -80,6 +80,11 @@ and Gryphmark copies its settings, recent files and recovery drafts on the first
 <tr><td><b>GitHub</b><br><small>GitHub preview</small></td><td><kbd>Ctrl</kbd>+<kbd>3</kbd></td><td>Read-only page rendered like GitHub, with syntax highlighting, task lists and clickable links.</td></tr></table>
 <figure><img src="{img('source_light_en.png')}"><figcaption>Markdown source with live preview.</figcaption></figure>
 <figure><img src="{img('preview_light_en.png')}"><figcaption>GitHub preview (light theme).</figcaption></figure>
+<h3>Read only</h3>
+<p>When you only want to read a document, choose <b>Read only</b> in the <b>Edit | Read only</b> switch, to the left of the view buttons
+(also <i>View → Read only</i> or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd>). The text is locked in every view: keys, paste, drag and drop and
+the task boxes do nothing, and the formatting buttons are greyed out. You can still read, select, copy, find and switch views.
+If you type, the status bar reminds you how to unlock it. Choose <b>Edit</b> to write again; Gryphmark remembers your choice.</p>
 """),
    ("Folders: the Files panel", f"""
 <p>Like VS Code or Obsidian, Gryphmark can open a whole folder and show its tree on the left: subfolders and
@@ -142,7 +147,7 @@ In GitHub preview, links to web pages open in your browser, links to other <code
 <tr><td>One window per file</td><td>Opening a .md while Gryphmark is running brings the existing window forward instead of starting a second copy. <i>File → New window</i> still opens another one.</td></tr>
 <tr><td>Updates</td><td>Gryphmark checks once a day for a new version; <i>Help → Check for updates</i> does it on demand.</td></tr>
 <tr><td>About</td><td><i>Help → About Gryphmark</i> shows the version, author, license and credits. <i>Copy info</i> copies the version details, handy for reporting a problem.</td></tr>
-<tr><td>Sample document</td><td>A sample that shows every feature in the three views. It opens on the first start and from <i>Help → Sample document</i>, and it is pinned at the top of <i>File → Open recent</i>; right-click it there and choose <i>Hide sample</i> to remove it from that list. It opens as an untitled copy, so the original is never overwritten, and it changes language together with the menus.</td></tr></table>
+<tr><td>Sample document</td><td>A sample that shows every feature in the three views. It opens on the first start and from <i>Help → Sample document</i>, and it is pinned at the top of <i>File → Open recent</i>; <i>Hide sample</i>, right below it, removes it from that list, and <i>Help → Show sample in Open recent</i> brings it back. It opens as an untitled copy, so the original is never overwritten, and it changes language together with the menus.</td></tr></table>
 <h3>GitHub extras</h3>
 <p>Also rendered exactly like GitHub: alerts (<code>&gt; [!NOTE]</code>, <code>[!TIP]</code>, <code>[!IMPORTANT]</code>, <code>[!WARNING]</code>, <code>[!CAUTION]</code>),
 <code>```mermaid</code> diagrams, math (<code>$E=mc^2$</code> and <code>$$ … $$</code>), footnotes (<code>[^1]</code>) and emoji shortcodes (<code>:rocket:</code>).</p>
@@ -164,7 +169,7 @@ The first time, Gryphmark follows the Windows language.</p>
 <tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Close window</td><td><kbd>F1</kbd></td><td>This manual</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Find / Replace</td><td><kbd>F3</kbd> / <kbd>Shift</kbd>+<kbd>F3</kbd></td><td>Next / previous match</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd></td><td>Outline</td><td><kbd>Esc</kbd></td><td>Close find bar</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td><td>Files panel</td><td></td><td></td></tr></table>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td><td>Files panel</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td><td>Read only / Edit</td></tr></table>
 """),
    ("Technical information", """
 <table><tr><th>Item</th><th>Detail</th></tr>
@@ -222,6 +227,11 @@ configuración en <code>%APPDATA%\\Gryphmark</code> se conserva.</p>
 <tr><td><b>GitHub</b><br><small>Vista GitHub</small></td><td><kbd>Ctrl</kbd>+<kbd>3</kbd></td><td>Página de solo lectura igual a GitHub, con colores de código, listas de tareas y enlaces que funcionan.</td></tr></table>
 <figure><img src="{img('source_light_es.png')}"><figcaption>Código Markdown con vista previa en vivo.</figcaption></figure>
 <figure><img src="{img('preview_light_es.png')}"><figcaption>Vista GitHub (tema claro).</figcaption></figure>
+<h3>Solo lectura</h3>
+<p>Cuando sólo querés leer un documento, elegí <b>Solo lectura</b> en el selector <b>Editar | Solo lectura</b>, a la izquierda de los botones de vista
+(también <i>Ver → Solo lectura</i> o <kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>L</kbd>). El texto queda bloqueado en todas las vistas: las teclas, pegar, arrastrar y soltar
+y las casillas de tareas no hacen nada, y los botones de formato quedan en gris. Igual podés leer, seleccionar, copiar, buscar y cambiar de vista.
+Si escribís, la barra de estado te recuerda cómo desbloquearlo. Elegí <b>Editar</b> para volver a escribir; Gryphmark recuerda tu elección.</p>
 """),
    ("Carpetas: el panel de archivos", f"""
 <p>Como VS Code u Obsidian, Gryphmark puede abrir una carpeta entera y mostrar su árbol a la izquierda: subcarpetas y
@@ -284,7 +294,7 @@ En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otro
 <tr><td>Una sola ventana</td><td>Abrir un .md con Gryphmark ya abierto trae al frente la ventana existente en vez de abrir otra copia. <i>Archivo → Nueva ventana</i> sigue abriendo otra.</td></tr>
 <tr><td>Actualizaciones</td><td>Gryphmark busca una versión nueva una vez por día; <i>Ayuda → Buscar actualizaciones</i> lo hace en el momento.</td></tr>
 <tr><td>Acerca de</td><td><i>Ayuda → Acerca de Gryphmark</i> muestra la versión, el autor, la licencia y los créditos. <i>Copiar info</i> copia los datos de versión, útil para reportar un problema.</td></tr>
-<tr><td>Documento de ejemplo</td><td>Un ejemplo que muestra todas las funciones en las tres vistas. Se abre la primera vez que arrancás el programa y desde <i>Ayuda → Documento de ejemplo</i>, y está fijo arriba de todo en <i>Archivo → Abrir reciente</i>; con clic derecho ahí y <i>Ocultar ejemplo</i> lo sacás de esa lista. Se abre como copia sin título, así que el original nunca se pisa, y cambia de idioma junto con los menús.</td></tr></table>
+<tr><td>Documento de ejemplo</td><td>Un ejemplo que muestra todas las funciones en las tres vistas. Se abre la primera vez que arrancás el programa y desde <i>Ayuda → Documento de ejemplo</i>, y está fijo arriba de todo en <i>Archivo → Abrir reciente</i>; <i>Ocultar ejemplo</i>, justo debajo, lo saca de esa lista, y <i>Ayuda → Mostrar el ejemplo en Abrir reciente</i> lo vuelve a poner. Se abre como copia sin título, así que el original nunca se pisa, y cambia de idioma junto con los menús.</td></tr></table>
 <h3>Extras de GitHub</h3>
 <p>También se muestran igual que en GitHub: avisos (<code>&gt; [!NOTE]</code>, <code>[!TIP]</code>, <code>[!IMPORTANT]</code>, <code>[!WARNING]</code>, <code>[!CAUTION]</code>),
 diagramas <code>```mermaid</code>, fórmulas (<code>$E=mc^2$</code> y <code>$$ … $$</code>), notas al pie (<code>[^1]</code>) y emojis por código (<code>:rocket:</code>).</p>
@@ -306,7 +316,7 @@ La primera vez, Gryphmark toma el idioma de Windows.</p>
 <tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Cerrar ventana</td><td><kbd>F1</kbd></td><td>Este manual</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Buscar / Reemplazar</td><td><kbd>F3</kbd> / <kbd>Mayús</kbd>+<kbd>F3</kbd></td><td>Coincidencia siguiente / anterior</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd></td><td>Esquema</td><td><kbd>Esc</kbd></td><td>Cerrar búsqueda</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>E</kbd></td><td>Panel de archivos</td><td></td><td></td></tr></table>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>E</kbd></td><td>Panel de archivos</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>L</kbd></td><td>Solo lectura / Editar</td></tr></table>
 """),
    ("Información técnica", """
 <table><tr><th>Ítem</th><th>Detalle</th></tr>

@@ -3,7 +3,7 @@
 Este es un **documento de ejemplo**. Cambialo todo lo que quieras: se abre como una copia sin título, así que el original nunca se pisa. Si querés conservar tu versión, guardala con **Guardar como**.
 
 > [!TIP]
-> Probá los tres botones del extremo derecho de la barra — **Visual · Markdown · GitHub** — o apretá `Ctrl+1`, `Ctrl+2` y `Ctrl+3`. Es el mismo documento visto de tres maneras.
+> Probá los tres botones del extremo derecho de la barra — **Visual · Markdown · GitHub** — o apretá `Ctrl+1`, `Ctrl+2` y `Ctrl+3`. Es el mismo documento visto de tres maneras. ¿Solo vas a leer? Elegí **Solo lectura** al lado (`Ctrl+Shift+L`) y nada cambia por error.
 
 ## Las tres vistas
 
@@ -67,6 +67,6 @@ Abrí una carpeta entera con **Archivo → Abrir carpeta…** y sus archivos Mar
 
 ---
 
-Para que este ejemplo no aparezca más en **Archivo → Abrir reciente**, hacé clic derecho sobre él ahí y elegí **Ocultar ejemplo**. Siempre lo podés volver a abrir desde **Ayuda → Documento de ejemplo**.
+Para que este ejemplo no aparezca más en **Archivo → Abrir reciente**, elegí **Ocultar ejemplo**, justo debajo de él (o desmarcá **Ayuda → Mostrar el ejemplo en Abrir reciente**). Siempre lo podés volver a abrir desde **Ayuda → Documento de ejemplo**.
 
 [^1]: Una nota al pie: en la vista GitHub aparece al final de la página.
