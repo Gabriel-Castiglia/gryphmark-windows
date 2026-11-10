@@ -1,6 +1,40 @@
-node_modules/
+# --- Build output ---
+out/
 bin/
 obj/
-out/
-*.user
+publish/
+*.binlog
+
+# --- Dependencies ---
+node_modules/
+npm-debug.log*
+__pycache__/
+*.py[cod]
+
+# --- Code signing (never commit certificates or secrets) ---
+*.pfx
+*.p12
+*.snk
+*.cer
+.env
+.env.*
+
+# --- IDE / editor ---
 .vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.swp
+*~
+
+# --- OS ---
+Thumbs.db
+ehthumbs.db
+desktop.ini
+.DS_Store
+$RECYCLE.BIN/
+
+# --- Logs / temp ---
+*.log
+*.tmp
