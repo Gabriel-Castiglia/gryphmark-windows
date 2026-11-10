@@ -59,13 +59,7 @@
       hideModeSwitch: true,
       autofocus: false,
       plugins: [codeSyntaxHighlight],
-      toolbarItems: [
-        ['heading', 'bold', 'italic', 'strike'],
-        ['hr', 'quote'],
-        ['ul', 'ol', 'task', 'indent', 'outdent'],
-        ['table', 'image', 'link'],
-        ['code', 'codeblock'],
-      ],
+      toolbarItems: [],   // the toolbar is native (WPF); see MainWindow
       events: {
         change: () => { if (!suppressDirty) post({ type: 'dirty', words: countWords() }); },
       },
@@ -114,6 +108,8 @@
     exec(cmd, payload) { if (state.mode === 'preview') return; try { editor.exec(cmd, payload); } catch (e) { /* not available in this mode */ } editor.focus(); },
     insertText(t) { editor.insertText(t); },
     words() { return countWords(); },
+    selectedText() { try { return editor.getSelectedText() || ''; } catch (e) { return ''; } },
+    focus() { if (editor) editor.focus(); },
     exportHtml(title) {
       const css = document.getElementById('ghcss').href, hl = document.getElementById('hlcss').href;
       return { body: renderGithub(editor.getMarkdown()), title, theme: state.theme, css, hl };

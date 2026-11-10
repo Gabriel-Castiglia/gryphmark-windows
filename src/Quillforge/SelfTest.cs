@@ -20,6 +20,7 @@ public static class SelfTest
             w.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
             var menu = (Menu)w.FindName("MainMenu");
             Save(menu, Path.Combine(dir, $"menubar_{(dark ? "dark" : "light")}.png"));
+            Save((FrameworkElement)w.FindName("ToolBarHost"), Path.Combine(dir, $"toolbar_{(dark ? "dark" : "light")}.png"));
             int i = 0;
             foreach (MenuItem top in menu.Items)
             {
@@ -46,15 +47,16 @@ public static class SelfTest
         int hpx = (int)Math.Ceiling(Math.Max(el.ActualHeight, el.DesiredSize.Height) * scale);
         if (wpx <= 0 || hpx <= 0) return;
         var rtb = new RenderTargetBitmap(wpx, hpx, 96 * scale, 96 * scale, PixelFormats.Pbgra32);
-        if (darkBg.HasValue)
+        var dv = new DrawingVisual();
+        using (var dc = dv.RenderOpen())
         {
-            // page colour behind the popup so the shadow is visible
-            var dv = new DrawingVisual();
-            using (var dc = dv.RenderOpen())
-                dc.DrawRectangle(new SolidColorBrush(darkBg.Value ? Color.FromRgb(13, 17, 23) : Colors.White), null, new Rect(0, 0, wpx / scale, hpx / scale));
-            rtb.Render(dv);
+            var r = new Rect(0, 0, wpx / scale, hpx / scale);
+            // page colour behind popups so the shadow is visible
+            if (darkBg.HasValue) dc.DrawRectangle(new SolidColorBrush(darkBg.Value ? Color.FromRgb(13, 17, 23) : Colors.White), null, r);
+            // VisualBrush ignores the element's offset inside the window
+            dc.DrawRectangle(new VisualBrush(el) { Stretch = Stretch.None, AlignmentX = AlignmentX.Left, AlignmentY = AlignmentY.Top }, null, r);
         }
-        rtb.Render(el);
+        rtb.Render(dv);
         var enc = new PngBitmapEncoder();
         enc.Frames.Add(BitmapFrame.Create(rtb));
         using var fs = File.Create(path);

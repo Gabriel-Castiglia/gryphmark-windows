@@ -12,32 +12,23 @@ body.mode-preview #previewHost { display: block; }
 
 /* Toast UI frame tuned to look like a document, not a widget */
 .toastui-editor-defaultUI { border: none !important; border-radius: 0 !important; }
-.toastui-editor-defaultUI .toastui-editor-toolbar { position: sticky; top: 0; z-index: 5; }
-.toastui-editor-mode-switch { display: none !important; }
+/* The toolbar is native (WPF): hide Toast's own */
+.toastui-editor-toolbar, .toastui-editor-mode-switch { display: none !important; }
+.toastui-editor-main { height: 100% !important; }
 
-/* Apple-like toolbar: neutral greys, soft rounded buttons, hairline divider */
-.toastui-editor-defaultUI-toolbar {
-  background: #F5F5F7 !important; border-bottom: 1px solid #E3E3E8 !important;
-  padding: 6px 14px !important; height: auto !important; min-height: 44px;
+/* Table right-click menu, kept soft */
+.toastui-editor-context-menu {
+  border: 1px solid #E0E0E5 !important; border-radius: 10px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,.12) !important; overflow: hidden; padding: 4px 0 !important;
 }
-.toastui-editor-defaultUI-toolbar button {
-  border: none !important; border-radius: 8px !important; margin: 0 1px !important;
-  transition: background-color .12s ease; opacity: .82;
-}
-.toastui-editor-defaultUI-toolbar button:not(:disabled):hover { background-color: #E6E6EB !important; opacity: 1; }
-.toastui-editor-defaultUI-toolbar button.active { background-color: #DCDCE2 !important; opacity: 1; }
-.toastui-editor-toolbar-divider { background-color: #DCDCE1 !important; margin: 0 8px !important; height: 18px !important; }
-.toastui-editor-popup, .toastui-editor-context-menu {
-  border: 1px solid #E0E0E5 !important; border-radius: 12px !important;
-  box-shadow: 0 10px 32px rgba(0,0,0,.12) !important; overflow: hidden;
-}
-.toastui-editor-tooltip { border-radius: 6px !important; background: #1D1D1F !important; }
+body.dark .toastui-editor-context-menu { border-color: #3A3A3C !important; background: #2A2A2D !important; }
 
-body.dark .toastui-editor-defaultUI-toolbar { background: #1C1C1E !important; border-bottom-color: #2C2C2E !important; }
-body.dark .toastui-editor-defaultUI-toolbar button:not(:disabled):hover { background-color: #3A3A3D !important; }
-body.dark .toastui-editor-defaultUI-toolbar button.active { background-color: #454548 !important; }
-body.dark .toastui-editor-toolbar-divider { background-color: #3A3A3C !important; }
-body.dark .toastui-editor-popup, body.dark .toastui-editor-context-menu { border-color: #3A3A3C !important; background: #2A2A2D !important; }
+/* Quiet scrollbars */
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,.18); border-radius: 6px; border: 3px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background-color: rgba(0,0,0,.32); }
+body.dark ::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,.18); }
+::-webkit-scrollbar-track { background: transparent; }
 
 /* Visual editor page: same column and spacing as github.com */
 .toastui-editor-ww-container .toastui-editor-contents.markdown-body {

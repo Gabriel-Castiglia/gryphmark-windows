@@ -8,6 +8,18 @@
         AllowDrop="True" Background="{DynamicResource Qf.Chrome}">
     <DockPanel>
         <Menu x:Name="MainMenu" DockPanel.Dock="Top" />
+        <Border x:Name="ToolBarHost" DockPanel.Dock="Top" Style="{DynamicResource Qf.ToolBar}">
+            <DockPanel LastChildFill="False">
+                <Border DockPanel.Dock="Right" Style="{DynamicResource Qf.SegmentHost}" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton x:Name="SegVisual" Style="{DynamicResource Qf.Segment}" GroupName="mode" />
+                        <RadioButton x:Name="SegSource" Style="{DynamicResource Qf.Segment}" GroupName="mode" />
+                        <RadioButton x:Name="SegPreview" Style="{DynamicResource Qf.Segment}" GroupName="mode" />
+                    </StackPanel>
+                </Border>
+                <StackPanel x:Name="Tools" DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center" />
+            </DockPanel>
+        </Border>
         <StatusBar x:Name="Status" DockPanel.Dock="Bottom">
             <StatusBarItem>
                 <TextBlock x:Name="StatusPath" TextTrimming="CharacterEllipsis" />

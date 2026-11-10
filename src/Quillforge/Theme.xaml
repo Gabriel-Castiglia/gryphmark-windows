@@ -27,7 +27,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Menu">
                     <Border Background="{TemplateBinding Background}" BorderBrush="{DynamicResource Qf.ChromeBorder}"
-                            BorderThickness="0,0,0,1" Padding="{TemplateBinding Padding}">
+                            BorderThickness="0" Padding="{TemplateBinding Padding}">
                         <ItemsPresenter SnapsToDevicePixels="True" />
                     </Border>
                 </ControlTemplate>
@@ -148,6 +148,174 @@
         <Setter Property="Effect">
             <Setter.Value>
                 <DropShadowEffect BlurRadius="32" ShadowDepth="8" Direction="270" Opacity="0.13" Color="#000000" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Toolbar -->
+    <Style x:Key="Qf.ToolBar" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource Qf.Chrome}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Qf.ChromeBorder}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Padding" Value="10,6" />
+    </Style>
+
+    <Style x:Key="Qf.ToolButton" TargetType="Button">
+        <Setter Property="Foreground" Value="{DynamicResource Qf.Text}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Qf.Icons}" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Width" Value="34" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Margin" Value="1,0" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="ToolTipService.InitialShowDelay" Value="450" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bg" CornerRadius="7" Background="Transparent">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.85" x:Name="C" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Hover}" />
+                            <Setter TargetName="C" Property="Opacity" Value="1" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Pressed}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="C" Property="Opacity" Value="0.3" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Qf.ToolSep" TargetType="Border">
+        <Setter Property="Width" Value="1" />
+        <Setter Property="Height" Value="18" />
+        <Setter Property="Margin" Value="8,0" />
+        <Setter Property="Background" Value="{DynamicResource Qf.Separator}" />
+    </Style>
+
+    <!-- Segmented control (Visual | Markdown | GitHub) -->
+    <Style x:Key="Qf.SegmentHost" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource Qf.Hover}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="2" />
+    </Style>
+    <Style x:Key="Qf.Segment" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{DynamicResource Qf.Text}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Qf.Font}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Bg" CornerRadius="6" Padding="12,4" Background="Transparent">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Popup}" />
+                            <Setter TargetName="Bg" Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect BlurRadius="4" ShadowDepth="1" Direction="270" Opacity="0.12" />
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="False">
+                            <Setter Property="Opacity" Value="0.75" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Tooltips -->
+    <Style TargetType="ToolTip">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="HasDropShadow" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToolTip">
+                    <Border Background="{DynamicResource Qf.Popup}" BorderBrush="{DynamicResource Qf.PopupBorder}" BorderThickness="1"
+                            CornerRadius="7" Padding="9,5" Margin="6,4,6,10">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="2" Direction="270" Opacity="0.12" />
+                        </Border.Effect>
+                        <ContentPresenter TextElement.Foreground="{DynamicResource Qf.Text}" TextElement.FontFamily="{DynamicResource Qf.Font}"
+                                          TextElement.FontSize="12" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Context menu (heading picker) -->
+    <Style TargetType="ContextMenu">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="HasDropShadow" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border Style="{DynamicResource Qf.PopupFrame}">
+                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Dialog controls -->
+    <Style x:Key="Qf.Field" TargetType="TextBox">
+        <Setter Property="FontFamily" Value="{DynamicResource Qf.Font}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource Qf.Text}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource Qf.Text}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="B" Background="{DynamicResource Qf.Popup}" BorderBrush="{DynamicResource Qf.PopupBorder}"
+                            BorderThickness="1" CornerRadius="7" Padding="8,6">
+                        <ScrollViewer x:Name="PART_ContentHost" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="B" Property="BorderBrush" Value="{DynamicResource Qf.TextMuted}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="Qf.DialogButton" TargetType="Button">
+        <Setter Property="FontFamily" Value="{DynamicResource Qf.Font}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource Qf.Text}" />
+        <Setter Property="MinWidth" Value="88" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Margin" Value="8,0,0,0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bg" CornerRadius="7" Background="{DynamicResource Qf.Hover}" Padding="14,0">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Pressed}" />
+                        </Trigger>
+                        <Trigger Property="IsDefault" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Text}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Qf.Popup}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
