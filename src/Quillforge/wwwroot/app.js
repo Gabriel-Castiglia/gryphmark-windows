@@ -5,41 +5,83 @@
   const post = (msg) => host && host.postMessage(msg);
 
   let editor = null;
-  let state = { lang: 'en', theme: 'light', mode: 'visual' };
+  let state = { lang: 'en', theme: 'light', mode: 'visual', spell: true };
   let suppressDirty = false;
+  let original = '';        // text exactly as read from disk
+  let baseline = '';        // the same text after the editor's normalisation (captured at load)
 
-  marked.setOptions({ gfm: true, breaks: false });
-  const renderer = new marked.Renderer();
-  renderer.code = function ({ text, lang }) {
-    const l = (lang || '').split(/\s+/)[0];
-    let html;
-    try {
-      html = l && hljs.getLanguage(l) ? hljs.highlight(text, { language: l }).value : hljs.highlightAuto(text).value;
-    } catch (e) { html = escapeHtml(text); }
-    return '<pre><code class="hljs' + (l ? ' language-' + escapeHtml(l) : '') + '">' + html + '</code></pre>';
-  };
-  // GitHub-style heading anchors
+  // ------------------------------------------------------------------ GitHub renderer
+  const md = new Marked({ gfm: true, breaks: false });
+  md.use(markedAlert());
+  md.use(markedFootnote());
+  md.use(markedKatex({ throwOnError: false, nonStandard: true }));
+  md.use({
+    extensions: [{
+      name: 'emoji', level: 'inline',
+      start(src) { const i = src.indexOf(':'); return i < 0 ? undefined : i; },
+      tokenizer(src) {
+        const m = /^:([a-z0-9_+\-]+):/.exec(src);
+        if (m && nameToEmoji[m[1]]) return { type: 'emoji', raw: m[0], ch: nameToEmoji[m[1]] };
+      },
+      renderer(t) { return t.ch; },
+    }],
+  });
   const slugCount = {};
-  renderer.heading = function ({ tokens, depth }) {
-    const inner = this.parser.parseInline(tokens);
-    const plain = inner.replace(/<[^>]+>/g, '').toLowerCase().trim()
-      .replace(/[^\p{L}\p{N}\s-]/gu, '').replace(/\s/g, '-');
-    let slug = plain; const n = slugCount[plain] || 0; if (n) slug += '-' + n; slugCount[plain] = n + 1;
-    return '<h' + depth + ' id="' + slug + '">' + inner + '</h' + depth + '>';
-  };
+  md.use({
+    renderer: {
+      code({ text, lang }) {
+        const l = (lang || '').split(/\s+/)[0];
+        if (l === 'mermaid') return '<pre class="mermaid">' + escapeHtml(text) + '</pre>';
+        let html;
+        try { html = l && hljs.getLanguage(l) ? hljs.highlight(text, { language: l }).value : hljs.highlightAuto(text).value; }
+        catch (e) { html = escapeHtml(text); }
+        return '<pre><code class="hljs' + (l ? ' language-' + escapeHtml(l) : '') + '">' + html + '</code></pre>';
+      },
+      heading({ tokens, depth }) {
+        const inner = this.parser.parseInline(tokens);
+        const plain = inner.replace(/<[^>]+>/g, '').toLowerCase().trim().replace(/[^\p{L}\p{N}\s-]/gu, '').replace(/\s/g, '-');
+        let slug = plain; const n = slugCount[plain] || 0; if (n) slug += '-' + n; slugCount[plain] = n + 1;
+        return '<h' + depth + ' id="' + slug + '">' + inner + '</h' + depth + '>';
+      },
+    },
+  });
 
   function escapeHtml(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
-  function renderGithub(md) {
+  function renderGithub(text) {
     for (const k in slugCount) delete slugCount[k];
-    let html = marked.parse(md || '', { renderer });
-    // GitHub task lists render disabled checkboxes
+    let html = md.parse(text || '');
     html = html.replace(/<input (checked="" )?disabled="" type="checkbox">/g, (m, c) => '<input type="checkbox" disabled ' + (c ? 'checked ' : '') + 'class="task-list-item-checkbox">');
     return html;
   }
 
+  let mermaidLoading = null;
+  function loadMermaid() {
+    if (window.mermaid) return Promise.resolve();
+    if (!mermaidLoading) mermaidLoading = new Promise((ok, fail) => {
+      const s = document.createElement('script'); s.src = 'https://app.local/lib/mermaid.min.js';
+      s.onload = ok; s.onerror = fail; document.head.appendChild(s);
+    });
+    return mermaidLoading;
+  }
+  async function runMermaid(root) {
+    const nodes = root.querySelectorAll('pre.mermaid');
+    if (!nodes.length) return;
+    await loadMermaid();
+    mermaid.initialize({ startOnLoad: false, theme: state.theme === 'dark' ? 'dark' : 'default', securityLevel: 'strict' });
+    try { await mermaid.run({ nodes }); } catch (e) { /* invalid diagram: mermaid leaves its error text */ }
+  }
+
+  async function showPreview() {
+    const el = document.getElementById('preview');
+    el.innerHTML = renderGithub(preserveFormatting(editor.getMarkdown()));
+    await runMermaid(el);
+  }
+
+  // ------------------------------------------------------------------ editor
   function markGithubClass() {
     document.querySelectorAll('.toastui-editor-contents').forEach((e) => e.classList.add('markdown-body'));
+    applySpell();
   }
 
   function build(markdown) {
@@ -59,13 +101,15 @@
       hideModeSwitch: true,
       autofocus: false,
       plugins: [codeSyntaxHighlight],
-      toolbarItems: [],   // the toolbar is native (WPF); see MainWindow
+      toolbarItems: [],   // the toolbar is native (WPF)
       events: {
-        change: () => { if (!suppressDirty) post({ type: 'dirty', words: countWords() }); },
+        change: () => {
+          if (!suppressDirty) post({ type: 'dirty', words: countWords() });
+          scheduleOutline(); if (find.query) scheduleFind();
+        },
       },
     });
     markGithubClass();
-    // Toast normalises the text once after load; that is not a user edit
     setTimeout(() => { suppressDirty = false; }, 50);
   }
 
@@ -81,53 +125,249 @@
     document.getElementById('hlcss').href = 'https://app.local/lib/hljs-' + (state.theme === 'dark' ? 'dark' : 'light') + '.css';
   }
 
-  function applyMode() {
+  function applySpell() {
+    document.documentElement.lang = state.lang;
+    document.querySelectorAll('.ProseMirror').forEach((e) => e.setAttribute('spellcheck', state.spell ? 'true' : 'false'));
+  }
+
+  async function applyMode() {
     document.body.classList.toggle('mode-preview', state.mode === 'preview');
     if (state.mode === 'preview') {
-      document.getElementById('preview').innerHTML = renderGithub(editor.getMarkdown());
+      await showPreview();
       document.getElementById('previewHost').scrollTop = 0;
     } else {
       editor.changeMode(state.mode === 'source' ? 'markdown' : 'wysiwyg', true);
       markGithubClass();
     }
+    if (find.query) runFind(0);
   }
 
-  // ---- API used by the host (ExecuteScriptAsync) ----
+  // ------------------------------------------------------------------ keep the original formatting
+  // The visual editor rewrites Markdown in its own style. On save, every block the user did not
+  // touch is written back exactly as it was on disk; only edited blocks take the new text.
+  function preserveFormatting(current) {
+    if (current === baseline) return original;
+    const O = original.split('\n'), N = baseline.split('\n'), C = current.split('\n');
+    // 1) align original <-> baseline into segments
+    const seg = [];            // { o: [...], n: [...] }
+    const segOfN = new Array(N.length);
+    const zeroBefore = {};     // n-index -> segments with no baseline lines, placed before it
+    let ni = 0;
+    const d1 = diffArrays(O, N);
+    for (let i = 0; i < d1.length; i++) {
+      const p = d1[i];
+      if (!p.added && !p.removed) {
+        for (const line of p.value) { seg.push({ o: [line], n: [ni] }); segOfN[ni++] = seg.length - 1; }
+      } else {
+        const removed = p.removed ? p.value : [];
+        let added = [];
+        if (p.removed && d1[i + 1] && d1[i + 1].added) { added = d1[i + 1].value; i++; }
+        else if (p.added) added = p.value;
+        const s = { o: removed, n: [] };
+        for (let k = 0; k < added.length; k++) { s.n.push(ni); segOfN[ni++] = seg.length; }
+        seg.push(s);
+        if (!s.n.length) (zeroBefore[ni] = zeroBefore[ni] || []).push(s);
+      }
+    }
+    // 2) which baseline lines survive unchanged in current
+    const kept = new Array(N.length).fill(false);
+    const out = [];
+    const d2 = diffArrays(N, C);
+    let n = 0;
+    const plan = [];           // sequence of { kind: 'n', idx } | { kind: 'c', line }
+    for (const p of d2) {
+      if (p.added) { for (const line of p.value) plan.push({ kind: 'c', line }); }
+      else if (p.removed) { n += p.value.length; }
+      else { for (let k = 0; k < p.value.length; k++) { kept[n] = true; plan.push({ kind: 'n', idx: n++ }); } }
+    }
+    const segIntact = (s) => s.n.every((i) => kept[i]);
+    const emitted = new Set();
+    let prevKept = true;
+    for (const step of plan) {
+      if (step.kind === 'c') { out.push(step.line); prevKept = false; continue; }
+      const i = step.idx;
+      if (prevKept && zeroBefore[i]) for (const z of zeroBefore[i]) out.push(...z.o);
+      const s = seg[segOfN[i]];
+      if (segIntact(s)) { if (!emitted.has(s)) { out.push(...s.o); emitted.add(s); } }
+      else out.push(N[i]);
+      prevKept = true;
+    }
+    if (prevKept && zeroBefore[N.length]) for (const z of zeroBefore[N.length]) out.push(...z.o);
+    return out.join('\n');
+  }
+
+  // ------------------------------------------------------------------ find & replace
+  const find = { query: '', cs: false, matches: [], cur: -1 };
+  let findTimer = null;
+  function scheduleFind() { clearTimeout(findTimer); findTimer = setTimeout(() => runFind(0, true), 150); }
+
+  function pmView() { try { const m = editor.getCurrentModeEditor(); return m && m.view; } catch (e) { return null; } }
+
+  function collectPm(view, q, cs) {
+    const res = []; const needle = cs ? q : q.toLowerCase();
+    view.state.doc.descendants((node, pos) => {
+      if (!node.isTextblock) return true;
+      let text = '', map = [];
+      node.forEach((child, off) => {
+        if (child.isText) { for (let k = 0; k < child.text.length; k++) map.push(pos + 1 + off + k); text += child.text; }
+        else { text += '￼'; map.push(pos + 1 + off); }
+      });
+      const hay = cs ? text : text.toLowerCase();
+      let i = hay.indexOf(needle);
+      while (i >= 0 && needle) { res.push({ from: map[i], to: map[i + needle.length - 1] + 1 }); i = hay.indexOf(needle, i + needle.length); }
+      return false;
+    });
+    return res;
+  }
+
+  function collectDom(root, q, cs) {
+    const res = []; const needle = cs ? q : q.toLowerCase();
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = tw.nextNode())) {
+      const hay = cs ? node.data : node.data.toLowerCase();
+      let i = hay.indexOf(needle);
+      while (i >= 0 && needle) { res.push({ node, start: i, end: i + needle.length }); i = hay.indexOf(needle, i + needle.length); }
+    }
+    return res;
+  }
+
+  function toRange(m) {
+    const r = document.createRange();
+    if (m.node) { r.setStart(m.node, m.start); r.setEnd(m.node, m.end); return r; }
+    const view = pmView();
+    const a = view.domAtPos(m.from), b = view.domAtPos(m.to);
+    r.setStart(a.node, a.offset); r.setEnd(b.node, b.offset); return r;
+  }
+
+  function paint() {
+    if (!window.CSS || !CSS.highlights) return;
+    CSS.highlights.clear();
+    const all = [], cur = [];
+    find.matches.forEach((m, i) => { try { (i === find.cur ? cur : all).push(toRange(m)); } catch (e) { } });
+    CSS.highlights.set('qf-find', new Highlight(...all));
+    CSS.highlights.set('qf-cur', new Highlight(...cur));
+    if (find.cur >= 0 && cur[0]) {
+      const el = cur[0].startContainer.nodeType === 1 ? cur[0].startContainer : cur[0].startContainer.parentElement;
+      if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }
+
+  function runFind(step, keepPosition) {
+    if (!find.query) { find.matches = []; find.cur = -1; paint(); return report(); }
+    if (state.mode === 'preview') find.matches = collectDom(document.getElementById('preview'), find.query, find.cs);
+    else { const v = pmView(); find.matches = v ? collectPm(v, find.query, find.cs) : []; }
+    const n = find.matches.length;
+    if (!n) find.cur = -1;
+    else if (keepPosition && find.cur >= 0) find.cur = Math.min(find.cur, n - 1);
+    else find.cur = find.cur < 0 ? 0 : ((find.cur + step) % n + n) % n;
+    paint(); report();
+  }
+
+  function report() { post({ type: 'find', index: find.cur, total: find.matches.length }); }
+
+  function replaceCurrent(repl) {
+    if (state.mode === 'preview' || find.cur < 0) return;
+    const v = pmView(); const m = find.matches[find.cur];
+    v.dispatch(v.state.tr.insertText(repl, m.from, m.to));
+    runFind(0, true);
+  }
+
+  function replaceAll(repl) {
+    if (state.mode === 'preview') return 0;
+    const v = pmView(); const ms = collectPm(v, find.query, find.cs);
+    let tr = v.state.tr;
+    for (let i = ms.length - 1; i >= 0; i--) tr = tr.insertText(repl, ms[i].from, ms[i].to);
+    if (ms.length) v.dispatch(tr);
+    runFind(0);
+    return ms.length;
+  }
+
+  // ------------------------------------------------------------------ outline
+  let outlineTimer = null;
+  function scheduleOutline() { clearTimeout(outlineTimer); outlineTimer = setTimeout(sendOutline, 250); }
+  function headings() {
+    const out = []; let fence = false;
+    (editor ? editor.getMarkdown() : '').split('\n').forEach((line, i) => {
+      if (/^\s*(```|~~~)/.test(line)) { fence = !fence; return; }
+      if (fence) return;
+      const m = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
+      if (m) out.push({ level: m[1].length, text: m[2].replace(/[*_`~]/g, ''), line: i });
+    });
+    return out;
+  }
+  function sendOutline() { post({ type: 'outline', items: headings() }); }
+
+  function scrollToHeading(i) {
+    let el = null;
+    if (state.mode === 'preview') el = document.querySelectorAll('#preview h1,#preview h2,#preview h3,#preview h4,#preview h5,#preview h6')[i];
+    else if (state.mode === 'visual') { const v = pmView(); el = v && v.dom.querySelectorAll('h1,h2,h3,h4,h5,h6')[i]; }
+    else {
+      const v = pmView(); const h = headings()[i];
+      if (v && h && h.line < v.state.doc.childCount) {
+        let pos = 0; for (let k = 0; k < h.line; k++) pos += v.state.doc.child(k).nodeSize;
+        el = v.nodeDOM(pos);
+        try { v.dispatch(v.state.tr.setSelection(PMTextSelection.create(v.state.doc, pos + 1))); } catch (e) { }
+      }
+    }
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+
+  // ------------------------------------------------------------------ API used by the host
   window.mdApp = {
     load(markdown, docBase) {
       document.getElementById('docbase').href = docBase || 'https://app.local/';
-      build(markdown);
-      applyMode();
+      original = (markdown || '').replace(/\r\n/g, '\n');
+      build(original);
+      baseline = editor.getMarkdown();
+      applyMode(); sendOutline();
       return true;
     },
     getMarkdown() { return editor ? editor.getMarkdown() : ''; },
-    setLang(lang) { const md = editor.getMarkdown(); state.lang = lang; build(md); applyMode(); },
-    setTheme(theme) { const md = editor.getMarkdown(); state.theme = theme; applyTheme(); build(md); applyMode(); },
+    getMarkdownPreserving() { return editor ? preserveFormatting(editor.getMarkdown()) : ''; },
+    markSaved(text) { original = text.replace(/\r\n/g, '\n'); const cur = editor.getMarkdown(); baseline = cur; },
+    setLang(lang) { const t = editor.getMarkdown(); state.lang = lang; build(t); applyMode(); },
+    setTheme(theme) { const t = editor.getMarkdown(); state.theme = theme; applyTheme(); build(t); applyMode(); },
     setMode(mode) { state.mode = mode; applyMode(); },
-    init(lang, theme, mode) { state = { lang, theme, mode }; applyTheme(); build(''); applyMode(); },
-    exec(cmd, payload) { if (state.mode === 'preview') return; try { editor.exec(cmd, payload); } catch (e) { /* not available in this mode */ } editor.focus(); },
+    setSpell(on) { state.spell = !!on; applySpell(); },
+    init(lang, theme, mode, spell) { state = { lang, theme, mode, spell: spell !== false }; applyTheme(); build(''); applyMode(); },
+    exec(cmd, payload) { if (state.mode === 'preview') return; try { editor.exec(cmd, payload); } catch (e) { } editor.focus(); },
     insertText(t) { editor.insertText(t); },
     words() { return countWords(); },
     selectedText() { try { return editor.getSelectedText() || ''; } catch (e) { return ''; } },
-    focus() { if (editor) editor.focus(); },
-    exportHtml(title) {
-      const css = document.getElementById('ghcss').href, hl = document.getElementById('hlcss').href;
-      return { body: renderGithub(editor.getMarkdown()), title, theme: state.theme, css, hl };
+    focus() { if (editor && state.mode !== 'preview') editor.focus(); },
+    find(q, cs, step) { const changed = q !== find.query || !!cs !== find.cs; find.query = q; find.cs = !!cs; if (changed) find.cur = -1; runFind(changed ? 0 : (step || 1)); },
+    findClose() { find.query = ''; find.matches = []; find.cur = -1; paint(); },
+    replace(q, cs, r) { find.query = q; find.cs = !!cs; replaceCurrent(r); },
+    replaceAll(q, cs, r) { find.query = q; find.cs = !!cs; return replaceAll(r); },
+    scrollToHeading(i) { scrollToHeading(i); },
+    _view() { return pmView(); },   // for tools/jstest.py
+    async exportHtml(title) {
+      const tmp = document.createElement('div'); tmp.className = 'markdown-body'; tmp.style.cssText = 'position:absolute;left:-99999px;width:980px';
+      document.body.appendChild(tmp);
+      tmp.innerHTML = renderGithub(preserveFormatting(editor.getMarkdown()));
+      await runMermaid(tmp);
+      const body = tmp.innerHTML; tmp.remove();
+      post({ type: 'export', title, body, theme: state.theme, math: /class="katex/.test(body) });
     },
-    preparePrint() { document.getElementById('preview').innerHTML = renderGithub(editor.getMarkdown()); },
+    async preparePrint() { await showPreview(); post({ type: 'printReady' }); },
   };
 
-  // ---- keyboard shortcuts while the page has focus ----
+  // ------------------------------------------------------------------ keyboard shortcuts while the page has focus
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'F1') { e.preventDefault(); post({ type: 'cmd', cmd: 'manual' }); return; }
+    if (e.key === 'F3') { e.preventDefault(); post({ type: 'cmd', cmd: e.shiftKey ? 'findprev' : 'findnext' }); return; }
+    if (e.key === 'Escape') { post({ type: 'cmd', cmd: 'findclose' }); return; }
     if (!e.ctrlKey || e.altKey) return;
     const k = e.key.toLowerCase();
-    const map = { n: 'new', o: 'open', s: e.shiftKey ? 'saveas' : 'save', p: 'print', w: 'close' };
+    const map = { n: 'new', o: 'open', s: e.shiftKey ? 'saveas' : 'save', p: 'print', w: 'close', f: 'find', h: 'replace' };
+    if (k === 'o' && e.shiftKey) { e.preventDefault(); post({ type: 'cmd', cmd: 'outline' }); return; }
     if (map[k]) { e.preventDefault(); post({ type: 'cmd', cmd: map[k] }); }
     else if (k === '1' || k === '2' || k === '3') { e.preventDefault(); post({ type: 'cmd', cmd: 'mode' + k }); }
     else if (k === '=' || k === '+' || k === '-' || k === '0') { e.preventDefault(); post({ type: 'cmd', cmd: k === '0' ? 'zoom0' : (k === '-' ? 'zoom-' : 'zoom+') }); }
   }, true);
 
-  // ---- drag & drop a file onto the window ----
+  // ------------------------------------------------------------------ drag & drop a file onto the window
   window.addEventListener('dragover', (e) => { e.preventDefault(); }, true);
   window.addEventListener('drop', (e) => {
     if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
@@ -136,7 +376,7 @@
     }
   }, true);
 
-  // ---- links in the GitHub view ----
+  // ------------------------------------------------------------------ links in the GitHub view
   document.getElementById('preview').addEventListener('click', (e) => {
     const a = e.target.closest('a'); if (!a) return;
     const href = a.getAttribute('href') || '';

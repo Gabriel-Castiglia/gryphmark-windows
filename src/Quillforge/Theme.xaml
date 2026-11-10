@@ -193,6 +193,71 @@
         </Setter>
     </Style>
 
+    <Style x:Key="Qf.ToolToggle" TargetType="ToggleButton">
+        <Setter Property="Foreground" Value="{DynamicResource Qf.Text}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Qf.Font}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Width" Value="34" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Margin" Value="1,0" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border x:Name="Bg" CornerRadius="7" Background="Transparent">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="C" Opacity="0.6" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Hover}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Pressed}" />
+                            <Setter TargetName="C" Property="Opacity" Value="1" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Outline list: indented headings, soft hover pill -->
+    <Style x:Key="Qf.OutlineList" TargetType="ListBox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="6,0,6,10" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ItemContainerStyle">
+            <Setter.Value>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="Foreground" Value="{DynamicResource Qf.Text}" />
+                    <Setter Property="FontFamily" Value="{DynamicResource Qf.Font}" />
+                    <Setter Property="FontSize" Value="13" />
+                    <Setter Property="Cursor" Value="Hand" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListBoxItem">
+                                <Border x:Name="Bg" CornerRadius="6" Padding="{TemplateBinding Padding}" Margin="0,1" Background="Transparent">
+                                    <ContentPresenter />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Hover}" />
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Qf.Pressed}" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="Qf.ToolSep" TargetType="Border">
         <Setter Property="Width" Value="1" />
         <Setter Property="Height" Value="18" />
@@ -282,9 +347,16 @@
                 <ControlTemplate TargetType="TextBox">
                     <Border x:Name="B" Background="{DynamicResource Qf.Popup}" BorderBrush="{DynamicResource Qf.PopupBorder}"
                             BorderThickness="1" CornerRadius="7" Padding="8,6">
-                        <ScrollViewer x:Name="PART_ContentHost" />
+                        <Grid>
+                            <TextBlock x:Name="Ph" Text="{TemplateBinding Tag}" Foreground="{DynamicResource Qf.TextMuted}" Margin="2,0,0,0"
+                                       VerticalAlignment="Center" IsHitTestVisible="False" Visibility="Collapsed" />
+                            <ScrollViewer x:Name="PART_ContentHost" />
+                        </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="Text" Value="">
+                            <Setter TargetName="Ph" Property="Visibility" Value="Visible" />
+                        </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="B" Property="BorderBrush" Value="{DynamicResource Qf.TextMuted}" />
                         </Trigger>

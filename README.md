@@ -13,15 +13,19 @@ Quillforge writes the Markdown tags for you. Documents are rendered exactly like
 - Visual editor, Markdown source with live preview, and read-only GitHub preview (`Ctrl+1/2/3`)
 - English and Spanish interface, switchable at runtime
 - Relative images and links, `.md` links open in Quillforge
+- GitHub alerts, Mermaid diagrams, math, footnotes and emoji
+- Find & replace, outline sidebar, spell check
+- Keeps your formatting: only edited lines change on save (CRLF/BOM preserved)
+- Reloads files changed outside, crash recovery, single instance, update check
 - Export to self-contained HTML, print / save as PDF
 - Per-user installer (no admin rights), optional `.md` association
 - Manuals: [`docs/Quillforge_Manual_EN.pdf`](docs/Quillforge_Manual_EN.pdf)
 
-**Build:** Windows, .NET 8 SDK, Node.js, Python 3 + Pillow, Inno Setup 6, Microsoft Edge.
+**Build:** Windows, .NET 8 SDK, Node.js, Python 3 + Pillow/numpy/scipy/opencv, Inno Setup 6, Microsoft Edge.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.0.0
-# -> out/Quillforge-Setup-1.0.0.exe
+powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.1.0
+# -> out/Quillforge-Setup-1.1.0.exe
 ```
 
 ## Español
@@ -33,15 +37,19 @@ tema claro u oscuro.
 - Editor visual, código Markdown con vista previa en vivo y vista GitHub de solo lectura (`Ctrl+1/2/3`)
 - Interfaz en inglés y en español, se cambia sin reiniciar
 - Imágenes y enlaces relativos; los enlaces a `.md` se abren en Quillforge
+- Avisos de GitHub, diagramas Mermaid, fórmulas, notas al pie y emojis
+- Buscar y reemplazar, esquema lateral, revisión ortográfica
+- Respeta tu formato: al guardar sólo cambian las líneas editadas (conserva CRLF/BOM)
+- Recarga archivos cambiados afuera, recuperación ante cierres, instancia única, aviso de actualizaciones
 - Exportar a HTML autónomo, imprimir o guardar como PDF
 - Instalador por usuario (sin permisos de administrador), asociación opcional de `.md`
 - Manuales: [`docs/Quillforge_Manual_ES.pdf`](docs/Quillforge_Manual_ES.pdf)
 
-**Compilar:** Windows, SDK de .NET 8, Node.js, Python 3 + Pillow, Inno Setup 6, Microsoft Edge.
+**Compilar:** Windows, SDK de .NET 8, Node.js, Python 3 + Pillow/numpy/scipy/opencv, Inno Setup 6, Microsoft Edge.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.0.0
-# -> out/Quillforge-Setup-1.0.0.exe
+powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.1.0
+# -> out/Quillforge-Setup-1.1.0.exe
 ```
 
 ## Project layout / Estructura

@@ -39,6 +39,7 @@ public partial class MainWindow : Window
         SourceInitialized += (_, _) => ThemeManager.Apply(this, _settings.Theme == "dark");
         Loaded += async (_, _) => await InitWebAsync();
         Closing += OnClosing;
+        InitFeatures();
         PreviewKeyDown += OnKey;
         Drop += (_, e) =>
         {
@@ -93,10 +94,11 @@ public partial class MainWindow : Window
         switch (root.GetProperty("type").GetString())
         {
             case "ready":
-                await Js($"mdApp.init({Q(_settings.Lang)},{Q(_settings.Theme)},{Q(_settings.Mode)})");
+                await Js($"mdApp.init({Q(_settings.Lang)},{Q(_settings.Theme)},{Q(_settings.Mode)},{(_settings.Spell ? "true" : "false")})");
                 _ready = true;
                 if (_pendingOpen != null) { var p = _pendingOpen; _pendingOpen = null; await LoadFileAsync(p); }
                 else UpdateStatus();
+                await OfferRecoveryAsync();
                 break;
             case "dirty":
                 if (root.TryGetProperty("words", out var w)) _words = w.GetInt32();
@@ -105,6 +107,18 @@ public partial class MainWindow : Window
                 break;
             case "cmd":
                 await RunCommand(root.GetProperty("cmd").GetString() ?? "");
+                break;
+            case "find":
+                UpdateFindCount(root.GetProperty("index").GetInt32(), root.GetProperty("total").GetInt32());
+                break;
+            case "outline":
+                UpdateOutline(root.GetProperty("items"));
+                break;
+            case "export":
+                WriteExport(root);
+                break;
+            case "printReady":
+                Web.CoreWebView2.ShowPrintUI(CoreWebView2PrintDialogKind.Browser);
                 break;
             case "link":
                 OpenLink(root.GetProperty("href").GetString() ?? "");
@@ -152,12 +166,16 @@ public partial class MainWindow : Window
                 _settings.Recent.Remove(path); BuildMenu();
                 return;
             }
-            string text = File.ReadAllText(path, Encoding.UTF8);
+            var bytes = File.ReadAllBytes(path);
+            _bom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
+            string text = new UTF8Encoding(false).GetString(bytes, _bom ? 3 : 0, bytes.Length - (_bom ? 3 : 0));
+            _crlf = text.Contains("\r\n");
             var dir = Path.GetDirectoryName(path)!;
             Web.CoreWebView2.ClearVirtualHostNameToFolderMapping("doc.local");
             Web.CoreWebView2.SetVirtualHostNameToFolderMapping("doc.local", dir, CoreWebView2HostResourceAccessKind.Allow);
             await Js($"mdApp.load({Q(text)},'https://doc.local/')");
             _path = path; _dirty = false;
+            Watch(path);
             _words = int.TryParse(await Js("mdApp.words()"), out var n) ? n : 0;
             _settings.AddRecent(path); _settings.Save();
             BuildMenu(); UpdateTitle(); UpdateStatus();
@@ -185,11 +203,16 @@ public partial class MainWindow : Window
         }
         try
         {
-            var md = JsonSerializer.Deserialize<string>(await Js("mdApp.getMarkdown()")) ?? "";
+            // untouched blocks keep their original Markdown; line endings and BOM as the file had them
+            var md = JsonSerializer.Deserialize<string>(await Js("mdApp.getMarkdownPreserving()")) ?? "";
             if (!md.EndsWith('\n')) md += "\n";
-            File.WriteAllText(target!, md, new UTF8Encoding(false));
+            await Js($"mdApp.markSaved({Q(md)})");
+            var disk = _crlf ? md.Replace("\r\n", "\n").Replace("\n", "\r\n") : md;
+            _suppressWatchUntil = DateTime.UtcNow.AddSeconds(2);
+            File.WriteAllText(target!, disk, new UTF8Encoding(_bom));
             bool moved = !string.Equals(target, _path, StringComparison.OrdinalIgnoreCase);
             _path = target; _dirty = false;
+            Watch(target!); ClearRecovery();
             if (moved)
             {
                 Web.CoreWebView2.ClearVirtualHostNameToFolderMapping("doc.local");
@@ -223,9 +246,9 @@ public partial class MainWindow : Window
         if (WindowState == WindowState.Normal) { _settings.Width = Width; _settings.Height = Height; }
         if (_ready) _settings.Zoom = Web.ZoomFactor;
         _settings.Save();
-        if (_closingConfirmed || !_dirty) return;
+        if (_closingConfirmed || !_dirty) { ClearRecovery(); StopFeatures(); return; }
         e.Cancel = true;
-        if (await ConfirmDiscardAsync()) { _closingConfirmed = true; Close(); }
+        if (await ConfirmDiscardAsync()) { _closingConfirmed = true; ClearRecovery(); StopFeatures(); Close(); }
     }
 
     private async Task NewDocAsync()
@@ -233,7 +256,8 @@ public partial class MainWindow : Window
         if (!await ConfirmDiscardAsync()) return;
         Web.CoreWebView2.ClearVirtualHostNameToFolderMapping("doc.local");
         await Js("mdApp.load('', null)");
-        _path = null; _dirty = false; _words = 0;
+        _path = null; _dirty = false; _words = 0; _crlf = false; _bom = false;
+        Watch(null); ClearRecovery();
         UpdateTitle(); UpdateStatus();
     }
 
@@ -246,10 +270,20 @@ public partial class MainWindow : Window
             InitialDirectory = _path != null ? Path.GetDirectoryName(_path) : null,
         };
         if (dlg.ShowDialog(this) != true) return;
-        var title = Path.GetFileNameWithoutExtension(dlg.FileName);
-        using var doc = JsonDocument.Parse(await Js($"mdApp.exportHtml({Q(title)})"));
-        var r = doc.RootElement;
+        _pendingExport = dlg.FileName;
+        // the page renders (diagrams included) and answers with an "export" message
+        await Js($"mdApp.exportHtml({Q(Path.GetFileNameWithoutExtension(dlg.FileName))})");
+    }
+
+    private string? _pendingExport;
+
+    private void WriteExport(JsonElement r)
+    {
+        if (_pendingExport == null) return;
+        var file = _pendingExport; _pendingExport = null;
+        var title = r.GetProperty("title").GetString() ?? "";
         bool dark = r.GetProperty("theme").GetString() == "dark";
+        bool math = r.TryGetProperty("math", out var mv) && mv.GetBoolean();
         string css = File.ReadAllText(Path.Combine(AppDir, "wwwroot", "lib", dark ? "github-markdown-dark.css" : "github-markdown-light.css"));
         string hl = File.ReadAllText(Path.Combine(AppDir, "wwwroot", "lib", dark ? "hljs-dark.css" : "hljs-light.css"));
         string bg = dark ? "#0d1117" : "#ffffff";
@@ -262,6 +296,7 @@ public partial class MainWindow : Window
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <meta name="generator" content="Quillforge {{Version}}">
             <title>{{System.Net.WebUtility.HtmlEncode(title)}}</title>
+            {{(math ? "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css\">" : "")}}
             <style>
             {{css}}
             {{hl}}
@@ -277,7 +312,7 @@ public partial class MainWindow : Window
             </body>
             </html>
             """;
-        try { File.WriteAllText(dlg.FileName, html, new UTF8Encoding(false)); }
+        try { File.WriteAllText(file, html, new UTF8Encoding(false)); }
         catch (Exception ex) { MessageBox.Show(this, string.Format(Strings.Get("ErrSave"), ex.Message), "Quillforge", MessageBoxButton.OK, MessageBoxImage.Error); }
     }
 
@@ -288,7 +323,7 @@ public partial class MainWindow : Window
         switch (cmd)
         {
             case "new": await NewDocAsync(); break;
-            case "newwindow": Process.Start(new ProcessStartInfo(Environment.ProcessPath!) { UseShellExecute = true }); break;
+            case "newwindow": Process.Start(new ProcessStartInfo(Environment.ProcessPath!, "--new-window") { UseShellExecute = true }); break;
             case "open":
                 var dlg = new OpenFileDialog
                 {
@@ -300,10 +335,14 @@ public partial class MainWindow : Window
             case "save": await SaveAsync(false); break;
             case "saveas": await SaveAsync(true); break;
             case "export": await ExportHtmlAsync(); break;
-            case "print":
-                await Js("mdApp.preparePrint()");
-                Web.CoreWebView2.ShowPrintUI(CoreWebView2PrintDialogKind.Browser);
-                break;
+            case "print": await Js("mdApp.preparePrint()"); break;   // continues on "printReady"
+            case "find": ShowFind(false); break;
+            case "replace": ShowFind(true); break;
+            case "findnext": await FindStep(1); break;
+            case "findprev": await FindStep(-1); break;
+            case "findclose": await HideFind(); break;
+            case "outline": ToggleOutline(); break;
+            case "manual": OpenManual(); break;
             case "folder":
                 if (_path != null) Process.Start("explorer.exe", $"/select,\"{_path}\"");
                 break;
@@ -357,7 +396,8 @@ public partial class MainWindow : Window
         ["Task"] = "", ["CodeBlock"] = "", ["Hr"] = "",
         ["ModeVisual"] = "", ["ModeSource"] = "", ["ModePreview"] = "",
         ["Dark"] = "", ["ZoomIn"] = "", ["ZoomOut"] = "", ["ZoomReset"] = "",
-        ["Manual"] = "", ["Guide"] = "", ["About"] = "", ["RecentClear"] = "",
+        ["Manual"] = "", ["Guide"] = "", ["About"] = "",
+        ["Find"] = "", ["Replace"] = "", ["FindNext"] = "", ["Outline"] = "", ["CheckUpdates"] = "", ["RecentClear"] = "",
     };
 
     private static object? Glyph(string key) => Glyphs.TryGetValue(key, out var g)
@@ -411,6 +451,10 @@ public partial class MainWindow : Window
         var edit = new MenuItem { Header = Strings.Get("Edit") };
         edit.Items.Add(Item("Undo", ctrl + "Z", () => Exec("undo")));
         edit.Items.Add(Item("Redo", ctrl + "Y", () => Exec("redo")));
+        edit.Items.Add(new Separator());
+        edit.Items.Add(Item("Find", ctrl + "F", () => RunCommand("find")));
+        edit.Items.Add(Item("Replace", ctrl + "H", () => RunCommand("replace")));
+        edit.Items.Add(Item("FindNext", "F3", () => RunCommand("findnext")));
         MainMenu.Items.Add(edit);
 
         var fmt = new MenuItem { Header = Strings.Get("Format") };
@@ -454,6 +498,14 @@ public partial class MainWindow : Window
         view.Items.Add(Item("ZoomIn", ctrl + "+", () => RunCommand("zoom+")));
         view.Items.Add(Item("ZoomOut", ctrl + "-", () => RunCommand("zoom-")));
         view.Items.Add(Item("ZoomReset", ctrl + "0", () => RunCommand("zoom0")));
+        view.Items.Add(new Separator());
+        view.Items.Add(Item("Outline", ctrl + "Shift+O", () => { ToggleOutline(); return Task.CompletedTask; }, _settings.Outline));
+        view.Items.Add(Item("Spell", null, async () =>
+        {
+            _settings.Spell = !_settings.Spell; _settings.Save();
+            if (_ready) await Js($"mdApp.setSpell({(_settings.Spell ? "true" : "false")})");
+            BuildMenu();
+        }, _settings.Spell));
         MainMenu.Items.Add(view);
 
         var lang = new MenuItem { Header = Strings.Get("Language") };
@@ -474,6 +526,7 @@ public partial class MainWindow : Window
                 : "https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax");
             return Task.CompletedTask;
         }));
+        help.Items.Add(Item("CheckUpdates", null, () => CheckUpdatesAsync(true)));
         help.Items.Add(new Separator());
         help.Items.Add(Item("About", null, () =>
         {
@@ -507,6 +560,8 @@ public partial class MainWindow : Window
     {
         Tools.Children.Clear();
         void Sep() => Tools.Children.Add(new Border { Style = (Style)FindResource("Qf.ToolSep") });
+        Tools.Children.Add(Tool("", "Outline", "Ctrl+Shift+O", () => { ToggleOutline(); return Task.CompletedTask; }));
+        Sep();
 
         var h = Tool("", "Heading", null, () => Task.CompletedTask);
         h.Click += (_, _) =>
@@ -642,7 +697,7 @@ public partial class MainWindow : Window
     {
         _settings.Lang = code; Strings.Lang = code; _settings.Save();
         if (_ready) await Js($"mdApp.setLang({Q(code)})");
-        BuildMenu(); UpdateTitle(); UpdateStatus();
+        BuildMenu(); UpdateTitle(); UpdateStatus(); LocalizeFeatures();
     }
 
     // ------------------------------------------------------------------ Chrome

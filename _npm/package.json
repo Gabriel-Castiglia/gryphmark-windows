@@ -13,9 +13,16 @@
   "dependencies": {
     "@toast-ui/editor": "^3.2.2",
     "@toast-ui/editor-plugin-code-syntax-highlight": "^3.1.0",
+    "diff": "^7.0.0",
     "esbuild": "^0.25.5",
+    "gemoji": "^8.1.0",
     "github-markdown-css": "^5.8.1",
     "highlight.js": "^11.11.1",
-    "marked": "^15.0.12"
+    "katex": "^0.16.21",
+    "marked": "^15.0.12",
+    "marked-alert": "^2.1.2",
+    "marked-footnote": "^1.2.4",
+    "marked-katex-extension": "^5.1.4",
+    "mermaid": "^11.4.1"
   }
 }

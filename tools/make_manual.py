@@ -99,7 +99,7 @@ The .NET runtime is included; nothing else has to be installed.</p>
 <table><tr><th>Action</th><th>How</th></tr>
 <tr><td>Open</td><td><i>File → Open</i> (<kbd>Ctrl</kbd>+<kbd>O</kbd>), double-click a .md file, or drag a file onto the window.</td></tr>
 <tr><td>Recent files</td><td><i>File → Open recent</i> keeps the last 12 files.</td></tr>
-<tr><td>Save / Save as</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. Files are saved as UTF-8 without BOM, the same as GitHub.</td></tr>
+<tr><td>Save / Save as</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. New files are saved as UTF-8 without BOM, the same as GitHub; existing files keep their encoding and line endings.</td></tr>
 <tr><td>New / New window</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> starts an empty document; <i>New window</i> opens a second Quillforge.</td></tr>
 <tr><td>Show in folder</td><td>Opens Explorer with the file selected.</td></tr></table>
 <p>If you close a document with unsaved changes, Quillforge asks whether to save them.</p>
@@ -111,6 +111,20 @@ In GitHub preview, links to web pages open in your browser, links to other <code
    ("Export and print", """
 <p><b>Export to HTML</b> saves a single, self-contained HTML page with the GitHub style embedded — ready to e-mail or publish.</p>
 <p><b>Print / PDF</b> (<kbd>Ctrl</kbd>+<kbd>P</kbd>) prints the GitHub-style page. Choose <i>Save as PDF</i> as the printer to create a PDF.</p>
+"""),
+   ("Working tools", """
+<table><tr><th>Feature</th><th>How it works</th></tr>
+<tr><td>Find / Replace</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> open a bar above the document. <kbd>F3</kbd> and <kbd>Shift</kbd>+<kbd>F3</kbd> jump between matches; <kbd>Esc</kbd> closes it. <i>Aa</i> matches case.</td></tr>
+<tr><td>Outline</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> or the first toolbar button shows the headings on the left; click one to jump to it.</td></tr>
+<tr><td>Your formatting is kept</td><td>Only the lines you change are rewritten when you save: list markers, <code>__bold__</code>, table alignment, line endings (CRLF/LF) and BOM stay as they were.</td></tr>
+<tr><td>Changed outside</td><td>If another program modifies the open file, Quillforge reloads it (or asks first if you have unsaved changes).</td></tr>
+<tr><td>Crash recovery</td><td>Unsaved work is backed up every 20 seconds. If Quillforge or Windows stops unexpectedly, the next start offers to recover it.</td></tr>
+<tr><td>Spell check</td><td><i>View → Spell check</i> underlines misspelled words (Windows dictionaries).</td></tr>
+<tr><td>One window per file</td><td>Opening a .md while Quillforge is running brings the existing window forward instead of starting a second copy. <i>File → New window</i> still opens another one.</td></tr>
+<tr><td>Updates</td><td>Quillforge checks once a day for a new version; <i>Help → Check for updates</i> does it on demand.</td></tr></table>
+<h3>GitHub extras</h3>
+<p>Also rendered exactly like GitHub: alerts (<code>&gt; [!NOTE]</code>, <code>[!TIP]</code>, <code>[!IMPORTANT]</code>, <code>[!WARNING]</code>, <code>[!CAUTION]</code>),
+<code>```mermaid</code> diagrams, math (<code>$E=mc^2$</code> and <code>$$ … $$</code>), footnotes (<code>[^1]</code>) and emoji shortcodes (<code>:rocket:</code>).</p>
 """),
    ("Language, theme and zoom", f"""
 <p><b>Language</b> menu: English or Español. It changes the menus, the toolbar tooltips and dialogs immediately.
@@ -126,7 +140,9 @@ The first time, Quillforge follows the Windows language.</p>
 <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Save</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td><td>Undo / Redo</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Save as</td><td><kbd>Ctrl</kbd>+<kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd></td><td>Visual / Source / GitHub</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>P</kbd></td><td>Print / PDF</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>-</kbd> / <kbd>0</kbd></td><td>Zoom</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Close window</td><td><kbd>F1</kbd></td><td>This manual</td></tr></table>
+<tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Close window</td><td><kbd>F1</kbd></td><td>This manual</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Find / Replace</td><td><kbd>F3</kbd> / <kbd>Shift</kbd>+<kbd>F3</kbd></td><td>Next / previous match</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd></td><td>Outline</td><td><kbd>Esc</kbd></td><td>Close find bar</td></tr></table>
 """),
    ("Technical information", """
 <table><tr><th>Item</th><th>Detail</th></tr>
@@ -202,7 +218,7 @@ configuración en <code>%APPDATA%\\Quillforge</code> se conserva.</p>
 <table><tr><th>Acción</th><th>Cómo</th></tr>
 <tr><td>Abrir</td><td><i>Archivo → Abrir</i> (<kbd>Ctrl</kbd>+<kbd>O</kbd>), doble clic en un .md, o arrastrar el archivo a la ventana.</td></tr>
 <tr><td>Recientes</td><td><i>Archivo → Abrir reciente</i> guarda los últimos 12.</td></tr>
-<tr><td>Guardar / Guardar como</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. Se guarda en UTF-8 sin BOM, igual que GitHub.</td></tr>
+<tr><td>Guardar / Guardar como</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. Los archivos nuevos se guardan en UTF-8 sin BOM, igual que GitHub; los existentes conservan su codificación y finales de línea.</td></tr>
 <tr><td>Nuevo / Nueva ventana</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> empieza un documento vacío; <i>Nueva ventana</i> abre otro Quillforge.</td></tr>
 <tr><td>Mostrar en la carpeta</td><td>Abre el Explorador con el archivo seleccionado.</td></tr></table>
 <p>Si cerrás un documento con cambios sin guardar, Quillforge pregunta si querés guardarlos.</p>
@@ -214,6 +230,20 @@ En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otro
    ("Exportar e imprimir", """
 <p><b>Exportar a HTML</b> guarda una sola página HTML autónoma con el estilo de GitHub adentro, lista para mandar por mail o publicar.</p>
 <p><b>Imprimir / PDF</b> (<kbd>Ctrl</kbd>+<kbd>P</kbd>) imprime la página con estilo GitHub. Elegí <i>Guardar como PDF</i> como impresora para sacar un PDF.</p>
+"""),
+   ("Herramientas de trabajo", """
+<table><tr><th>Función</th><th>Cómo funciona</th></tr>
+<tr><td>Buscar / Reemplazar</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> abren una barra sobre el documento. <kbd>F3</kbd> y <kbd>Mayús</kbd>+<kbd>F3</kbd> saltan entre coincidencias; <kbd>Esc</kbd> la cierra. <i>Aa</i> distingue mayúsculas.</td></tr>
+<tr><td>Esquema</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd> o el primer botón de la barra muestra los títulos a la izquierda; un clic salta a ese título.</td></tr>
+<tr><td>Se respeta tu formato</td><td>Al guardar sólo se reescriben las líneas que cambiaste: viñetas, <code>__negrita__</code>, alineación de tablas, finales de línea (CRLF/LF) y BOM quedan como estaban.</td></tr>
+<tr><td>Cambios externos</td><td>Si otro programa modifica el archivo abierto, Quillforge lo recarga (o pregunta antes si tenés cambios sin guardar).</td></tr>
+<tr><td>Recuperación</td><td>Lo no guardado se respalda cada 20 segundos. Si Quillforge o Windows se cierran de golpe, al volver a abrir ofrece recuperarlo.</td></tr>
+<tr><td>Ortografía</td><td><i>Ver → Revisar ortografía</i> subraya las palabras mal escritas (diccionarios de Windows).</td></tr>
+<tr><td>Una sola ventana</td><td>Abrir un .md con Quillforge ya abierto trae al frente la ventana existente en vez de abrir otra copia. <i>Archivo → Nueva ventana</i> sigue abriendo otra.</td></tr>
+<tr><td>Actualizaciones</td><td>Quillforge busca una versión nueva una vez por día; <i>Ayuda → Buscar actualizaciones</i> lo hace en el momento.</td></tr></table>
+<h3>Extras de GitHub</h3>
+<p>También se muestran igual que en GitHub: avisos (<code>&gt; [!NOTE]</code>, <code>[!TIP]</code>, <code>[!IMPORTANT]</code>, <code>[!WARNING]</code>, <code>[!CAUTION]</code>),
+diagramas <code>```mermaid</code>, fórmulas (<code>$E=mc^2$</code> y <code>$$ … $$</code>), notas al pie (<code>[^1]</code>) y emojis por código (<code>:rocket:</code>).</p>
 """),
    ("Idioma, tema y zoom", f"""
 <p>Menú <b>Idioma</b>: English o Español. Cambia al instante los menús, las ayudas de la barra y los diálogos.
@@ -229,7 +259,9 @@ La primera vez, Quillforge toma el idioma de Windows.</p>
 <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Guardar</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></td><td>Deshacer / Rehacer</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Guardar como</td><td><kbd>Ctrl</kbd>+<kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd></td><td>Visual / Código / GitHub</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>P</kbd></td><td>Imprimir / PDF</td><td><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>-</kbd> / <kbd>0</kbd></td><td>Zoom</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Cerrar ventana</td><td><kbd>F1</kbd></td><td>Este manual</td></tr></table>
+<tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Cerrar ventana</td><td><kbd>F1</kbd></td><td>Este manual</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Buscar / Reemplazar</td><td><kbd>F3</kbd> / <kbd>Mayús</kbd>+<kbd>F3</kbd></td><td>Coincidencia siguiente / anterior</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd></td><td>Esquema</td><td><kbd>Esc</kbd></td><td>Cerrar búsqueda</td></tr></table>
 """),
    ("Información técnica", """
 <table><tr><th>Ítem</th><th>Detalle</th></tr>

@@ -1,6 +1,6 @@
-# Quillforge — full build: web bundle, icon, manuals (PDF), self-contained publish, installer.
+﻿# Quillforge — full build: web bundle, icon, manuals (PDF), self-contained publish, installer.
 # Usage:  powershell -ExecutionPolicy Bypass -File build.ps1 [-Version 1.0.0] [-SkipNpm]
-param([string]$Version = "1.0.0", [switch]$SkipNpm)
+param([string]$Version = "1.1.0", [switch]$SkipNpm)
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
 $out = Join-Path $root "out"
@@ -22,6 +22,9 @@ if (-not $SkipNpm) {
               "$nm/github-markdown-css/github-markdown-light.css", "$nm/github-markdown-css/github-markdown-dark.css" "$www/lib/"
     Copy-Item "$nm/highlight.js/styles/github.min.css" "$www/lib/hljs-light.css"
     Copy-Item "$nm/highlight.js/styles/github-dark.min.css" "$www/lib/hljs-dark.css"
+    Copy-Item "$nm/mermaid/dist/mermaid.min.js", "$nm/katex/dist/katex.min.css" "$www/lib/"
+    New-Item -ItemType Directory -Force "$www/lib/fonts" | Out-Null
+    Copy-Item "$nm/katex/dist/fonts/*.woff2" "$www/lib/fonts/"
     Pop-Location
 }
 
@@ -51,10 +54,22 @@ if ($LASTEXITCODE) { throw "dotnet publish failed" }
 New-Item -ItemType Directory -Force "$pub/docs" | Out-Null
 Copy-Item "$root/docs/Quillforge_Manual_EN.pdf", "$root/docs/Quillforge_Manual_ES.pdf" "$pub/docs/"
 
+# Optional code signing: set QF_SIGN_PFX (path to a .pfx) and QF_SIGN_PASS before building.
+function Sign($file) {
+    if (-not $env:QF_SIGN_PFX) { return }
+    $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Recurse -Filter signtool.exe -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -match "x64" } | Select-Object -Last 1
+    if (-not $signtool) { throw "signtool.exe not found (install the Windows SDK)" }
+    & $signtool.FullName sign /f $env:QF_SIGN_PFX /p $env:QF_SIGN_PASS /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 $file
+    if ($LASTEXITCODE) { throw "signing failed: $file" }
+}
+Sign "$pub/Quillforge.exe"
+
 # 5. Installer
 Step "installer"
 $iscc = @("$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe", "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
 if (-not $iscc) { throw "Inno Setup 6 not found (winget install JRSoftware.InnoSetup)" }
 & $iscc /Q "/DAppVersion=$Version" "/DPublishDir=$pub" "$root/installer/Quillforge.iss"
 if ($LASTEXITCODE) { throw "ISCC failed" }
+Sign "$out/Quillforge-Setup-$Version.exe"
 Get-Item "$out/Quillforge-Setup-$Version.exe" | Select-Object Name, Length

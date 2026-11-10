@@ -32,6 +32,51 @@
                 </StackPanel>
             </StatusBarItem>
         </StatusBar>
-        <wv2:WebView2 x:Name="Web" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="OutlineColumn" Width="0" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <!-- Outline -->
+            <Border x:Name="OutlinePane" Grid.Column="0" Background="{DynamicResource Qf.Chrome}" BorderBrush="{DynamicResource Qf.ChromeBorder}" BorderThickness="0,0,1,0">
+                <DockPanel>
+                    <TextBlock x:Name="OutlineTitle" DockPanel.Dock="Top" Margin="18,14,12,8" FontSize="11" FontWeight="SemiBold"
+                               Foreground="{DynamicResource Qf.TextMuted}" FontFamily="{DynamicResource Qf.Font}" />
+                    <TextBlock x:Name="OutlineEmpty" DockPanel.Dock="Top" Margin="18,4,12,0" FontSize="12" TextWrapping="Wrap"
+                               Foreground="{DynamicResource Qf.TextMuted}" FontFamily="{DynamicResource Qf.Font}" />
+                    <ListBox x:Name="OutlineList" Style="{DynamicResource Qf.OutlineList}" />
+                </DockPanel>
+            </Border>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <!-- Find / replace -->
+                <Border x:Name="FindBar" Grid.Row="0" Visibility="Collapsed" Background="{DynamicResource Qf.Chrome}"
+                        BorderBrush="{DynamicResource Qf.ChromeBorder}" BorderThickness="0,0,0,1" Padding="12,7">
+                    <StackPanel>
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock x:Name="FindCount" MinWidth="70" TextAlignment="Right" Margin="0,0,8,0" VerticalAlignment="Center"
+                                           FontSize="12" Foreground="{DynamicResource Qf.TextMuted}" FontFamily="{DynamicResource Qf.Font}" />
+                                <ToggleButton x:Name="FindCase" Style="{DynamicResource Qf.ToolToggle}" Content="Aa" />
+                                <Button x:Name="FindPrev" Style="{DynamicResource Qf.ToolButton}" Content="&#xE70E;" />
+                                <Button x:Name="FindNextBtn" Style="{DynamicResource Qf.ToolButton}" Content="&#xE70D;" />
+                                <Button x:Name="FindCloseBtn" Style="{DynamicResource Qf.ToolButton}" Content="&#xE711;" FontSize="12" />
+                            </StackPanel>
+                            <TextBox x:Name="FindBox" Style="{DynamicResource Qf.Field}" MaxWidth="520" HorizontalAlignment="Left" Width="420" />
+                        </DockPanel>
+                        <DockPanel x:Name="ReplaceRow" Margin="0,6,0,0" Visibility="Collapsed">
+                            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" />
+                            <TextBox x:Name="ReplaceBox" Style="{DynamicResource Qf.Field}" Width="420" HorizontalAlignment="Left" />
+                            <Button x:Name="ReplaceBtn" Style="{DynamicResource Qf.DialogButton}" />
+                            <Button x:Name="ReplaceAllBtn" Style="{DynamicResource Qf.DialogButton}" HorizontalAlignment="Left" />
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+                <wv2:WebView2 x:Name="Web" Grid.Row="1" />
+            </Grid>
+        </Grid>
     </DockPanel>
 </Window>

@@ -14,6 +14,9 @@ public sealed class Settings
     public double Width { get; set; } = 1200;
     public double Height { get; set; } = 820;
     public bool Maximized { get; set; }
+    public bool Outline { get; set; } = true;
+    public bool Spell { get; set; } = true;
+    public DateTime LastUpdateCheck { get; set; }
 
     public static string Dir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Quillforge");
     private static string FilePath => Path.Combine(Dir, "settings.json");

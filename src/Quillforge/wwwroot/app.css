@@ -23,6 +23,14 @@ body.mode-preview #previewHost { display: block; }
 }
 body.dark .toastui-editor-context-menu { border-color: #3A3A3C !important; background: #2A2A2D !important; }
 
+/* Find highlights (CSS Custom Highlight API) */
+::highlight(qf-find) { background-color: rgba(255, 214, 10, .38); }
+::highlight(qf-cur)  { background-color: rgba(255, 159, 10, .85); color: #1d1d1f; }
+body.dark ::highlight(qf-find) { background-color: rgba(255, 214, 10, .28); }
+
+/* Mermaid diagrams centred like on GitHub */
+.markdown-body pre.mermaid { background: transparent; text-align: center; }
+
 /* Quiet scrollbars */
 ::-webkit-scrollbar { width: 12px; height: 12px; }
 ::-webkit-scrollbar-thumb { background: rgba(0,0,0,.18); border-radius: 6px; border: 3px solid transparent; background-clip: content-box; }
