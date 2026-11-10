@@ -7,6 +7,7 @@
 #endif
 
 [Setup]
+LicenseFile=..\LICENSE
 AppId={{8C1E2B57-4F0A-4D3B-9E62-5A1B0F0E2C71}
 AppName=Quillforge
 AppVersion={#AppVersion}
@@ -57,6 +58,7 @@ Name: "assoc"; Description: "{cm:AssocTask}"; GroupDescription: "{cm:AssocGroup}
 
 [Files]
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\Quillforge"; Filename: "{app}\Quillforge.exe"; IconFilename: "{app}\Quillforge.ico"

@@ -147,6 +147,7 @@ The first time, Quillforge follows the Windows language.</p>
    ("Technical information", """
 <table><tr><th>Item</th><th>Detail</th></tr>
 <tr><td>Version</td><td>{v}</td></tr>
+<tr><td>License</td><td>GNU GPL version 2 only (GPL-2.0-only) — free software, no warranty. Full text: <code>LICENSE.txt</code> in the program folder.</td></tr>
 <tr><td>Platform</td><td>.NET 8 (WPF, self-contained) + Microsoft Edge WebView2</td></tr>
 <tr><td>Editor</td><td>TOAST UI Editor 3.2 (MIT)</td></tr>
 <tr><td>GitHub rendering</td><td>marked (GitHub Flavored Markdown), highlight.js, github-markdown-css (MIT)</td></tr>
@@ -266,6 +267,7 @@ La primera vez, Quillforge toma el idioma de Windows.</p>
    ("Información técnica", """
 <table><tr><th>Ítem</th><th>Detalle</th></tr>
 <tr><td>Versión</td><td>{v}</td></tr>
+<tr><td>Licencia</td><td>GNU GPL versión 2 únicamente (GPL-2.0-only) — software libre, sin garantía. Texto completo: <code>LICENSE.txt</code> en la carpeta del programa.</td></tr>
 <tr><td>Plataforma</td><td>.NET 8 (WPF, autónomo) + Microsoft Edge WebView2</td></tr>
 <tr><td>Editor</td><td>TOAST UI Editor 3.2 (MIT)</td></tr>
 <tr><td>Render GitHub</td><td>marked (GitHub Flavored Markdown), highlight.js, github-markdown-css (MIT)</td></tr>

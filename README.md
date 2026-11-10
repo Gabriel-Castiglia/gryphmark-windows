@@ -63,8 +63,24 @@ powershell -ExecutionPolicy Bypass -File build.ps1 -Version 1.1.0
 | `docs/` | Manuals (HTML + PDF, EN/ES) and screenshots |
 | `out/` | Build output: publish folder and installer |
 
+## License / Licencia
+
+Copyright (C) 2026 Gabriel Castiglia.
+
+Quillforge is free software: you can redistribute it and/or modify it under the terms of the GNU General
+Public License, version 2 only (GPL-2.0-only), as published by the Free Software Foundation. It is
+distributed WITHOUT ANY WARRANTY. See [`LICENSE`](LICENSE) for the full text.
+
+Quillforge es software libre: podés redistribuirlo y/o modificarlo bajo los términos de la GNU General
+Public License, versión 2 únicamente (GPL-2.0-only). Se distribuye SIN NINGUNA GARANTÍA. El texto completo
+está en [`LICENSE`](LICENSE).
+
 ## Credits / Créditos
 
-TOAST UI Editor, marked, highlight.js, github-markdown-css — MIT License.
-Icon / ícono: griffin from Martin Schongauer's engraving (c. 1485), The Metropolitan Museum of Art, CC0 — quill added.
-© 2026 Gabriel Castiglia.
+| Component | License |
+|---|---|
+| TOAST UI Editor, ProseMirror, marked (+ alert, footnote, katex extensions), github-markdown-css, Mermaid, KaTeX, gemoji | MIT |
+| highlight.js, jsdiff | BSD-3-Clause |
+| .NET 8 / WPF | MIT |
+| Microsoft Edge WebView2 SDK | Microsoft WebView2 SDK license (redistributable); the WebView2 Runtime is a Windows system component |
+| Icon / ícono: griffin from Martin Schongauer's engraving (c. 1485), The Metropolitan Museum of Art — quill added | CC0 |
