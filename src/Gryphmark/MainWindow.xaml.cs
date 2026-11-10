@@ -33,12 +33,16 @@ public partial class MainWindow : Window
         _pendingOpen = startPath;
         Width = _settings.Width; Height = _settings.Height;
         if (_settings.Maximized) WindowState = WindowState.Maximized;
-        ThemeManager.Apply(this, _settings.Theme == "dark");
+        ThemeManager.Apply(this, IsDark, _settings.Accent);
+        Icon = Accents.WindowIcon(_settings.Accent) ?? Icon;
         // page colour from the first frame, so there is no white/black flash while the editor loads
-        Web.DefaultBackgroundColor = _settings.Theme == "dark" ? System.Drawing.Color.FromArgb(13, 17, 23) : System.Drawing.Color.White;
+        Web.DefaultBackgroundColor = IsDark ? System.Drawing.Color.FromArgb(13, 17, 23) : System.Drawing.Color.White;
         BuildMenu();
         UpdateTitle();
-        SourceInitialized += (_, _) => ThemeManager.Apply(this, _settings.Theme == "dark");
+        SourceInitialized += (_, _) => ThemeManager.Apply(this, IsDark, _settings.Accent);
+        Accents.ApplyToSystem(_settings.Accent);   // e.g. after an update reinstalled the default icon
+        Microsoft.Win32.SystemEvents.UserPreferenceChanged += OnSystemPreference;
+        Closed += (_, _) => Microsoft.Win32.SystemEvents.UserPreferenceChanged -= OnSystemPreference;
         Loaded += async (_, _) => await InitWebAsync();
         Closing += OnClosing;
         Closed += (_, _) => CloseTrace.Log("window closed");
@@ -98,7 +102,7 @@ public partial class MainWindow : Window
         switch (root.GetProperty("type").GetString())
         {
             case "ready":
-                await Js($"mdApp.init({Q(_settings.Lang)},{Q(_settings.Theme)},{Q(_settings.Mode)},{(_settings.Spell ? "true" : "false")},{(_settings.ReadOnly ? "true" : "false")})");
+                await Js($"mdApp.init({Q(_settings.Lang)},{Q(IsDark ? "dark" : "light")},{Q(_settings.Mode)},{(_settings.Spell ? "true" : "false")},{(_settings.ReadOnly ? "true" : "false")})");
                 _ready = true;
                 if (_pendingOpen != null) { var p = _pendingOpen; _pendingOpen = null; await LoadFileAsync(p); }
                 else if (!_settings.SampleShown && SamplePath != null) { _settings.SampleShown = true; _settings.Save(); await LoadSampleAsync(); }
@@ -428,6 +432,34 @@ public partial class MainWindow : Window
         BuildMenu(); UpdateStatus();
     }
 
+    // ------------------------------------------------------------------ theme (View → Theme…)
+    private bool IsDark => _settings.Theme == "dark" || (_settings.Theme == "auto" && ThemeManager.SystemDark());
+    internal string AccentKey => _settings.Accent;
+    private bool _appliedDark;
+
+    private async Task ApplyThemeAsync()
+    {
+        bool dark = IsDark;
+        ThemeManager.Apply(this, dark, _settings.Accent);
+        Icon = Accents.WindowIcon(_settings.Accent) ?? Icon;
+        Web.DefaultBackgroundColor = dark ? System.Drawing.Color.FromArgb(13, 17, 23) : System.Drawing.Color.White;
+        if (_ready && dark != _appliedDark) await Js($"mdApp.setTheme({Q(dark ? "dark" : "light")})");
+        _appliedDark = dark;
+    }
+
+    private void ShowThemeDialog()
+    {
+        var dlg = new ThemeDialog(this, _settings.Theme, _settings.Accent,
+            async mode => { _settings.Theme = mode; _settings.Save(); await ApplyThemeAsync(); },
+            async key => { _settings.Accent = key; _settings.Save(); await ApplyThemeAsync(); Accents.ApplyToSystem(key); });
+        dlg.ShowDialog();
+    }
+
+    private void OnSystemPreference(object? sender, Microsoft.Win32.UserPreferenceChangedEventArgs e)
+    {
+        if (_settings.Theme == "auto") Dispatcher.BeginInvoke(async () => await ApplyThemeAsync());
+    }
+
     private async Task SetReadOnly(bool on)
     {
         _settings.ReadOnly = on; _settings.Save();
@@ -601,13 +633,7 @@ public partial class MainWindow : Window
         view.Items.Add(new Separator());
         view.Items.Add(Item("ReadOnly", ctrl + "Shift+L", () => SetReadOnly(!_settings.ReadOnly), _settings.ReadOnly));
         view.Items.Add(new Separator());
-        view.Items.Add(Item("Dark", null, async () =>
-        {
-            _settings.Theme = _settings.Theme == "dark" ? "light" : "dark"; _settings.Save();
-            ThemeManager.Apply(this, _settings.Theme == "dark");
-            if (_ready) await Js($"mdApp.setTheme({Q(_settings.Theme)})");
-            BuildMenu();
-        }, _settings.Theme == "dark"));
+        view.Items.Add(Item("ThemeMenu", null, () => { ShowThemeDialog(); return Task.CompletedTask; }));
         view.Items.Add(new Separator());
         view.Items.Add(Item("ZoomIn", ctrl + "+", () => RunCommand("zoom+")));
         view.Items.Add(Item("ZoomOut", ctrl + "-", () => RunCommand("zoom-")));

@@ -18,12 +18,11 @@ public static class ThemeManager
         ["Gm.TextMuted"] = ("#86868B", "#98989D"),
         ["Gm.Hover"] = ("#EBEBF0", "#3A3A3D"),
         ["Gm.Pressed"] = ("#E1E1E6", "#454548"),
-        ["Gm.Accent"] = ("#1D1D1F", "#F5F5F7"),
         ["Gm.Separator"] = ("#E8E8ED", "#38383A"),
-        ["Gm.FolderIcon"] = ("#D9652F", "#F08A5D"),   // the ember orange of the icon
     };
 
-    public static void Apply(Window window, bool dark)
+    /// <summary>Chrome colours plus the theme colour (folder icons, check marks, selected item).</summary>
+    public static void Apply(Window window, bool dark, string? accent = null)
     {
         var res = Application.Current.Resources;
         foreach (var (key, (light, darkHex)) in Palette)
@@ -31,7 +30,23 @@ public static class ThemeManager
             var c = (Color)ColorConverter.ConvertFromString(dark ? darkHex : light);
             res[key] = new SolidColorBrush(c);
         }
+        var a = Accents.Get(accent);
+        var ac = (Color)ColorConverter.ConvertFromString(dark ? a.Dark : a.Light);
+        res["Gm.Accent"] = new SolidColorBrush(ac);
+        res["Gm.FolderIcon"] = new SolidColorBrush(ac);
+        res["Gm.Selected"] = new SolidColorBrush(Color.FromArgb(dark ? (byte)0x48 : (byte)0x2E, ac.R, ac.G, ac.B));
         ApplyTitleBar(window, dark);
+    }
+
+    /// <summary>Windows "app mode": true when apps are set to dark (Settings → Personalisation → Colours).</summary>
+    public static bool SystemDark()
+    {
+        try
+        {
+            using var k = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            return k?.GetValue("AppsUseLightTheme") is int v && v == 0;
+        }
+        catch { return false; }
     }
 
     // Windows 11: dark title bar + caption colour matching the menu bar, so the header reads as one piece.

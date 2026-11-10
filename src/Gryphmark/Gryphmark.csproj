@@ -9,7 +9,7 @@
     <ApplicationIcon>Gryphmark.ico</ApplicationIcon>
     <AssemblyName>Gryphmark</AssemblyName>
     <RootNamespace>Gryphmark</RootNamespace>
-    <Version>1.4.0</Version>
+    <Version>1.5.0</Version>
     <Product>Gryphmark</Product>
     <Company>Gabriel Castiglia</Company>
     <Copyright>© 2026 Gabriel Castiglia</Copyright>
@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <Resource Include="Gryphmark.ico" />
+    <Resource Include="icons\*.ico" />
     <Content Include="Gryphmark.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="wwwroot\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>

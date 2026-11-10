@@ -108,6 +108,7 @@ public sealed class AboutDialog : Window
     {
         try
         {
+            if (Application.Current.MainWindow is MainWindow mw) return Accents.Icon(mw.AccentKey);
             var dec = BitmapDecoder.Create(new Uri("pack://application:,,,/Gryphmark.ico"), BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
             return dec.Frames.OrderByDescending(f => f.PixelWidth).First();
         }

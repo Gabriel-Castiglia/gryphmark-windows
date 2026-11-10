@@ -44,10 +44,14 @@ public static class SelfTest
             {
                 Strings.Lang = lang;
                 string sfx = $"{lang}_{(dark ? "dark" : "light")}";
-                var about = new AboutDialog(w, "1.3.0");
+                var about = new AboutDialog(w, "1.5.0");
                 Layout(about.Card);
                 Save(about.Card, Path.Combine(dir, $"about_{sfx}.png"), dark);
                 about.Close();
+                var theme = new ThemeDialog(w, "auto", Accents.Default, _ => { }, _ => { });
+                Layout(theme.Card);
+                Save(theme.Card, Path.Combine(dir, $"theme_{sfx}.png"), dark);
+                theme.Close();
                 var tips = new StackPanel();
                 foreach (var (n, t, g) in new[] { ("ModeVisual", "TipVisual", "Ctrl+1"), ("ModeSource", "TipSource", "Ctrl+2"), ("ModePreview", "TipPreview", "Ctrl+3") })
                 {

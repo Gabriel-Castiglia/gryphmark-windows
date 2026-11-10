@@ -7,7 +7,8 @@ namespace Gryphmark;
 public sealed class Settings
 {
     public string Lang { get; set; } = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "es" ? "es" : "en";
-    public string Theme { get; set; } = "light";
+    public string Theme { get; set; } = "auto";      // light | dark | auto (follows Windows)
+    public string Accent { get; set; } = Accents.Default;
     public string Mode { get; set; } = "visual";
     public bool ReadOnly { get; set; }
     public double Zoom { get; set; } = 1.0;

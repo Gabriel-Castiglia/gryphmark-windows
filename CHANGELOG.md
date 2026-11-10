@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.0 — 2026-11-10
+
+- **Themes** (*View → Theme…*): **Light**, **Dark** or **Automatic** (follows the Windows app mode and switches
+  live), plus a catalogue of eleven colours. The colour is the background of the icon — window, taskbar,
+  desktop and Start-menu shortcuts, `.md` files and the folder menu — and the highlight of the app (folders in
+  the Files panel, check marks, the selected item). Shortcuts with an icon of their own are left alone.
+- The default colour is now **Advent purple**; the original orange is in the catalogue. New installs start in
+  Automatic; existing ones keep their light or dark choice.
+
 ## 1.4.0 — 2026-11-10
 
 - **Read only:** a new *Edit | Read only* switch next to the view buttons (also *View → Read only*,

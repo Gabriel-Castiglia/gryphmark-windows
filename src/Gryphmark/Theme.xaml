@@ -10,9 +10,10 @@
     <SolidColorBrush x:Key="Gm.TextMuted" Color="#86868B" />
     <SolidColorBrush x:Key="Gm.Hover" Color="#EBEBF0" />
     <SolidColorBrush x:Key="Gm.Pressed" Color="#E1E1E6" />
-    <SolidColorBrush x:Key="Gm.Accent" Color="#1D1D1F" />
+    <SolidColorBrush x:Key="Gm.Accent" Color="#5B2A86" />
     <SolidColorBrush x:Key="Gm.Separator" Color="#E8E8ED" />
-    <SolidColorBrush x:Key="Gm.FolderIcon" Color="#D9652F" />
+    <SolidColorBrush x:Key="Gm.FolderIcon" Color="#5B2A86" />
+    <SolidColorBrush x:Key="Gm.Selected" Color="#2E5B2A86" />
 
     <FontFamily x:Key="Gm.Font">Segoe UI Variable Display, Segoe UI Variable Text, Segoe UI</FontFamily>
     <FontFamily x:Key="Gm.Icons">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
@@ -269,7 +270,7 @@
                             <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Hover}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Pressed}" />
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Selected}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -318,7 +319,7 @@
                                         <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Hover}" />
                                     </Trigger>
                                     <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Pressed}" />
+                                        <Setter TargetName="Bg" Property="Background" Value="{DynamicResource Gm.Selected}" />
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
