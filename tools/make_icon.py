@@ -1,4 +1,4 @@
-"""Quillforge icon: a glowing quill nib forged over an anvil, on a dark ember tile."""
+"""Quillforge icon: a document page with the Markdown mark (M + down arrow) and a glowing quill writing on it."""
 import math, sys
 from PIL import Image, ImageDraw, ImageFilter
 
@@ -7,95 +7,96 @@ out_ico, out_png = sys.argv[1], sys.argv[2]
 
 def lerp(a, b, t): return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(len(a)))
 
-# --- tile: deep night gradient with a warm forge glow at the bottom ---
-tile = Image.new("RGBA", (S, S))
-px = tile.load()
-top, bot = (22, 24, 38), (46, 20, 24)
-for y in range(S):
-    c = lerp(top, bot, y / S)
-    for x in range(S):
-        px[x, y] = c + (255,)
-glow = Image.new("RGBA", (S, S), (0, 0, 0, 0))
-gd = ImageDraw.Draw(glow)
-gd.ellipse((S*0.12, S*0.52, S*0.88, S*1.15), fill=(255, 120, 30, 150))
-glow = glow.filter(ImageFilter.GaussianBlur(110))
-tile = Image.alpha_composite(tile, glow)
+def vgrad(w, h, c0, c1):
+    g = Image.new("RGBA", (w, h)); p = g.load()
+    for y in range(h):
+        c = lerp(c0, c1, y / max(h - 1, 1)) + (255,)
+        for x in range(w): p[x, y] = c
+    return g
 
+# ---- tile: night blue to ember ----
+tile = vgrad(S, S, (24, 28, 52), (120, 44, 16))
+glow = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+ImageDraw.Draw(glow).ellipse((S*0.30, S*0.55, S*1.10, S*1.20), fill=(255, 130, 40, 140))
+tile = Image.alpha_composite(tile, glow.filter(ImageFilter.GaussianBlur(120)))
 mask = Image.new("L", (S, S), 0)
 ImageDraw.Draw(mask).rounded_rectangle((0, 0, S - 1, S - 1), radius=int(S * 0.22), fill=255)
 
-art = Image.new("RGBA", (S, S), (0, 0, 0, 0))
-d = ImageDraw.Draw(art)
+# ---- document page (drawn upright on its own layer, then tilted) ----
+P = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+pd = ImageDraw.Draw(P)
+x0, y0, x1, y1, fold = S*0.20, S*0.14, S*0.74, S*0.86, S*0.13
+page = [(x0, y0), (x1 - fold, y0), (x1, y0 + fold), (x1, y1), (x0, y1)]
+# shadow
+sh = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+ImageDraw.Draw(sh).polygon([(x + S*0.02, y + S*0.03) for x, y in page], fill=(0, 0, 0, 150))
+P = Image.alpha_composite(P, sh.filter(ImageFilter.GaussianBlur(22)))
+pd = ImageDraw.Draw(P)
+pd.polygon(page, fill=(250, 246, 238, 255))
+pd.polygon([(x1 - fold, y0), (x1 - fold, y0 + fold), (x1, y0 + fold)], fill=(222, 210, 192, 255))
 
-# --- anvil (steel, bottom) ---
-steel_hi, steel_lo = (176, 184, 200), (92, 98, 116)
-anvil = [(S*0.20, S*0.70), (S*0.80, S*0.70), (S*0.74, S*0.76), (S*0.60, S*0.78),
-         (S*0.62, S*0.86), (S*0.70, S*0.88), (S*0.30, S*0.88), (S*0.38, S*0.86),
-         (S*0.40, S*0.78), (S*0.26, S*0.76)]
-d.polygon(anvil, fill=steel_lo)
-d.polygon([(S*0.20, S*0.70), (S*0.80, S*0.70), (S*0.76, S*0.735), (S*0.24, S*0.735)], fill=steel_hi)
-# horn
-d.polygon([(S*0.20, S*0.70), (S*0.08, S*0.705), (S*0.24, S*0.75)], fill=steel_hi)
+# Markdown mark: rounded frame + "M" + down arrow
+mx0, my0, mx1, my1 = x0 + S*0.06, S*0.40, x1 - S*0.06, S*0.66
+ink = (30, 32, 48, 255)
+pd.rounded_rectangle((mx0, my0, mx1, my1), radius=int(S*0.035), outline=ink, width=int(S*0.028))
+h = my1 - my0; pad = h*0.24; lw = int(S*0.045)
+mL, mR = mx0 + pad*1.05, mx0 + (mx1 - mx0)*0.56
+top, bot = my0 + pad, my1 - pad
+pd.line([(mL, bot), (mL, top), ((mL + mR)/2, top + (bot - top)*0.55), (mR, top), (mR, bot)], fill=ink, width=lw, joint="curve")
+ax = mx0 + (mx1 - mx0)*0.79
+pd.line([(ax, top), (ax, bot - S*0.05)], fill=ink, width=lw)
+aw = S*0.065
+pd.polygon([(ax - aw, bot - S*0.075), (ax + aw, bot - S*0.075), (ax, bot + S*0.01)], fill=ink)
+# writing lines
+for i, yy in enumerate((S*0.24, S*0.30, S*0.72, S*0.78)):
+    ww = (x1 - x0 - S*0.12) * (0.55 if i in (1, 3) else 0.85)
+    pd.rounded_rectangle((x0 + S*0.06, yy, x0 + S*0.06 + ww, yy + S*0.022), radius=int(S*0.011), fill=(196, 186, 172, 255))
+P = P.rotate(6, resample=Image.BICUBIC, center=(S*0.47, S*0.5))
 
-# --- quill nib, molten gold, pointing down onto the anvil ---
-cx, tipy, topy, half = S*0.5, S*0.68, S*0.14, S*0.20
-def side(sg):
+# ---- quill feather, diagonal, nib touching the page ----
+Q = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+qd = ImageDraw.Draw(Q)
+# feather built along the x axis then rotated: tip at the left
+L0, L1, cy = S*0.10, S*0.74, S*0.5
+def vane(sign, width):
     pts = []
-    for i in range(0, 21):  # tip -> widest belly (quadratic curve)
-        t = i / 20
-        x0, y0, x1, y1, x2, y2 = 0, tipy, S*0.19, S*0.52, S*0.17, S*0.36
-        x = (1-t)**2*x0 + 2*(1-t)*t*x1 + t*t*x2; y = (1-t)**2*y0 + 2*(1-t)*t*y1 + t*t*y2
-        pts.append((cx + sg*x, y))
-    for i in range(1, 11):  # belly -> neck
-        t = i / 10
-        x0, y0, x1, y1, x2, y2 = S*0.17, S*0.36, S*0.16, S*0.26, S*0.10, S*0.22
-        x = (1-t)**2*x0 + 2*(1-t)*t*x1 + t*t*x2; y = (1-t)**2*y0 + 2*(1-t)*t*y1 + t*t*y2
-        pts.append((cx + sg*x, y))
-    pts.append((cx + sg*S*0.10, topy))
+    for i in range(41):
+        t = i / 40
+        x = L0 + S*0.18 + (L1 - L0 - S*0.18) * t
+        w = width * math.sin(math.pi * min(t * 1.05, 1)) ** 0.8 * (0.35 + 0.65 * t)
+        pts.append((x, cy + sign * w))
     return pts
-L = side(-1); R = side(1)
-nib = L + R[::-1]
-nib_layer = Image.new("RGBA", (S, S), (0, 0, 0, 0))
-nd = ImageDraw.Draw(nib_layer)
-nd.polygon(nib, fill=(255, 255, 255, 255))
-# vertical molten gradient for the nib
-grad = Image.new("RGBA", (S, S))
-gp = grad.load()
-for y in range(S):
-    t = min(max((y - topy) / (tipy - topy), 0), 1)
-    c = lerp((255, 236, 170), (255, 120, 20), t)
-    for x in range(S):
-        gp[x, y] = c + (255,)
-nib_col = Image.composite(grad, Image.new("RGBA", (S, S), (0, 0, 0, 0)), nib_layer.split()[3])
-# outer heat glow
-halo = nib_layer.copy().filter(ImageFilter.GaussianBlur(40))
-halo = Image.composite(Image.new("RGBA", (S, S), (255, 150, 40, 255)), Image.new("RGBA", (S, S), (0, 0, 0, 0)), halo.split()[3].point(lambda v: int(v * 0.85)))
-art = Image.alpha_composite(art, halo)
-art = Image.alpha_composite(art, nib_col)
-d = ImageDraw.Draw(art)
-# slit and breather hole
-dark = (60, 22, 10, 255)
-d.line([(cx, tipy - S*0.01), (cx, S*0.36)], fill=dark, width=int(S*0.018))
-r = S*0.035
-d.ellipse((cx - r, S*0.33 - r, cx + r, S*0.33 + r), fill=dark)
-# neck band
-d.rectangle((cx - S*0.10, S*0.205, cx + S*0.10, S*0.225), fill=(150, 60, 15, 255))
+up, dn = vane(-1, S*0.085), vane(1, S*0.060)
+feather = [(L0 + S*0.18, cy)] + up + [(L1, cy)] + dn[::-1]
+fg = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+ImageDraw.Draw(fg).polygon(feather, fill=(255, 255, 255, 255))
+fcol = Image.new("RGBA", (S, S)); fp = fcol.load()
+for x in range(S):
+    t = min(max((x - L0) / (L1 - L0), 0), 1)
+    c = lerp((255, 214, 120), (255, 120, 30), t) + (255,)
+    for y in range(S): fp[x, y] = c
+Q = Image.composite(fcol, Q, fg.split()[3])
+qd = ImageDraw.Draw(Q)
+for i in range(1, 15):  # barb notches
+    x = L0 + S*0.24 + i * (L1 - L0 - S*0.26) / 15
+    qd.line([(x, cy), (x + S*0.03, cy - S*0.045)], fill=(200, 90, 20, 160), width=int(S*0.006))
+    qd.line([(x, cy), (x + S*0.025, cy + S*0.035)], fill=(200, 90, 20, 130), width=int(S*0.006))
+qd.line([(L0 + S*0.12, cy), (L1, cy)], fill=(120, 50, 14, 255), width=int(S*0.014))  # shaft
+qd.polygon([(L0, cy), (L0 + S*0.13, cy - S*0.022), (L0 + S*0.13, cy + S*0.022)], fill=(45, 30, 30, 255))  # nib
+Q = Q.rotate(45, resample=Image.BICUBIC, center=(L0, cy))
+# place: nib at the end of the last writing line (right-lower area of the page)
+qx, qy = S*0.50 - L0, S*0.79 - cy
+Q2 = Image.new("RGBA", (S, S), (0, 0, 0, 0)); Q2.paste(Q, (int(qx), int(qy)), Q)
+halo = Q2.split()[3].filter(ImageFilter.GaussianBlur(28)).point(lambda v: int(v * 0.7))
+halo_img = Image.composite(Image.new("RGBA", (S, S), (255, 150, 50, 255)), Image.new("RGBA", (S, S), (0, 0, 0, 0)), halo)
+# spark where the nib writes
+sp = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+ImageDraw.Draw(sp).ellipse((S*0.485, S*0.775, S*0.515, S*0.805), fill=(255, 220, 140, 200))
+sp = Image.alpha_composite(sp.filter(ImageFilter.GaussianBlur(14)), sp.filter(ImageFilter.GaussianBlur(3)))
 
-# --- sparks from the strike point ---
-import random
-random.seed(7)
-spark = Image.new("RGBA", (S, S), (0, 0, 0, 0))
-sd = ImageDraw.Draw(spark)
-for i in range(22):
-    a = math.radians(random.choice([random.uniform(195, 240), random.uniform(300, 345)]))
-    l = random.uniform(S*0.05, S*0.16)
-    x0, y0 = cx + math.cos(a)*S*0.05, tipy + math.sin(a)*S*0.02
-    x1, y1 = x0 + math.cos(a)*l, y0 + math.sin(a)*l
-    sd.line([(x0, y0), (x1, y1)], fill=(255, 200, 90, 230), width=int(S*0.007))
-spark = Image.alpha_composite(spark.filter(ImageFilter.GaussianBlur(6)), spark)
-art = Image.alpha_composite(art, spark)
-
-icon = Image.alpha_composite(tile, art)
+icon = tile
+for layer in (P, halo_img, Q2, sp):
+    icon = Image.alpha_composite(icon, layer)
 final = Image.new("RGBA", (S, S), (0, 0, 0, 0))
 final.paste(icon, (0, 0), mask)
 final.save(out_png)
