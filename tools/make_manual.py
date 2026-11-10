@@ -125,7 +125,8 @@ In GitHub preview, links to web pages open in your browser, links to other <code
 <tr><td>Spell check</td><td><i>View → Spell check</i> underlines misspelled words (Windows dictionaries).</td></tr>
 <tr><td>One window per file</td><td>Opening a .md while Gryphmark is running brings the existing window forward instead of starting a second copy. <i>File → New window</i> still opens another one.</td></tr>
 <tr><td>Updates</td><td>Gryphmark checks once a day for a new version; <i>Help → Check for updates</i> does it on demand.</td></tr>
-<tr><td>About</td><td><i>Help → About Gryphmark</i> shows the version, author, license and credits. <i>Copy info</i> copies the version details, handy for reporting a problem.</td></tr></table>
+<tr><td>About</td><td><i>Help → About Gryphmark</i> shows the version, author, license and credits. <i>Copy info</i> copies the version details, handy for reporting a problem.</td></tr>
+<tr><td>Sample document</td><td>A sample that shows every feature in the three views. It opens on the first start and from <i>Help → Sample document</i>, and it is pinned at the top of <i>File → Open recent</i>; right-click it there and choose <i>Hide sample</i> to remove it from that list. It opens as an untitled copy, so the original is never overwritten, and it changes language together with the menus.</td></tr></table>
 <h3>GitHub extras</h3>
 <p>Also rendered exactly like GitHub: alerts (<code>&gt; [!NOTE]</code>, <code>[!TIP]</code>, <code>[!IMPORTANT]</code>, <code>[!WARNING]</code>, <code>[!CAUTION]</code>),
 <code>```mermaid</code> diagrams, math (<code>$E=mc^2$</code> and <code>$$ … $$</code>), footnotes (<code>[^1]</code>) and emoji shortcodes (<code>:rocket:</code>).</p>
@@ -249,7 +250,8 @@ En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otro
 <tr><td>Ortografía</td><td><i>Ver → Revisar ortografía</i> subraya las palabras mal escritas (diccionarios de Windows).</td></tr>
 <tr><td>Una sola ventana</td><td>Abrir un .md con Gryphmark ya abierto trae al frente la ventana existente en vez de abrir otra copia. <i>Archivo → Nueva ventana</i> sigue abriendo otra.</td></tr>
 <tr><td>Actualizaciones</td><td>Gryphmark busca una versión nueva una vez por día; <i>Ayuda → Buscar actualizaciones</i> lo hace en el momento.</td></tr>
-<tr><td>Acerca de</td><td><i>Ayuda → Acerca de Gryphmark</i> muestra la versión, el autor, la licencia y los créditos. <i>Copiar info</i> copia los datos de versión, útil para reportar un problema.</td></tr></table>
+<tr><td>Acerca de</td><td><i>Ayuda → Acerca de Gryphmark</i> muestra la versión, el autor, la licencia y los créditos. <i>Copiar info</i> copia los datos de versión, útil para reportar un problema.</td></tr>
+<tr><td>Documento de ejemplo</td><td>Un ejemplo que muestra todas las funciones en las tres vistas. Se abre la primera vez que arrancás el programa y desde <i>Ayuda → Documento de ejemplo</i>, y está fijo arriba de todo en <i>Archivo → Abrir reciente</i>; con clic derecho ahí y <i>Ocultar ejemplo</i> lo sacás de esa lista. Se abre como copia sin título, así que el original nunca se pisa, y cambia de idioma junto con los menús.</td></tr></table>
 <h3>Extras de GitHub</h3>
 <p>También se muestran igual que en GitHub: avisos (<code>&gt; [!NOTE]</code>, <code>[!TIP]</code>, <code>[!IMPORTANT]</code>, <code>[!WARNING]</code>, <code>[!CAUTION]</code>),
 diagramas <code>```mermaid</code>, fórmulas (<code>$E=mc^2$</code> y <code>$$ … $$</code>), notas al pie (<code>[^1]</code>) y emojis por código (<code>:rocket:</code>).</p>

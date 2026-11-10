@@ -270,13 +270,14 @@ public partial class MainWindow
     {
         try
         {
+            // remember the attempt even if it fails (no network, no release yet): at most one try a day
+            _settings.LastUpdateCheck = DateTime.UtcNow; _settings.Save();
             using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
             http.DefaultRequestHeaders.UserAgent.ParseAdd($"Gryphmark/{Version}");
             var json = await http.GetStringAsync($"https://api.github.com/repos/{Repo}/releases/latest");
             using var doc = JsonDocument.Parse(json);
             var tag = (doc.RootElement.GetProperty("tag_name").GetString() ?? "").TrimStart('v', 'V');
             var url = doc.RootElement.GetProperty("html_url").GetString();
-            _settings.LastUpdateCheck = DateTime.UtcNow; _settings.Save();
             if (System.Version.TryParse(tag, out var latest) && System.Version.TryParse(Version, out var mine) && latest > mine)
             {
                 var r = MessageBox.Show(this, string.Format(Strings.Get("UpdateAvailable"), tag, Version), "Gryphmark", MessageBoxButton.YesNo, MessageBoxImage.Information);

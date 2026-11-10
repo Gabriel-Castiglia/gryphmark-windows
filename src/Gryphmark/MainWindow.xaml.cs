@@ -39,6 +39,7 @@ public partial class MainWindow : Window
         SourceInitialized += (_, _) => ThemeManager.Apply(this, _settings.Theme == "dark");
         Loaded += async (_, _) => await InitWebAsync();
         Closing += OnClosing;
+        Closed += (_, _) => CloseTrace.Log("window closed");
         InitFeatures();
         PreviewKeyDown += OnKey;
         Drop += (_, e) =>
@@ -97,8 +98,16 @@ public partial class MainWindow : Window
                 await Js($"mdApp.init({Q(_settings.Lang)},{Q(_settings.Theme)},{Q(_settings.Mode)},{(_settings.Spell ? "true" : "false")})");
                 _ready = true;
                 if (_pendingOpen != null) { var p = _pendingOpen; _pendingOpen = null; await LoadFileAsync(p); }
+                else if (!_settings.SampleShown && SamplePath != null) { _settings.SampleShown = true; _settings.Save(); await LoadSampleAsync(); }
                 else UpdateStatus();
                 await OfferRecoveryAsync();
+                if (CloseTrace.On)
+                {
+                    CloseTrace.Log("editor ready");
+                    var t = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+                    t.Tick += (_, _) => { t.Stop(); CloseTrace.Log("Close() called"); Close(); };
+                    t.Start();
+                }
                 break;
             case "dirty":
                 if (root.TryGetProperty("words", out var w)) _words = w.GetInt32();
@@ -174,7 +183,7 @@ public partial class MainWindow : Window
             Web.CoreWebView2.ClearVirtualHostNameToFolderMapping("doc.local");
             Web.CoreWebView2.SetVirtualHostNameToFolderMapping("doc.local", dir, CoreWebView2HostResourceAccessKind.Allow);
             await Js($"mdApp.load({Q(text)},'https://doc.local/')");
-            _path = path; _dirty = false;
+            _path = path; _dirty = false; _isSample = false;
             Watch(path);
             _words = int.TryParse(await Js("mdApp.words()"), out var n) ? n : 0;
             _settings.AddRecent(path); _settings.Save();
@@ -242,13 +251,58 @@ public partial class MainWindow : Window
 
     private async void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
+        CloseTrace.Log("OnClosing start");
         _settings.Maximized = WindowState == WindowState.Maximized;
         if (WindowState == WindowState.Normal) { _settings.Width = Width; _settings.Height = Height; }
         if (_ready) _settings.Zoom = Web.ZoomFactor;
         _settings.Save();
-        if (_closingConfirmed || !_dirty) { ClearRecovery(); StopFeatures(); return; }
+        if (_closingConfirmed || !_dirty) { Hide(); ClearRecovery(); StopFeatures(); CloseTrace.Log("OnClosing done"); return; }
         e.Cancel = true;
         if (await ConfirmDiscardAsync()) { _closingConfirmed = true; ClearRecovery(); StopFeatures(); Close(); }
+    }
+
+    // ------------------------------------------------------------------ Sample document
+    // Installed hidden in {app}\samples (one per language). It opens as an untitled copy, so the
+    // installed file is never overwritten; Save asks for a new name.
+    private bool _isSample;
+
+    private static string? SamplePath
+    {
+        get
+        {
+            foreach (var lang in new[] { Strings.Lang, "en" })
+            {
+                var p = Path.Combine(AppDir, "samples", $"sample_{lang}.md");
+                if (File.Exists(p)) return p;
+            }
+            return null;
+        }
+    }
+
+    private async Task OpenSampleAsync()
+    {
+        if (!_ready || !await ConfirmDiscardAsync()) return;
+        await LoadSampleAsync();
+    }
+
+    private async Task LoadSampleAsync()
+    {
+        var p = SamplePath;
+        if (p == null) return;
+        try
+        {
+            var text = File.ReadAllText(p, Encoding.UTF8);
+            Web.CoreWebView2.ClearVirtualHostNameToFolderMapping("doc.local");
+            await Js($"mdApp.load({Q(text)}, null)");
+            _path = null; _dirty = false; _crlf = false; _bom = false; _isSample = true;
+            Watch(null); ClearRecovery();
+            _words = int.TryParse(await Js("mdApp.words()"), out var n) ? n : 0;
+            UpdateTitle(); UpdateStatus();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, string.Format(Strings.Get("ErrOpen"), ex.Message), "Gryphmark", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private async Task NewDocAsync()
@@ -256,7 +310,7 @@ public partial class MainWindow : Window
         if (!await ConfirmDiscardAsync()) return;
         Web.CoreWebView2.ClearVirtualHostNameToFolderMapping("doc.local");
         await Js("mdApp.load('', null)");
-        _path = null; _dirty = false; _words = 0; _crlf = false; _bom = false;
+        _path = null; _dirty = false; _words = 0; _crlf = false; _bom = false; _isSample = false;
         Watch(null); ClearRecovery();
         UpdateTitle(); UpdateStatus();
     }
@@ -396,7 +450,7 @@ public partial class MainWindow : Window
         ["Task"] = "", ["CodeBlock"] = "", ["Hr"] = "",
         ["ModeVisual"] = "", ["ModeSource"] = "", ["ModePreview"] = "",
         ["Dark"] = "", ["ZoomIn"] = "", ["ZoomOut"] = "", ["ZoomReset"] = "",
-        ["Manual"] = "", ["Guide"] = "", ["About"] = "",
+        ["Sample"] = "\uE736", ["Manual"] = "", ["Guide"] = "", ["About"] = "",
         ["Find"] = "", ["Replace"] = "", ["FindNext"] = "", ["Outline"] = "", ["CheckUpdates"] = "", ["RecentClear"] = "",
     };
 
@@ -422,6 +476,16 @@ public partial class MainWindow : Window
         file.Items.Add(Item("NewWindow", null, () => RunCommand("newwindow")));
         file.Items.Add(Item("Open", ctrl + "O", () => RunCommand("open")));
         var recent = new MenuItem { Header = Strings.Get("Recent"), Icon = Glyph("Recent") };
+        if (SamplePath != null && !_settings.SampleHidden)
+        {
+            var smi = new MenuItem { Header = Strings.Get("SampleItem"), Icon = Glyph("Sample"), ToolTip = Strings.Get("SampleTip") };
+            smi.Click += async (_, _) => await OpenSampleAsync();
+            var hide = new MenuItem { Header = Strings.Get("SampleHide") };
+            hide.Click += (_, _) => { _settings.SampleHidden = true; _settings.Save(); BuildMenu(); };
+            smi.ContextMenu = new ContextMenu { Items = { hide } };
+            recent.Items.Add(smi);
+            recent.Items.Add(new Separator());
+        }
         if (_settings.Recent.Count == 0) recent.Items.Add(new MenuItem { Header = Strings.Get("RecentEmpty"), IsEnabled = false });
         else
         {
@@ -519,6 +583,7 @@ public partial class MainWindow : Window
 
         var help = new MenuItem { Header = Strings.Get("Help") };
         help.Items.Add(Item("Manual", "F1", () => { OpenManual(); return Task.CompletedTask; }));
+        help.Items.Add(Item("Sample", null, OpenSampleAsync, enabled: SamplePath != null));
         help.Items.Add(Item("Guide", null, () =>
         {
             OpenLink(Strings.Lang == "es"
@@ -707,18 +772,20 @@ public partial class MainWindow : Window
         _settings.Lang = code; Strings.Lang = code; _settings.Save();
         if (_ready) await Js($"mdApp.setLang({Q(code)})");
         BuildMenu(); UpdateTitle(); UpdateStatus(); LocalizeFeatures();
+        // the sample follows the interface language (unless it was edited: those changes are kept)
+        if (_ready && _isSample && _path == null && !_dirty) await LoadSampleAsync();
     }
 
     // ------------------------------------------------------------------ Chrome
     private void UpdateTitle()
     {
-        var name = _path != null ? Path.GetFileName(_path) : Strings.Get("Untitled");
+        var name = _path != null ? Path.GetFileName(_path) : Strings.Get(_isSample ? "SampleTitle" : "Untitled");
         Title = $"{(_dirty ? "● " : "")}{name} — Gryphmark";
     }
 
     private void UpdateStatus()
     {
-        StatusPath.Text = _path ?? Strings.Get("Untitled");
+        StatusPath.Text = _path ?? Strings.Get(_isSample ? "SampleTitle" : "Untitled");
         StatusWords.Text = string.Format(Strings.Get("Words"), _words);
         StatusMode.Text = Strings.Plain(_settings.Mode switch { "source" => "ModeSource", "preview" => "ModePreview", _ => "ModeVisual" });
         StatusState.Text = _dirty ? Strings.Get("Modified") : (_path != null ? Strings.Get("Saved") : "");

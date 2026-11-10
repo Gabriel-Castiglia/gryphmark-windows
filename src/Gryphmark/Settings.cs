@@ -16,6 +16,10 @@ public sealed class Settings
     public bool Maximized { get; set; }
     public bool Outline { get; set; } = true;
     public bool Spell { get; set; } = true;
+    /// <summary>The sample document was opened once on first start.</summary>
+    public bool SampleShown { get; set; }
+    /// <summary>The user hid the sample from File → Open recent (Help → Sample document still opens it).</summary>
+    public bool SampleHidden { get; set; }
     public DateTime LastUpdateCheck { get; set; }
 
     public static string Dir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Gryphmark");

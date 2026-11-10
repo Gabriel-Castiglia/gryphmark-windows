@@ -59,6 +59,11 @@ Name: "assoc"; Description: "{cm:AssocTask}"; GroupDescription: "{cm:AssocGroup}
 [Files]
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"; Flags: ignoreversion
+; Sample document (Help → Sample document). Hidden, so it is not deleted by accident.
+Source: "..\samples\sample_*.md"; DestDir: "{app}\samples"; Attribs: hidden; Flags: ignoreversion
+
+[Dirs]
+Name: "{app}\samples"; Attribs: hidden
 
 [Icons]
 Name: "{autoprograms}\Gryphmark"; Filename: "{app}\Gryphmark.exe"; IconFilename: "{app}\Gryphmark.ico"

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.1 — 2026-11-10
+
+- Sample document installed with the program (English and Spanish, hidden file in `samples\`): it opens on
+  the first start, from **Help → Sample document**, and pinned at the top of **File → Open recent**, where a
+  right-click hides it. It opens as an untitled copy, so the installed file is never overwritten, and it
+  switches language together with the interface.
+- Closing hides the window at once; the editor is torn down behind it.
+- The daily update check is remembered even when it fails, so it no longer runs on every start.
+- Diagnostics: `GM_TRACE_CLOSE=<log>` times each shutdown step.
+
 ## 1.2.0 — 2026-11-10
 
 - **Renamed from Quillforge to Gryphmark**, after the griffin in the icon. Program, installer, manuals,

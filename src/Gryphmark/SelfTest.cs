@@ -44,7 +44,7 @@ public static class SelfTest
             {
                 Strings.Lang = lang;
                 string sfx = $"{lang}_{(dark ? "dark" : "light")}";
-                var about = new AboutDialog(w, "1.2.0");
+                var about = new AboutDialog(w, "1.2.1");
                 Layout(about.Card);
                 Save(about.Card, Path.Combine(dir, $"about_{sfx}.png"), dark);
                 about.Close();

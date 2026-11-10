@@ -36,6 +36,8 @@ public partial class App : Application
         if (first) StartServer(main);
     }
 
+    private void OnExit(object sender, ExitEventArgs e) => CloseTrace.Log("Application.Exit");
+
     private static bool TrySend(string path)
     {
         try
