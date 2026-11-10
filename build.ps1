@@ -1,8 +1,17 @@
 ﻿# Gryphmark — full build: web bundle, icon, manuals (PDF), self-contained publish, installer.
-# Usage:  powershell -ExecutionPolicy Bypass -File build.ps1 [-Version 1.0.0] [-SkipNpm]
-param([string]$Version = "1.7.2", [switch]$SkipNpm)
+# Usage:  powershell -ExecutionPolicy Bypass -File build.ps1 [-SkipNpm] [-Art]
+#   -SkipNpm  keep the web bundle in src/Gryphmark/wwwroot/lib as it is
+#   -Art      redraw the icons and the installer pictures (they are committed; needs Python with
+#             Pillow, numpy, scipy and opencv-python)
+# The version comes from <Version> in src/Gryphmark/Gryphmark.csproj, the only place it is written.
+# Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+# Date: November 10, 2026
+# SPDX-License-Identifier: GPL-2.0-only
+param([switch]$SkipNpm, [switch]$Art)
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
+$Version = ([xml](Get-Content (Join-Path $root "src/Gryphmark/Gryphmark.csproj") -Raw)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+if (-not $Version) { throw "No <Version> in Gryphmark.csproj" }
 $out = Join-Path $root "out"
 $pub = Join-Path $out "publish"
 $www = Join-Path $root "src/Gryphmark/wwwroot"
@@ -14,6 +23,7 @@ if (-not $SkipNpm) {
     Step "npm bundle"
     Push-Location (Join-Path $root "_npm")
     npm ci --silent
+    if ($LASTEXITCODE) { throw "npm ci failed" }
     New-Item -ItemType Directory -Force (Join-Path $www "lib") | Out-Null
     npx esbuild entry.js --bundle --minify --format=iife --outfile="$www/lib/bundle.js"
     $nm = "node_modules"
@@ -28,22 +38,29 @@ if (-not $SkipNpm) {
     Pop-Location
 }
 
-# 2. Icon and installer artwork
+# 2. Icon and installer artwork (only with -Art: the drawn files are in the repository)
+if ($Art) {
 Step "icon + wizard art"
 python "$root/tools/make_icon_griffin.py" "$root/assets/griffin_schongauer_met_cc0.jpg" "$root/src/Gryphmark/Gryphmark.ico" "$root/assets/gryphmark.png" "232,96,44" "1060,400,900" "12"
 # theme colours; also copies the default (purple) variant over Gryphmark.ico
 python "$root/tools/make_theme_icons.py"
 python "$root/tools/make_wizard.py"
+}
 
-# 3. Manuals -> PDF (Edge headless)
+# 3. Manuals -> PDF (a Chromium browser, headless)
 Step "manuals"
 python "$root/tools/make_manual.py" $Version
-$edge = @("${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe", "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
+# any Chromium browser prints the PDF: Edge, Chrome or Brave
+$edge = @("${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe", "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe",
+          "$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe",
+          "$env:ProgramFiles\BraveSoftware\Brave-Browser\Application\brave.exe", "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\Application\brave.exe") |
+    Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $edge) { throw "No Chromium browser (Edge, Chrome or Brave) to print the manuals" }
 foreach ($l in "EN", "ES") {
     $html = Join-Path $root "docs/Gryphmark_Manual_$l.html"
     $pdf = Join-Path $root "docs/Gryphmark_Manual_$l.pdf"
     if (Test-Path $pdf) { Remove-Item $pdf -Force }
-    Start-Process -FilePath $edge -Wait -WindowStyle Hidden -ArgumentList @("--headless=new", "--disable-gpu", "--no-pdf-header-footer", "--print-to-pdf=`"$pdf`"", ([uri]$html).AbsoluteUri)
+    Start-Process -FilePath $edge -Wait -WindowStyle Hidden -ArgumentList @("--headless=new", "--disable-gpu", "--no-first-run", "--user-data-dir=`"$env:TEMP\gm_pdf_profile`"", "--no-pdf-header-footer", "--print-to-pdf=`"$pdf`"", ([uri]$html).AbsoluteUri)
     $t = 0; while (-not (Test-Path $pdf) -and $t -lt 60) { Start-Sleep -Milliseconds 500; $t++ }
     if (-not (Test-Path $pdf)) { throw "PDF not generated: $pdf" }
 }

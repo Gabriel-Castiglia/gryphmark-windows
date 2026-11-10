@@ -1,4 +1,8 @@
-"""Gryphmark icon: a document page with the Markdown mark (M + down arrow) and a glowing quill writing on it."""
+"""Gryphmark icon: a document page with the Markdown mark (M + down arrow) and a glowing quill writing on it.
+Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+Date: November 10, 2026
+SPDX-License-Identifier: GPL-2.0-only
+"""
 import math, sys
 from PIL import Image, ImageDraw, ImageFilter
 

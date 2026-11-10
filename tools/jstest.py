@@ -1,8 +1,19 @@
-"""Headless check of app.js logic: formatting preservation, find, GitHub extras. Prints the JSON result."""
+"""Headless check of app.js logic: formatting preservation, find, GitHub extras. Prints the JSON result.
+Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+Date: November 10, 2026
+SPDX-License-Identifier: GPL-2.0-only
+"""
 import json, pathlib, subprocess, sys, tempfile
 root = pathlib.Path(__file__).resolve().parents[1]
 www = root / "src" / "Gryphmark" / "wwwroot"
-edge = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+import os
+edge = next((p for p in (os.path.expandvars(x) for x in (
+    r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe", r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe",
+    r"%ProgramFiles%\Google\Chrome\Application\chrome.exe", r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe",
+    r"%ProgramFiles%\BraveSoftware\Brave-Browser\Application\brave.exe", r"%LOCALAPPDATA%\BraveSoftware\Brave-Browser\Application\brave.exe"))
+    if os.path.exists(p)), None)   # any Chromium browser
+if not edge:
+    sys.exit("No Chromium browser (Edge, Chrome or Brave) found")
 
 original = """# Title
 
@@ -51,7 +62,8 @@ def page(extra_js):
     html = html.replace('<script src="' + www.as_uri() + '/app.js"></script>', "<script>" + js + "</script><pre id='out'></pre>" + extra_js)
     f = pathlib.Path(tempfile.gettempdir()) / "gm_jstest.html"
     f.write_text(html, encoding="utf-8")
-    r = subprocess.run([edge, "--headless=new", "--disable-gpu", "--allow-file-access-from-files", "--virtual-time-budget=6000", "--dump-dom", f.as_uri()],
+    r = subprocess.run([edge, "--headless=new", "--disable-gpu", "--no-first-run",
+                        "--user-data-dir=" + str(pathlib.Path(tempfile.gettempdir()) / "gm_jstest_profile"), "--allow-file-access-from-files", "--virtual-time-budget=6000", "--dump-dom", f.as_uri()],
                        capture_output=True, text=True, encoding="utf-8", errors="replace")
     s = r.stdout
     i = s.find("<pre id=\"out\">"); j = s.find("</pre>", i)
@@ -89,6 +101,38 @@ js = """
     out.footnote = /footnote/.test(html);
     out.emoji = html.includes('\\u{1F680}');
     out.katex = html.includes('class="katex');
+    // sanitising: nothing in a document may run script or reach the host
+    window.__xss = 0;
+    const EVIL = '<img src=x onerror="window.__xss=1">\\n\\n<script>window.__xss=2<\\/script>\\n\\n' +
+      '[x](javascript:window.__xss=3)\\n\\n<svg><script>window.__xss=4<\\/script></svg>\\n\\n<a href="#" onclick="window.__xss=5">y</a>\\n';
+    mdApp.load(EVIL, null); mdApp.setMode('preview');
+    await new Promise(r => setTimeout(r, 600));
+    out.xss_blocked = window.__xss === 0;
+    out.xss_markup_gone = !/onerror|<script|javascript:|onclick/i.test(document.getElementById('preview').innerHTML);
+    // a change on disk keeps the reader's place and shows the new text
+    const LONG = Array.from({ length: 400 }, (_, i) => 'Line ' + i).join('\\n\\n');
+    mdApp.load(LONG, null); mdApp.setMode('preview');
+    await new Promise(r => setTimeout(r, 400));
+    const host = document.getElementById('previewHost'); host.scrollTop = 3000;
+    await mdApp.reload(LONG + '\\n\\nAdded at the end');
+    await new Promise(r => setTimeout(r, 400));
+    out.reload_scroll = host.scrollTop;
+    out.reload_keeps_place = Math.abs(host.scrollTop - 3000) < 5;
+    out.reload_new_text = document.getElementById('preview').textContent.includes('Added at the end');
+    // typing right after a reload still marks the document modified (the next reload must ask)
+    mdApp.setMode('visual');
+    window.__dirty = 0;
+    const realHost = window.chrome.webview.postMessage;
+    window.chrome.webview.postMessage = (m) => { if (m && m.type === 'dirty') window.__dirty++; realHost(m); };
+    await mdApp.reload('# Fresh\\n\\ntext\\n');
+    mdApp.focus(); mdApp.insertText('typed ');
+    await new Promise(r => setTimeout(r, 200));
+    out.typing_after_reload_dirty = window.__dirty > 0;
+    window.__dirty = 0;
+    await mdApp.reload('# Again\\n');
+    await new Promise(r => setTimeout(r, 200));
+    out.reload_itself_not_dirty = window.__dirty === 0;
+    window.chrome.webview.postMessage = realHost;
   } catch (e) { out.err = String(e && e.stack || e); }
   document.getElementById('out').textContent = JSON.stringify(out);
 })();

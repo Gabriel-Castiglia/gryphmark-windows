@@ -1,3 +1,8 @@
+// Gryphmark -- the About window.
+// Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+// Date: November 10, 2026
+// SPDX-License-Identifier: GPL-2.0-only
+
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -17,6 +22,7 @@ public sealed class AboutDialog : Window
         "TOAST UI Editor · ProseMirror · marked · github-markdown-css ·\n" +
         "Mermaid · KaTeX · gemoji — MIT\n" +
         "highlight.js · jsdiff — BSD-3-Clause\n" +
+        "DOMPurify — MPL-2.0\n" +
         ".NET (MIT) · Microsoft Edge WebView2";
 
     public FrameworkElement Card { get; }

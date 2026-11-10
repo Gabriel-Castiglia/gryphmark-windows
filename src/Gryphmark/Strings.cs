@@ -1,3 +1,8 @@
+// Gryphmark -- interface text in English and Spanish.
+// Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+// Date: November 10, 2026
+// SPDX-License-Identifier: GPL-2.0-only
+
 namespace Gryphmark;
 
 /// <summary>All user-visible text, English and Spanish.</summary>

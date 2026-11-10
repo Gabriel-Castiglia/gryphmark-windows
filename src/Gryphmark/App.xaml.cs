@@ -1,3 +1,8 @@
+// Gryphmark -- start-up: command line, profiles, one instance per profile.
+// Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+// Date: November 10, 2026
+// SPDX-License-Identifier: GPL-2.0-only
+
 using System.IO;
 using System.IO.Pipes;
 using System.Windows;
@@ -51,8 +56,6 @@ public partial class App : Application
         main.Show();
         if (first) StartServer(main);
     }
-
-    private void OnExit(object sender, ExitEventArgs e) => CloseTrace.Log("Application.Exit");
 
     private static bool TrySend(string path)
     {

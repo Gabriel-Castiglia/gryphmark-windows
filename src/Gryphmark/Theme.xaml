@@ -1,3 +1,7 @@
+<!-- Gryphmark: window styles.
+     Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+     Date: November 10, 2026
+     SPDX-License-Identifier: GPL-2.0-only -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 

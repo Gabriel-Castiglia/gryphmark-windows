@@ -1,4 +1,7 @@
-/* Gryphmark — editor page. Talks to the WPF host through chrome.webview. */
+/* Gryphmark — editor page. Talks to the WPF host through chrome.webview.
+   Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+   Date: November 10, 2026
+   SPDX-License-Identifier: GPL-2.0-only */
 (function () {
   'use strict';
   const host = window.chrome && window.chrome.webview;
@@ -7,6 +10,11 @@
   let editor = null;
   let state = { lang: 'en', theme: 'light', mode: 'visual', spell: true, locked: false };
   let suppressDirty = false;
+  // While suppressDirty is on (the editor is being filled by the program), only the change that
+  // filling makes is ignored: quietText is the text it leaves (null while it is being written).
+  // Anything the user types in that moment differs from it and still marks the document
+  // modified, so a reload never hides an edit.
+  let quietText = null;
   let original = '';        // text exactly as read from disk
   let baseline = '';        // the same text after the editor's normalisation (captured at load)
 
@@ -48,9 +56,13 @@
 
   function escapeHtml(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
+  // marked passes raw HTML through, and this page can talk to the host: everything a document
+  // renders is sanitised first, as GitHub does (no scripts, event handlers or javascript: links).
+  const PURIFY = { USE_PROFILES: { html: true, svg: true, mathMl: true }, FORBID_TAGS: ['style', 'form'], FORBID_ATTR: ['srcset'] };
+
   function renderGithub(text) {
     for (const k in slugCount) delete slugCount[k];
-    let html = md.parse(text || '');
+    let html = DOMPurify.sanitize(md.parse(text || ''), PURIFY);
     html = html.replace(/<input (checked="" )?disabled="" type="checkbox">/g, (m, c) => '<input type="checkbox" disabled ' + (c ? 'checked ' : '') + 'class="task-list-item-checkbox">');
     // GitHub's classes on task items and their lists: no bullet under the box (styled in app.css)
     const tmp = document.createElement('div');
@@ -98,6 +110,7 @@
     if (editor) { editor.destroy(); editor = null; }
     el.innerHTML = '';
     suppressDirty = true;
+    quietText = null;
     editor = new ToastEditor({
       el,
       height: '100%',
@@ -113,13 +126,14 @@
       toolbarItems: [],   // the toolbar is native (WPF)
       events: {
         change: () => {
-          if (!suppressDirty) post({ type: 'dirty', words: countWords() });
+          if (!suppressDirty || (quietText !== null && editor.getMarkdown() !== quietText)) post({ type: 'dirty', words: countWords() });
           scheduleOutline(); if (find.query) scheduleFind();
         },
       },
     });
     markGithubClass();
     applyLock();
+    quietText = editor.getMarkdown();
     setTimeout(() => { suppressDirty = false; }, 50);
   }
 
@@ -359,6 +373,28 @@
       build(original);
       baseline = editor.getMarkdown();
       applyMode(); sendOutline();
+      return true;
+    },
+    // The same file changed on disk (another program, often an AI assistant, is editing it):
+    // swap the text in place and keep the reader where they were in every view.
+    async reload(markdown) {
+      if (!editor) { this.load(markdown); return true; }
+      const panes = ['#previewHost', '#editorHost .toastui-editor-md-preview', '#editorHost .ProseMirror'];
+      const kept = panes.map((sel) => Array.from(document.querySelectorAll(sel)).map((el) => el.scrollTop));
+      original = (markdown || '').replace(/\r\n/g, '\n');
+      suppressDirty = true;
+      quietText = null;
+      editor.setMarkdown(original, false);
+      baseline = editor.getMarkdown();
+      quietText = baseline;
+      setTimeout(() => { suppressDirty = false; }, 50);
+      markGithubClass(); applyLock();
+      if (state.mode === 'preview') await showPreview();
+      const restore = () => panes.forEach((sel, i) => document.querySelectorAll(sel).forEach((el, j) => {
+        if (kept[i][j] !== undefined) el.scrollTop = kept[i][j];
+      }));
+      restore(); requestAnimationFrame(() => { restore(); setTimeout(restore, 120); });
+      sendOutline(); if (find.query) scheduleFind();
       return true;
     },
     getMarkdown() { return editor ? editor.getMarkdown() : ''; },

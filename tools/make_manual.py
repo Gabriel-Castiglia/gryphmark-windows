@@ -1,4 +1,8 @@
-"""Builds docs/Gryphmark_Manual_EN.html and _ES.html; build.ps1 prints them to PDF with Edge."""
+"""Builds docs/Gryphmark_Manual_EN.html and _ES.html; build.ps1 prints them to PDF with Edge.
+Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+Date: November 10, 2026
+SPDX-License-Identifier: GPL-2.0-only
+"""
 import pathlib, base64, sys
 
 root = pathlib.Path(__file__).resolve().parents[1]
@@ -204,9 +208,10 @@ The default is dark gold. Shortcuts you made with an icon of your own are not ch
 <table><tr><th>Item</th><th>Detail</th></tr>
 <tr><td>Version</td><td>{v}</td></tr>
 <tr><td>License</td><td>GNU GPL version 2 only (GPL-2.0-only) — free software, no warranty. Full text: <code>LICENSE.txt</code> in the program folder.</td></tr>
-<tr><td>Platform</td><td>.NET 8 (WPF, self-contained) + Microsoft Edge WebView2</td></tr>
+<tr><td>Platform</td><td>Windows 10/11 on x64 (64-bit Intel or AMD); there is no ARM build. .NET 10 (WPF, self-contained) + Microsoft Edge WebView2</td></tr>
+<tr><td>Project page</td><td>github.com/Gabriel-Castiglia/gryphmark-windows</td></tr>
 <tr><td>Editor</td><td>TOAST UI Editor 3.2 (MIT)</td></tr>
-<tr><td>GitHub rendering</td><td>marked (GitHub Flavored Markdown), highlight.js, github-markdown-css (MIT)</td></tr>
+<tr><td>GitHub rendering</td><td>marked (GitHub Flavored Markdown), highlight.js, github-markdown-css (MIT); DOMPurify (MPL-2.0) cleans the HTML</td></tr>
 <tr><td>Icon</td><td>Griffin from Martin Schongauer's engraving (c. 1485), The Metropolitan Museum of Art, CC0; quill added.</td></tr>
 <tr><td>Settings</td><td><code>%APPDATA%\\Gryphmark\\settings.json</code></td></tr>
 <tr><td>Source code</td><td><code>src/</code> in the project folder; build with <code>build.ps1</code>.</td></tr></table>
@@ -380,9 +385,10 @@ El color por defecto es el dorado oscuro. Los accesos directos que armaste con u
 <table><tr><th>Ítem</th><th>Detalle</th></tr>
 <tr><td>Versión</td><td>{v}</td></tr>
 <tr><td>Licencia</td><td>GNU GPL versión 2 únicamente (GPL-2.0-only) — software libre, sin garantía. Texto completo: <code>LICENSE.txt</code> en la carpeta del programa.</td></tr>
-<tr><td>Plataforma</td><td>.NET 8 (WPF, autónomo) + Microsoft Edge WebView2</td></tr>
+<tr><td>Plataforma</td><td>Windows 10/11 en x64 (Intel o AMD de 64 bits); no hay versión para ARM. .NET 10 (WPF, autónomo) + Microsoft Edge WebView2</td></tr>
+<tr><td>Página del proyecto</td><td>github.com/Gabriel-Castiglia/gryphmark-windows</td></tr>
 <tr><td>Editor</td><td>TOAST UI Editor 3.2 (MIT)</td></tr>
-<tr><td>Render GitHub</td><td>marked (GitHub Flavored Markdown), highlight.js, github-markdown-css (MIT)</td></tr>
+<tr><td>Render GitHub</td><td>marked (GitHub Flavored Markdown), highlight.js, github-markdown-css (MIT); DOMPurify (MPL-2.0) limpia el HTML</td></tr>
 <tr><td>Ícono</td><td>Grifo del grabado de Martin Schongauer (c. 1485), Museo Metropolitano de Arte, CC0; pluma agregada.</td></tr>
 <tr><td>Configuración</td><td><code>%APPDATA%\\Gryphmark\\settings.json</code></td></tr>
 <tr><td>Código fuente</td><td><code>src/</code> en la carpeta del proyecto; se compila con <code>build.ps1</code>.</td></tr></table>

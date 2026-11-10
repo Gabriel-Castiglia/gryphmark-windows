@@ -1,3 +1,8 @@
+// Gryphmark -- main window: live reload, updates and other features.
+// Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+// Date: November 10, 2026
+// SPDX-License-Identifier: GPL-2.0-only
+
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -20,7 +25,7 @@ public partial class MainWindow
     private readonly DispatcherTimer _statusTimer = new() { Interval = TimeSpan.FromSeconds(4) };
     private readonly string _recoveryId = Guid.NewGuid().ToString("N");
     private static string RecoveryDir => Path.Combine(Settings.Dir, "recovery");
-    public const string Repo = "Gabriel-Castiglia/gryphmark";
+    public const string Repo = "Gabriel-Castiglia/gryphmark-windows";
 
     private void InitFeatures()
     {
@@ -180,33 +185,69 @@ public partial class MainWindow
                 NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName,
                 EnableRaisingEvents = true,
             };
+            // Editors and AI assistants often save by writing a temporary file and renaming it over
+            // this one, or by deleting and recreating it: every one of those is a change to reload.
             _watcher.Changed += (_, _) => Dispatcher.BeginInvoke(() => OnExternalChange(path));
-            _watcher.Renamed += (_, _) => Dispatcher.BeginInvoke(() => Flash(Strings.Get("DeletedOnDisk")));
-            _watcher.Deleted += (_, _) => Dispatcher.BeginInvoke(() => Flash(Strings.Get("DeletedOnDisk")));
+            _watcher.Created += (_, _) => Dispatcher.BeginInvoke(() => OnExternalChange(path));
+            _watcher.Renamed += (_, e) => Dispatcher.BeginInvoke(() =>
+            {
+                if (string.Equals(e.FullPath, path, StringComparison.OrdinalIgnoreCase)) OnExternalChange(path);
+                else OnPossiblyGone(path);
+            });
+            _watcher.Deleted += (_, _) => Dispatcher.BeginInvoke(() => OnPossiblyGone(path));
         }
         catch { /* network folders without notifications: nothing to watch */ }
     }
 
-    private bool _changePending;
+    /// <summary>Deleted or renamed away: a save by replacement brings it back a moment later.</summary>
+    private async void OnPossiblyGone(string path)
+    {
+        await Task.Delay(600);
+        if (!string.Equals(path, _path, StringComparison.OrdinalIgnoreCase)) return;
+        if (File.Exists(path)) OnExternalChange(path);
+        else Flash(Strings.Get("DeletedOnDisk"));
+    }
+
+    private bool _changePending, _changeAgain;
     private async void OnExternalChange(string path)
     {
-        if (DateTime.UtcNow < _suppressWatchUntil || _changePending || !string.Equals(path, _path, StringComparison.OrdinalIgnoreCase)) return;
+        if (DateTime.UtcNow < _suppressWatchUntil || !string.Equals(path, _path, StringComparison.OrdinalIgnoreCase)) return;
+        if (_changePending) { _changeAgain = true; return; }   // a burst of writes: reload once more at the end
         _changePending = true;
         try
         {
-            await Task.Delay(400);   // let the other program finish writing
-            if (!File.Exists(path)) return;
-            if (_dirty)
+            do
             {
-                var r = MessageBox.Show(this, string.Format(Strings.Get("ChangedOnDisk"), Path.GetFileName(path)), "Gryphmark",
-                    MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (r != MessageBoxResult.Yes) return;
-            }
-            _dirty = false;
-            await LoadFileAsync(path);
+                _changeAgain = false;
+                await Task.Delay(250);   // let the other program finish writing
+                if (!File.Exists(path) || !string.Equals(path, _path, StringComparison.OrdinalIgnoreCase)) return;
+                if (_dirty)
+                {
+                    var r = MessageBox.Show(this, string.Format(Strings.Get("ChangedOnDisk"), Path.GetFileName(path)), "Gryphmark",
+                        MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (r != MessageBoxResult.Yes) return;
+                    _dirty = false;
+                }
+                if (!await ReloadFromDiskAsync(path)) { _changeAgain = true; await Task.Delay(250); }
+            } while (_changeAgain);
             Flash(Strings.Get("Reloaded"));
         }
-        finally { _changePending = false; }
+        finally { _changePending = false; _changeAgain = false; }
+    }
+
+    /// <summary>Reads the file again and swaps the text in place, keeping the scroll position of
+    /// every view. False while the other program still holds the file (tried again).</summary>
+    private async Task<bool> ReloadFromDiskAsync(string path)
+    {
+        string text;
+        try { text = ReadDocument(path); }
+        catch (IOException) { return false; }
+        catch (UnauthorizedAccessException) { return false; }
+        await Js($"mdApp.reload({Q(text)})");
+        _dirty = false;
+        _words = int.TryParse(await Js("mdApp.words()"), out var n) ? n : 0;
+        UpdateTitle(); UpdateStatus();
+        return true;
     }
 
     // ------------------------------------------------------------------ crash recovery

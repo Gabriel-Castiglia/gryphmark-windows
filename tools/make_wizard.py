@@ -1,4 +1,8 @@
-"""Inno Setup wizard bitmaps from the icon: big side panel (gradient to the default dark gold) and small top-right logo."""
+"""Inno Setup wizard bitmaps from the icon: big side panel (gradient to the default dark gold) and small top-right logo.
+Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+Date: November 10, 2026
+SPDX-License-Identifier: GPL-2.0-only
+"""
 import pathlib
 from PIL import Image, ImageDraw, ImageFont
 

@@ -38,3 +38,6 @@ $RECYCLE.BIN/
 # --- Logs / temp ---
 *.log
 *.tmp
+
+# --- Internal notes and tools (never published) ---
+_internal/

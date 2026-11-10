@@ -7,6 +7,9 @@ the original pixel's brightness, so anti-aliased edges and texture survive.
 Output: src/Gryphmark/icons/gryphmark_<key>.ico (16-256 px), docs/img/theme_icons.png (contact sheet), and
 src/Gryphmark/Gryphmark.ico = the default (gold) variant: exe, installer and shortcuts.
 Keep the keys and colours in sync with Accents.cs.
+Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+Date: November 10, 2026
+SPDX-License-Identifier: GPL-2.0-only
 """
 import pathlib
 import numpy as np

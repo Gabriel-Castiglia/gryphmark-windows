@@ -1,7 +1,11 @@
 """Gryphmark icon, engraving style: head of Martin Schongauer's Griffin (c. 1485, The Met, CC0)
 on a flat colour tile, with a quill held in the beak.
 Source: https://commons.wikimedia.org/wiki/File:Griffin_MET_DP820017.jpg
-usage: make_icon_griffin.py <source.jpg> <out.ico> <out.png> [R,G,B] [cx,cy,size]"""
+usage: make_icon_griffin.py <source.jpg> <out.ico> <out.png> [R,G,B] [cx,cy,size]
+Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+Date: November 10, 2026
+SPDX-License-Identifier: GPL-2.0-only
+"""
 import sys
 import numpy as np, cv2
 from PIL import Image, ImageDraw, ImageFilter

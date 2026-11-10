@@ -1,4 +1,7 @@
 ; Gryphmark installer (Inno Setup 6). Built by build.ps1, which passes /DAppVersion and /DPublishDir.
+; Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+; Date: November 10, 2026
+; SPDX-License-Identifier: GPL-2.0-only
 #ifndef AppVersion
   #define AppVersion "1.0.0"
 #endif

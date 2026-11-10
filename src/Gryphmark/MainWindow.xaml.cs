@@ -1,3 +1,8 @@
+// Gryphmark -- main window: the web view, files and commands.
+// Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+// Date: November 10, 2026
+// SPDX-License-Identifier: GPL-2.0-only
+
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -46,7 +51,6 @@ public partial class MainWindow : Window
         Closed += (_, _) => Microsoft.Win32.SystemEvents.UserPreferenceChanged -= OnSystemPreference;
         Loaded += async (_, _) => await InitWebAsync();
         Closing += OnClosing;
-        Closed += (_, _) => CloseTrace.Log("window closed");
         InitFeatures();
         InitFit();
         InitFolder(startFolder);
@@ -139,13 +143,6 @@ public partial class MainWindow : Window
                 else if (!_settings.SampleShown && SamplePath != null) { _settings.SampleShown = true; _settings.Save(); await LoadSampleAsync(); }
                 else UpdateStatus();
                 await OfferRecoveryAsync();
-                if (CloseTrace.On)
-                {
-                    CloseTrace.Log("editor ready");
-                    var t = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
-                    t.Tick += (_, _) => { t.Stop(); CloseTrace.Log("Close() called"); Close(); };
-                    t.Start();
-                }
                 break;
             case "dirty":
                 if (root.TryGetProperty("words", out var w)) _words = w.GetInt32();
@@ -186,13 +183,25 @@ public partial class MainWindow : Window
                 var rel = Uri.UnescapeDataString(new Uri(uri).AbsolutePath.TrimStart('/'));
                 var local = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(_path)!, rel));
                 if (IsMarkdown(local) && File.Exists(local)) { OpenPath(local); return; }
-                if (File.Exists(local)) { Process.Start(new ProcessStartInfo(local) { UseShellExecute = true }); return; }
+                // A document must never be able to run a program: only pictures and PDFs open
+                // with their viewer; any other file (.exe, .bat, .lnk...) is shown in Explorer.
+                if (File.Exists(local))
+                {
+                    if (IsViewable(local)) Process.Start(new ProcessStartInfo(local) { UseShellExecute = true });
+                    else Process.Start("explorer.exe", $"/select,\"{local}\"");
+                    return;
+                }
+                return;
             }
-            if (uri.StartsWith("http", StringComparison.OrdinalIgnoreCase) || uri.StartsWith("mailto:", StringComparison.OrdinalIgnoreCase))
-                Process.Start(new ProcessStartInfo(uri) { UseShellExecute = true });
+            if (uri.StartsWith("https://doc.local/", StringComparison.OrdinalIgnoreCase)) return;   // no document folder
+            if (Uri.TryCreate(uri, UriKind.Absolute, out var u) && (u.Scheme == Uri.UriSchemeHttp || u.Scheme == Uri.UriSchemeHttps || u.Scheme == Uri.UriSchemeMailto))
+                Process.Start(new ProcessStartInfo(u.AbsoluteUri) { UseShellExecute = true });
         }
         catch { /* nothing sensible to do with a broken link */ }
     }
+
+    private static bool IsViewable(string p) =>
+        new[] { ".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".pdf" }.Contains(Path.GetExtension(p).ToLowerInvariant());
 
     private static bool IsMarkdown(string p) =>
         new[] { ".md", ".markdown", ".mdown", ".mkd", ".txt" }.Contains(Path.GetExtension(p).ToLowerInvariant());
@@ -206,6 +215,23 @@ public partial class MainWindow : Window
         await LoadFileAsync(path);
     }
 
+    /// <summary>The file as text; remembers its BOM and line endings so a save writes them back.
+    /// Shared read access: another program may still have it open for writing.</summary>
+    private string ReadDocument(string path)
+    {
+        byte[] bytes;
+        using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+        using (var ms = new MemoryStream())
+        {
+            fs.CopyTo(ms);
+            bytes = ms.ToArray();
+        }
+        _bom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
+        string text = new UTF8Encoding(false).GetString(bytes, _bom ? 3 : 0, bytes.Length - (_bom ? 3 : 0));
+        _crlf = text.Contains("\r\n");
+        return text;
+    }
+
     private async Task LoadFileAsync(string path)
     {
         try
@@ -217,10 +243,7 @@ public partial class MainWindow : Window
                 _settings.Recent.Remove(path); BuildMenu();
                 return;
             }
-            var bytes = File.ReadAllBytes(path);
-            _bom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
-            string text = new UTF8Encoding(false).GetString(bytes, _bom ? 3 : 0, bytes.Length - (_bom ? 3 : 0));
-            _crlf = text.Contains("\r\n");
+            string text = ReadDocument(path);
             var dir = Path.GetDirectoryName(path)!;
             Web.CoreWebView2.ClearVirtualHostNameToFolderMapping("doc.local");
             Web.CoreWebView2.SetVirtualHostNameToFolderMapping("doc.local", dir, CoreWebView2HostResourceAccessKind.Allow);
@@ -293,12 +316,11 @@ public partial class MainWindow : Window
 
     private async void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        CloseTrace.Log("OnClosing start");
         _settings.Maximized = WindowState == WindowState.Maximized;
         if (WindowState == WindowState.Normal) { _settings.Width = Width; _settings.Height = Height; }
         if (_ready) _settings.Zoom = Web.ZoomFactor;
         _settings.Save();
-        if (_closingConfirmed || !_dirty) { Hide(); ClearRecovery(); StopFeatures(); CloseTrace.Log("OnClosing done"); return; }
+        if (_closingConfirmed || !_dirty) { Hide(); ClearRecovery(); StopFeatures(); return; }
         e.Cancel = true;
         if (await ConfirmDiscardAsync()) { _closingConfirmed = true; ClearRecovery(); StopFeatures(); Close(); }
     }
@@ -392,7 +414,7 @@ public partial class MainWindow : Window
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <meta name="generator" content="Gryphmark {{Version}}">
             <title>{{System.Net.WebUtility.HtmlEncode(title)}}</title>
-            {{(math ? "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css\">" : "")}}
+            {{(math ? "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.19.1/dist/katex.min.css\">" : "")}}
             <style>
             {{css}}
             {{hl}}

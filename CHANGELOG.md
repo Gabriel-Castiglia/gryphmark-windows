@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.8.0 — 2026-11-10
+
+- **Safer documents:** the HTML inside a Markdown file is cleaned (DOMPurify) before the GitHub view and the HTML
+  export show it, so a document can no longer run scripts in the editor page. Links open only web pages, e-mail,
+  other Markdown files, pictures and PDFs; a link to any other file (a program, a script, a shortcut) shows it in
+  Explorer instead of running it.
+- **Live reload that keeps up:** a file changed by another program, such as an AI assistant, is reloaded in place,
+  and every view keeps its scroll position. Saves that write a new file and rename it over the old one are now
+  followed too, and a burst of changes always ends with the last version on screen. A file that another program
+  holds open is read with shared access. Typing while a reload happens always marks the document modified, so
+  the next change on disk asks before replacing it.
+- **.NET 10:** Gryphmark now runs on .NET 10 (.NET 8 support ends on 10 November 2026). Builds carry no paths of the
+  build machine.
+- **Web libraries updated:** Mermaid 12.3, KaTeX 0.19.1 (also in the stylesheet that exported pages link to), jsdiff 9,
+  and one copy of DOMPurify for the whole bundle;
+  `npm audit` reports no known vulnerabilities (there were 14).
+- x64 Windows only, stated in the README and the manuals; the About window and the manuals name the project page.
+- Build: the version is written only in `Gryphmark.csproj`; `build.ps1 -Art` redraws the art, otherwise the committed
+  art is used; any Chromium browser can print the manuals. Every source file carries the GPL-2.0-only header.
+
 ## 1.7.2 — 2026-11-10
 
 - **Spell check follows the interface language:** switching between English and Spanish now also switches

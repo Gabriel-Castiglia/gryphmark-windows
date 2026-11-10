@@ -1,4 +1,8 @@
-"""Builds a file:// test page from wwwroot so the editor can be screenshotted with headless Edge."""
+"""Builds a file:// test page from wwwroot so the editor can be screenshotted with headless Edge.
+Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+Date: November 10, 2026
+SPDX-License-Identifier: GPL-2.0-only
+"""
 import sys, json, pathlib
 root = pathlib.Path(__file__).resolve().parents[1]
 www = root / "src" / "Gryphmark" / "wwwroot"
