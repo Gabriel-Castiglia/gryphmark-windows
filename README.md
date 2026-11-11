@@ -3,6 +3,8 @@
 <h1 align="center">Gryphmark</h1>
 <p align="center"><b>Write Markdown visually. See it like GitHub.</b><br><i>Escribí Markdown en forma visual. Miralo como en GitHub.</i></p>
 
+<p align="center"><img src="docs/img/visual_light_en.png" width="520" alt="The visual editor"></p>
+
 > **Windows 10/11 on x64 (64-bit Intel or AMD) only.** There is no build for ARM processors.
 > Solo para Windows 10/11 en x64 (Intel o AMD de 64 bits); no hay versión para procesadores ARM.
 
@@ -13,14 +15,13 @@
 Gryphmark is a Markdown viewer and editor for Windows. Format with buttons — headings, bold, lists, tables, code — and
 Gryphmark writes the Markdown tags for you. Documents are rendered exactly like GitHub, in light or dark theme.
 
-> Up to version 1.1.1 it was called **Quillforge**. The new installer removes the old version and your
-> settings are carried over.
-
 **Live reload.** When another program changes the open file, such as an AI assistant editing it, Gryphmark shows
 the new text at once and stays where you were reading. It also follows tools that save by writing a new file and
 renaming it over the old one.
 
 **Download:** the setup is in [Releases](https://github.com/Gabriel-Castiglia/gryphmark-windows/releases/latest).
+
+**macOS version:** <https://github.com/Gabriel-Castiglia/gryphmark> (Apple silicon only).
 
 - Visual editor, Markdown source with live preview, and read-only GitHub preview (`Ctrl+1/2/3`)
 - English and Spanish interface, switchable at runtime
@@ -51,20 +52,22 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 pictures, which are committed; it needs Python 3 with Pillow, numpy, scipy and opencv-python.
 The versions used for the released build are listed under *Build tools* below.
 
+Up to version 1.1.1 Gryphmark was called Quillforge. The new installer removes the old version and
+the settings are carried over.
+
 ## Español
 
 Gryphmark es un visor y editor de Markdown para Windows. Das formato con botones —títulos, negrita, listas, tablas,
 código— y Gryphmark escribe las etiquetas de Markdown por vos. Los documentos se ven exactamente como en GitHub, con
 tema claro u oscuro.
 
-> Hasta la versión 1.1.1 se llamaba **Quillforge**. El instalador nuevo quita la versión anterior y la
-> configuración se copia sola.
-
 **Recarga en vivo.** Cuando otro programa cambia el archivo abierto, por ejemplo un asistente de IA que lo edita,
 Gryphmark muestra el texto nuevo enseguida y no te mueve de donde estabas leyendo. También sigue a las herramientas
 que guardan escribiendo un archivo nuevo y renombrándolo encima del viejo.
 
 **Descarga:** el instalador está en [Releases](https://github.com/Gabriel-Castiglia/gryphmark-windows/releases/latest).
+
+**Versión para macOS:** <https://github.com/Gabriel-Castiglia/gryphmark> (solo Apple silicon).
 
 - Editor visual, código Markdown con vista previa en vivo y vista GitHub de solo lectura (`Ctrl+1/2/3`)
 - Interfaz en inglés y en español, se cambia sin reiniciar
@@ -94,6 +97,9 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 `-SkipNpm` deja como está el paquete web de `src/Gryphmark/wwwroot/lib`. `-Art` vuelve a dibujar los íconos y las
 imágenes del instalador, que ya están en el repositorio; necesita Python 3 con Pillow, numpy, scipy y opencv-python.
 Las versiones con que se compiló la versión publicada están abajo, en *Build tools*.
+
+Hasta la versión 1.1.1 Gryphmark se llamaba Quillforge. El instalador nuevo quita la versión anterior y la
+configuración se copia sola.
 
 ## Project layout / Estructura
 
