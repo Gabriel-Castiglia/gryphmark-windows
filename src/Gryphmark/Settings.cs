@@ -38,6 +38,7 @@ public sealed class Settings
     public List<string> RecentFolders { get; set; } = new();
     public bool FilesPanel { get; set; }
     public double FilesWidth { get; set; } = 260;
+    public double OutlineWidth { get; set; } = 250;
     public double Width { get; set; } = 1200;
     public double Height { get; set; } = 820;
     public bool Maximized { get; set; }
@@ -75,7 +76,7 @@ public sealed class Settings
     private static readonly HashSet<string> SessionKeys = new()
     {
         nameof(Folder), nameof(Folders), nameof(PinnedFolders), nameof(Width), nameof(Height), nameof(Maximized),
-        nameof(FilesPanel), nameof(FilesWidth), nameof(SampleShown),
+        nameof(FilesPanel), nameof(FilesWidth), nameof(OutlineWidth), nameof(SampleShown),
     };
 
     /// <summary>Gryphmark was called Quillforge up to 1.1.1: copy its settings, recent files and recovery

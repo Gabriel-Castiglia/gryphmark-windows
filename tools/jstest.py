@@ -174,6 +174,9 @@ js = """
     window.ToastEditor = RealEditor;
     mdApp.load('# Fine again\\n', null);
     out.editor_recovers = !mdApp.editorBroken() && getComputedStyle(note).display === 'none';
+    // Convert to TXT: the text as it reads in the GitHub view, without the Markdown marks
+    out.plain_text = mdApp.plainText('# Title\\n\\n- one\\n- **two**\\n\\n| a | b |\\n|---|---|\\n| 1 | 2 |\\n')
+      === 'Title\\n=====\\n\\n\u2022 one\\n\u2022 two\\n\\na  b\\n-  -\\n1  2\\n';
   } catch (e) { out.err = String(e && e.stack || e); }
   document.getElementById('out').textContent = JSON.stringify(out);
 })();

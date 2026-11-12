@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.9.0 — 2026-11-12
+
+- **Convert to TXT**: right-click a file in the Files panel. A .txt is written next to it as the document reads in the
+  GitHub view: headings underlined, lists with bullets or numbers, tables in columns, links with their address. The
+  Markdown file is not changed, and an existing .txt is never overwritten (`name (2).txt`).
+- The outline can be made wider by dragging its right edge (160 to 600 px), as the Files panel already could; each
+  window keeps its width.
+
 ## 1.8.2 — 2026-11-12
 
 - A Markdown file with an HTML table whose `<tbody>` is empty (pandoc writes one for every one-row table of a Word

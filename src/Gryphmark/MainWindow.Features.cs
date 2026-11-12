@@ -151,8 +151,12 @@ public partial class MainWindow
 
     private void ApplyOutlineVisibility()
     {
-        OutlineColumn.Width = new GridLength(_settings.Outline ? 250 : 0);
-        OutlinePane.Visibility = _settings.Outline ? Visibility.Visible : Visibility.Collapsed;
+        bool show = _settings.Outline;
+        OutlineColumn.MinWidth = show ? 160 : 0;
+        OutlineColumn.Width = new GridLength(show ? Math.Clamp(_settings.OutlineWidth, 160, 600) : 0);
+        OutlineSplitterColumn.Width = new GridLength(show ? 5 : 0);
+        OutlinePane.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        OutlineSplitter.Visibility = OutlinePane.Visibility;
     }
 
     private void UpdateOutline(JsonElement items)

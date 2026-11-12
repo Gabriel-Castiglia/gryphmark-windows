@@ -388,6 +388,98 @@
     if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
   }
 
+  // ------------------------------------------------------------------ plain text ("Convert to TXT")
+  // The document as it reads in the GitHub view, without the Markdown marks: headings underlined, lists with
+  // bullets or numbers, tables in padded columns, quotes with "> ", code as it is and links with their address.
+  const TXT_BLOCKS = /^(P|H[1-6]|UL|OL|PRE|TABLE|BLOCKQUOTE|HR|DIV|SECTION|DETAILS|SUMMARY|DL|DT|DD|LI|FIGURE)$/;
+  function txtInline(node) {
+    let s = '';
+    node.childNodes.forEach((n) => { s += txtInlineOne(n); });
+    return s;
+  }
+  function txtInlineOne(n) {
+    if (n.nodeType === 3) return n.nodeValue;
+    if (n.nodeType !== 1) return '';
+    const t = n.tagName;
+    if (t === 'BR') return '\n';
+    if (t === 'IMG') return n.getAttribute('alt') || '';
+    if (t === 'INPUT') return n.type === 'checkbox' ? (n.checked ? '[x] ' : '[ ] ') : '';
+    if (n.classList.contains('sr-only') || n.hasAttribute('data-footnote-backref')) return '';
+    if (n.classList.contains('katex')) {
+      // DOMPurify drops <annotation> but keeps its TeX as loose text inside <math>; the drawn copy is the fallback
+      const m = n.querySelector('math');
+      const tex = m ? Array.from(m.childNodes).filter((x) => x.nodeType === 3).map((x) => x.nodeValue).join('').trim() : '';
+      return tex || (n.querySelector('.katex-html') || n).textContent;
+    }
+    if (t === 'A') {
+      const text = txtInline(n); const href = n.getAttribute('href') || '';
+      const shown = href.replace(/^mailto:/i, '');
+      return /^(https?:|mailto:)/i.test(href) && shown !== text.trim() ? text + ' (' + shown + ')' : text;
+    }
+    if (t === 'SUP' && n.querySelector('a')) return '[' + n.textContent.trim() + ']';
+    if (TXT_BLOCKS.test(t)) return '\n' + txtInline(n) + '\n';
+    return txtInline(n);
+  }
+  const txtClean = (s) => s.replace(/[ \t ]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{2,}/g, '\n').trim();
+  function txtBlocks(el, out) {           // the blocks inside el, each a string, in order
+    let para = '';
+    const flush = () => { const t = txtClean(para); if (t) out.push(t); para = ''; };
+    el.childNodes.forEach((n) => {
+      if (n.nodeType === 1 && n.classList.contains('sr-only')) return;     // GitHub hides it ("Footnotes")
+      if (n.nodeType === 1 && TXT_BLOCKS.test(n.tagName)) { flush(); txtBlock(n, out); }
+      else para += txtInlineOne(n);
+    });
+    flush();
+    return out;
+  }
+  const txtIndent = (s, pre) => s.split('\n').map((l) => (l ? pre + l : l)).join('\n');
+  function txtBlock(n, out) {
+    const t = n.tagName;
+    if (/^H[1-6]$/.test(t)) {
+      const h = txtClean(txtInline(n)).replace(/\n/g, ' ');
+      if (h) out.push(t === 'H1' ? h + '\n' + '='.repeat(h.length) : t === 'H2' ? h + '\n' + '-'.repeat(h.length) : h);
+    } else if (t === 'P' || t === 'DT' || t === 'SUMMARY') {
+      const p = txtClean(txtInline(n)); if (p) out.push(p);
+    } else if (t === 'PRE') {
+      out.push(n.textContent.replace(/\n+$/, ''));
+    } else if (t === 'HR') {
+      out.push('----------');
+    } else if (t === 'UL' || t === 'OL') {
+      const start = parseInt(n.getAttribute('start') || '1', 10) || 1;
+      const lines = Array.from(n.children).filter((li) => li.tagName === 'LI').map((li, i) => {
+        const mark = t === 'OL' ? (start + i) + '. ' : '• ';
+        const parts = txtBlocks(li, []);
+        return parts.map((b, j) => (j === 0 ? mark + txtIndent(b, ' '.repeat(mark.length)).slice(mark.length) : txtIndent(b, ' '.repeat(mark.length)))).join('\n');
+      });
+      if (lines.length) out.push(lines.join('\n'));
+    } else if (t === 'TABLE') {
+      const rows = Array.from(n.querySelectorAll('tr')).map((tr) => Array.from(tr.children).map((c) => txtClean(txtInline(c)).replace(/\n/g, ' ')));
+      if (!rows.length) return;
+      const cols = Math.max(...rows.map((r) => r.length));
+      const w = Array.from({ length: cols }, (_, i) => Math.max(...rows.map((r) => (r[i] || '').length)));
+      const line = (r) => r.map((c, i) => (i === r.length - 1 ? c : c.padEnd(w[i]))).join('  ').replace(/\s+$/, '');
+      const head = n.querySelector('thead tr') ? 1 : 0;
+      const text = rows.map(line);
+      if (head) text.splice(1, 0, w.map((x) => '-'.repeat(Math.max(x, 1))).join('  '));
+      out.push(text.join('\n'));
+    } else if (n.classList.contains('footnotes')) {
+      out.push('----------'); txtBlocks(n, out);
+    } else if (t === 'BLOCKQUOTE' || n.classList.contains('markdown-alert')) {
+      const inner = txtBlocks(n, []).join('\n\n');
+      if (inner) out.push(inner.split('\n').map((l) => (l ? '> ' + l : '>')).join('\n'));
+    } else if (t === 'DD') {
+      const inner = txtBlocks(n, []).join('\n\n'); if (inner) out.push(txtIndent(inner, '    '));
+    } else {
+      txtBlocks(n, out);                  // DIV, SECTION, DETAILS, DL, FIGURE, LI out of a list
+    }
+  }
+  function plainText(markdown) {
+    const root = document.createElement('div');
+    root.innerHTML = renderGithub(String(markdown || '').replace(/^﻿/, '').replace(/\r\n?/g, '\n'));
+    const text = txtBlocks(root, []).join('\n\n');
+    return text ? text + '\n' : '';
+  }
+
   // ------------------------------------------------------------------ API used by the host
   window.mdApp = {
     load(markdown, docBase) {
@@ -422,6 +514,7 @@
     },
     getMarkdown() { return editorText(); },
     getMarkdownPreserving() { return currentText(); },
+    plainText(markdown) { return plainText(markdown); },
     markSaved(text) { original = text.replace(/\r\n/g, '\n'); baseline = editorText(); },
     setLang(lang) { const t = editorText(); state.lang = lang; build(t); applyMode(); },
     setTheme(theme) { const t = editorText(); state.theme = theme; applyTheme(); build(t); applyMode(); },

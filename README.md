@@ -32,7 +32,8 @@ renaming it over the old one.
 - **Themes**: light, dark or automatic (follows Windows), and a colour catalogue that changes the icon everywhere in Windows and the highlights of the app (*View → Theme…*)
 - **Dedicated instances**: open a file or folder in its own Gryphmark, separate from the main window (`--profile "Name"`, or right-click in the Files panel → desktop shortcut)
 - **Zoom bar** in the status bar (also `Ctrl` + mouse wheel); on a narrow window the buttons that do not fit go into a ⋯ menu
-- Find & replace, outline sidebar, spell check
+- Find & replace, outline sidebar (drag its edge to make it wider), spell check
+- **Convert to TXT**: right-click a file in the Files panel; a .txt is written next to it, as the document reads in the GitHub view, and the Markdown file is not changed
 - Keeps your formatting: only edited lines change on save (CRLF/BOM preserved)
 - Links in a document open only web pages, e-mail, other Markdown files, pictures and PDFs; a link to any other file shows it in Explorer instead of running it
 - Crash recovery, single instance, update check
@@ -78,7 +79,8 @@ que guardan escribiendo un archivo nuevo y renombrándolo encima del viejo.
 - **Temas**: claro, oscuro o automático (sigue a Windows), y un catálogo de colores que cambia el ícono en todo Windows y el resaltado de la app (*Ver → Tema…*)
 - **Instancias dedicadas**: abrir un archivo o una carpeta en su propio Gryphmark, separado de la ventana principal (`--profile "Nombre"`, o clic derecho en el panel de archivos → acceso directo en el escritorio)
 - **Barra de zoom** en la barra de estado (también `Ctrl` + rueda del mouse); con la ventana angosta, los botones que no entran van a un menú ⋯
-- Buscar y reemplazar, esquema lateral, revisión ortográfica
+- Buscar y reemplazar, esquema lateral (se ensancha arrastrando su borde), revisión ortográfica
+- **Convertir a TXT**: clic derecho en un archivo del panel de archivos; se escribe un .txt al lado, como se lee el documento en la vista GitHub, y el archivo Markdown no cambia
 - Respeta tu formato: al guardar sólo cambian las líneas editadas (conserva CRLF/BOM)
 - Los enlaces de un documento solo abren páginas web, correo, otros archivos Markdown, imágenes y PDF; un enlace a cualquier otro archivo lo muestra en el Explorador en vez de ejecutarlo
 - Recuperación ante cierres, instancia única, aviso de actualizaciones
@@ -114,7 +116,7 @@ configuración se copia sola.
 
 ## Build tools / Herramientas de compilación
 
-Gryphmark 1.8.2 was built and tested with / se compiló y probó con:
+Gryphmark 1.9.0 was built and tested with / se compiló y probó con:
 
 | Tool | Version |
 |---|---|

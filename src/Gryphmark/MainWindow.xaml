@@ -61,7 +61,8 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Name="FilesColumn" Width="0" MaxWidth="600" />
                 <ColumnDefinition x:Name="SplitterColumn" Width="0" />
-                <ColumnDefinition x:Name="OutlineColumn" Width="0" />
+                <ColumnDefinition x:Name="OutlineColumn" Width="0" MaxWidth="600" />
+                <ColumnDefinition x:Name="OutlineSplitterColumn" Width="0" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <!-- Files panel (folder tree) -->
@@ -96,7 +97,7 @@
                 </GridSplitter.Template>
             </GridSplitter>
             <!-- Outline -->
-            <Border x:Name="OutlinePane" Grid.Column="2" Background="{DynamicResource Gm.Chrome}" BorderBrush="{DynamicResource Gm.ChromeBorder}" BorderThickness="0,0,1,0">
+            <Border x:Name="OutlinePane" Grid.Column="2" Background="{DynamicResource Gm.Chrome}">
                 <DockPanel>
                     <TextBlock x:Name="OutlineTitle" DockPanel.Dock="Top" Margin="18,14,12,8" FontSize="11" FontWeight="SemiBold"
                                Foreground="{DynamicResource Gm.TextMuted}" FontFamily="{DynamicResource Gm.Font}" />
@@ -105,7 +106,17 @@
                     <ListBox x:Name="OutlineList" Style="{DynamicResource Gm.OutlineList}" />
                 </DockPanel>
             </Border>
-            <Grid Grid.Column="3">
+            <GridSplitter x:Name="OutlineSplitter" Grid.Column="3" HorizontalAlignment="Stretch" Cursor="SizeWE" Focusable="False"
+                          ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Visibility="Collapsed">
+                <GridSplitter.Template>
+                    <ControlTemplate TargetType="GridSplitter">
+                        <Border Background="Transparent">
+                            <Rectangle Width="1" HorizontalAlignment="Center" Fill="{DynamicResource Gm.ChromeBorder}" />
+                        </Border>
+                    </ControlTemplate>
+                </GridSplitter.Template>
+            </GridSplitter>
+            <Grid Grid.Column="4">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />

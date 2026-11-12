@@ -5,6 +5,8 @@
 
 using System.Diagnostics;
 using System.IO;
+using System.Text;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -52,6 +54,10 @@ public partial class MainWindow
         FilesSplitter.DragCompleted += (_, _) =>
         {
             if (FilesColumn.ActualWidth > 0) { _settings.FilesWidth = Math.Round(FilesColumn.ActualWidth); _settings.Save(); }
+        };
+        OutlineSplitter.DragCompleted += (_, _) =>
+        {
+            if (OutlineColumn.ActualWidth > 0) { _settings.OutlineWidth = Math.Round(OutlineColumn.ActualWidth); _settings.Save(); }
         };
         // 1.4 and earlier kept a single folder
         if (_settings.Folders.Count == 0 && _settings.Folder != null) _settings.Folders.Add(_settings.Folder);
@@ -451,8 +457,32 @@ public partial class MainWindow
             new Separator(),
             MenuEntry(Strings.Plain("OpenFolder"), () => ShowInExplorer(path, true)),
             MenuEntry(Strings.Get("CopyPath"), () => Clipboard.SetText(path)),
+            new Separator(),
+            MenuEntry(Strings.Get("ConvertTxt"), () => ConvertToText(path)),
         },
     };
+
+    /// <summary>"Convert to TXT": the file as it reads in the GitHub view (app.js plainText), as UTF-8 text with
+    /// Windows line ends, next to it as name.txt. The Markdown file is not touched and an existing .txt is never
+    /// overwritten (name (2).txt, name (3).txt...).</summary>
+    private async void ConvertToText(string path)
+    {
+        try
+        {
+            if (!File.Exists(path)) { Flash(Strings.Get("ItemGone")); RefreshTree(); return; }
+            var source = await File.ReadAllTextAsync(path);      // follows a BOM, UTF-8 otherwise
+            var text = JsonSerializer.Deserialize<string>(await Js("mdApp.plainText(" + JsonSerializer.Serialize(source) + ")"));
+            if (text == null) { Flash(string.Format(Strings.Get("TxtFailed"), Path.GetFileName(path))); return; }
+            var dir = Path.GetDirectoryName(path)!;
+            var name = Path.GetFileNameWithoutExtension(path);
+            var target = Path.Combine(dir, name + ".txt");
+            for (int n = 2; File.Exists(target); n++) target = Path.Combine(dir, $"{name} ({n}).txt");
+            using (var fs = new FileStream(target, FileMode.CreateNew))
+            using (var w = new StreamWriter(fs, new UTF8Encoding(false))) w.Write(text.Replace("\n", "\r\n"));
+            Flash(string.Format(Strings.Get("TxtDone"), Path.GetFileName(target)));
+        }
+        catch (Exception e) { Flash(string.Format(Strings.Get("TxtFailed"), e.Message)); }
+    }
 
     private ContextMenu FolderMenu(string path) => new()
     {

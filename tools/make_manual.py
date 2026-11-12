@@ -100,7 +100,7 @@ pastel colour and a stripe on its left edge, so you see at a glance where one tr
 <tr><td>Show / hide the panel</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>, the folder button at the left of the toolbar, or <i>View → Files panel</i>. Drag its right edge to make it wider.</td></tr>
 <tr><td>Browse</td><td>Click a folder to open or close it; click a file to open it. <kbd>Enter</kbd> does the same on the selected row.</td></tr>
 <tr><td>Right-click a folder's title</td><td><b>Pin to top</b> / <b>Unpin</b>, <b>Close this folder</b>, <b>Colour</b> (twelve pastel colours or <i>Automatic</i>), <b>Move up</b> / <b>Move down</b> (in opening order), show in folder, copy path, refresh.</td></tr>
-<tr><td>Right-click inside a tree</td><td>On a file: open, open in a new window, show in folder, copy path. On a folder: show in folder, copy path, refresh.</td></tr>
+<tr><td>Right-click inside a tree</td><td>On a file: open, open in a new window, show in folder, copy path, and <b>Convert to TXT</b>, which writes a .txt next to it as the document reads in the GitHub view (headings, lists, tables and links in plain text) and leaves the Markdown file as it is. On a folder: show in folder, copy path, refresh.</td></tr>
 <tr><td>Panel buttons</td><td><b>+</b> add folder, refresh, collapse all, and <b>⋯</b>: the order, the colours and what opens at start.</td></tr></table>
 <h3>Order, colours and pins</h3>
 <p>The <b>⋯</b> button of the panel sorts the folders: <i>Order opened</i> (the default), <i>Name A → Z</i>, <i>Name Z → A</i> or
@@ -166,7 +166,7 @@ In GitHub preview, links to web pages open in your browser, links to other <code
    ("Working tools", """
 <table><tr><th>Feature</th><th>How it works</th></tr>
 <tr><td>Find / Replace</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> open a bar above the document. <kbd>F3</kbd> and <kbd>Shift</kbd>+<kbd>F3</kbd> jump between matches; <kbd>Esc</kbd> closes it. <i>Aa</i> matches case.</td></tr>
-<tr><td>Outline</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> or the outline button of the toolbar shows the headings on the left; click one to jump to it.</td></tr>
+<tr><td>Outline</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> or the outline button of the toolbar shows the headings on the left; click one to jump to it. Drag its right edge to make it wider; the width is kept.</td></tr>
 <tr><td>Your formatting is kept</td><td>Only the lines you change are rewritten when you save: list markers, <code>__bold__</code>, table alignment, line endings (CRLF/LF) and BOM stay as they were.</td></tr>
 <tr><td>Changed outside</td><td>If another program modifies the open file, Gryphmark reloads it (or asks first if you have unsaved changes).</td></tr>
 <tr><td>Crash recovery</td><td>Unsaved work is backed up every 20 seconds. If Gryphmark or Windows stops unexpectedly, the next start offers to recover it.</td></tr>
@@ -277,7 +277,7 @@ color pastel y una franja en el borde izquierdo, así ves de un vistazo dónde t
 <tr><td>Mostrar / ocultar el panel</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>E</kbd>, el botón de carpeta a la izquierda de la barra, o <i>Ver → Panel de archivos</i>. Arrastrando su borde derecho se ensancha.</td></tr>
 <tr><td>Recorrer</td><td>Clic en una carpeta la abre o la cierra; clic en un archivo lo abre. <kbd>Enter</kbd> hace lo mismo sobre la fila seleccionada.</td></tr>
 <tr><td>Clic derecho en el título de una carpeta</td><td><b>Fijar arriba</b> / <b>Desfijar</b>, <b>Cerrar esta carpeta</b>, <b>Color</b> (doce colores pastel o <i>Automático</i>), <b>Subir</b> / <b>Bajar</b> (en orden de apertura), mostrar en la carpeta, copiar ruta, actualizar.</td></tr>
-<tr><td>Clic derecho dentro de un árbol</td><td>Sobre un archivo: abrir, abrir en otra ventana, mostrar en la carpeta, copiar ruta. Sobre una carpeta: mostrar en la carpeta, copiar ruta, actualizar.</td></tr>
+<tr><td>Clic derecho dentro de un árbol</td><td>Sobre un archivo: abrir, abrir en otra ventana, mostrar en la carpeta, copiar ruta y <b>Convertir a TXT</b>, que escribe un .txt al lado como se lee el documento en la vista GitHub (títulos, listas, tablas y enlaces en texto plano) y deja el archivo Markdown como está. Sobre una carpeta: mostrar en la carpeta, copiar ruta, actualizar.</td></tr>
 <tr><td>Botones del panel</td><td><b>+</b> agregar carpeta, actualizar, contraer todo, y <b>⋯</b>: el orden, los colores y qué se abre al iniciar.</td></tr></table>
 <h3>Orden, colores y fijadas</h3>
 <p>El botón <b>⋯</b> del panel ordena las carpetas: <i>Orden de apertura</i> (por defecto), <i>Nombre A → Z</i>, <i>Nombre Z → A</i> o
@@ -343,7 +343,7 @@ En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otro
    ("Herramientas de trabajo", """
 <table><tr><th>Función</th><th>Cómo funciona</th></tr>
 <tr><td>Buscar / Reemplazar</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> abren una barra sobre el documento. <kbd>F3</kbd> y <kbd>Mayús</kbd>+<kbd>F3</kbd> saltan entre coincidencias; <kbd>Esc</kbd> la cierra. <i>Aa</i> distingue mayúsculas.</td></tr>
-<tr><td>Esquema</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd> o el botón de esquema de la barra muestra los títulos a la izquierda; un clic salta a ese título.</td></tr>
+<tr><td>Esquema</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd> o el botón de esquema de la barra muestra los títulos a la izquierda; un clic salta a ese título. Arrastrando su borde derecho se ensancha, y el ancho se recuerda.</td></tr>
 <tr><td>Se respeta tu formato</td><td>Al guardar sólo se reescriben las líneas que cambiaste: viñetas, <code>__negrita__</code>, alineación de tablas, finales de línea (CRLF/LF) y BOM quedan como estaban.</td></tr>
 <tr><td>Cambios externos</td><td>Si otro programa modifica el archivo abierto, Gryphmark lo recarga (o pregunta antes si tenés cambios sin guardar).</td></tr>
 <tr><td>Recuperación</td><td>Lo no guardado se respalda cada 20 segundos. Si Gryphmark o Windows se cierran de golpe, al volver a abrir ofrece recuperarlo.</td></tr>
