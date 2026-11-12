@@ -5,7 +5,8 @@ Each pixel's weight is its saturation (the background is the only saturated area
 the original pixel's brightness, so anti-aliased edges and texture survive.
 
 Output: src/Gryphmark/icons/gryphmark_<key>.ico (16-256 px), docs/img/theme_icons.png (contact sheet), and
-src/Gryphmark/Gryphmark.ico = the default (gold) variant: exe, installer and shortcuts.
+src/Gryphmark/Gryphmark.ico = the default (gold) variant: exe, installer and shortcuts; assets/gryphmark.png = the
+same variant at full size, for the README, the manuals and the GitHub profile.
 Keep the keys and colours in sync with Accents.cs.
 Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
 Date: November 10, 2026
@@ -16,7 +17,7 @@ import numpy as np
 from PIL import Image
 
 root = pathlib.Path(__file__).resolve().parents[1]
-src = root / "assets" / "gryphmark.png"
+src = root / "assets" / "gryphmark_base.png"   # the drawn icon, in the original orange
 out = root / "src" / "Gryphmark" / "icons"
 out.mkdir(exist_ok=True)
 
@@ -52,6 +53,8 @@ for key, hexc in ACCENTS.items():
     res = rgb * (1 - w) + new * w
     img = Image.fromarray((np.concatenate([res, a[..., 3:]], -1) * 255).round().astype(np.uint8), "RGBA")
     img.save(out / f"gryphmark_{key}.ico", sizes=sizes)
+    if key == "gold":
+        img.save(root / "assets" / "gryphmark.png", optimize=True)
     tiles.append(img.resize((160, 160), Image.LANCZOS))
     print("ok", key)
 

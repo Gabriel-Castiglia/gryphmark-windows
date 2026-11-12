@@ -49,8 +49,8 @@ if (-not $SkipNpm) {
 # 2. Icon and installer artwork (only with -Art: the drawn files are in the repository)
 if ($Art) {
 Step "icon + wizard art"
-python "$root/tools/make_icon_griffin.py" "$root/assets/griffin_schongauer_met_cc0.jpg" "$root/src/Gryphmark/Gryphmark.ico" "$root/assets/gryphmark.png" "232,96,44" "1060,400,900" "12"
-# theme colours; also copies the default (purple) variant over Gryphmark.ico
+python "$root/tools/make_icon_griffin.py" "$root/assets/griffin_schongauer_met_cc0.jpg" "$root/src/Gryphmark/Gryphmark.ico" "$root/assets/gryphmark_base.png" "232,96,44" "1060,400,900" "12"
+# theme colours from that orange base; the default (gold) variant becomes Gryphmark.ico and assets/gryphmark.png
 python "$root/tools/make_theme_icons.py"
 python "$root/tools/make_wizard.py"
 }

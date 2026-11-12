@@ -7,6 +7,8 @@
   its code is now corrected in the bundle, and `build.ps1` corrects it again on every rebuild.
 - If the editor library ever fails on a document again, the GitHub view still shows all of it, the visual and Markdown
   views say what happened instead of staying blank, and saving writes the file back exactly as it is on disk.
+- The icon in the README and on the cover of the manuals is the gold one of the app; it was still the orange of
+  1.4.0. `build.ps1 -Art` now writes it from the gold variant.
 
 ## 1.8.1 — 2026-11-10
 
