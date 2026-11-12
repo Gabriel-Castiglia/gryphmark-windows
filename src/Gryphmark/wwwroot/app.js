@@ -17,6 +17,25 @@
   let quietText = null;
   let original = '';        // text exactly as read from disk
   let baseline = '';        // the same text after the editor's normalisation (captured at load)
+  // The editor library (TOAST UI) can throw on a text it cannot parse (1.8.1 and 1.1.1 showed a blank page
+  // on a table with an empty <tbody>). Then the page keeps working from the text read from disk: the GitHub
+  // view shows it, the editor views say why they are empty, and saving writes the file back as it was.
+  let editorBroken = false;
+  function editorText() { return editor ? editor.getMarkdown() : original; }
+  function currentText() { return editor ? preserveFormatting(editor.getMarkdown()) : original; }
+  function editorFailed(e) {
+    try { console.error('Gryphmark: the editor failed', e); } catch (x) { }
+    try { if (editor) editor.destroy(); } catch (x) { }
+    editor = null;
+    editorBroken = true;
+    document.getElementById('editorHost').innerHTML = '';
+    let el = document.getElementById('editorError');
+    if (!el) { el = document.createElement('div'); el.id = 'editorError'; document.body.insertBefore(el, document.getElementById('editorHost')); }
+    el.textContent = state.lang === 'es'
+      ? 'El editor no pudo abrir este archivo (falla de la biblioteca TOAST UI). La vista GitHub lo muestra completo. Esta vista no permite editarlo, y guardar deja el archivo como está en disco.'
+      : 'The editor could not open this file (a failure of the TOAST UI library). The GitHub view shows all of it. This view cannot edit it, and saving leaves the file as it is on disk.';
+    document.body.classList.add('editor-broken');
+  }
 
   // ------------------------------------------------------------------ GitHub renderer
   const md = new Marked({ gfm: true, breaks: false });
@@ -95,7 +114,7 @@
 
   async function showPreview() {
     const el = document.getElementById('preview');
-    el.innerHTML = renderGithub(preserveFormatting(editor.getMarkdown()));
+    el.innerHTML = renderGithub(currentText());
     await runMermaid(el);
   }
 
@@ -107,33 +126,37 @@
 
   function build(markdown) {
     const el = document.getElementById('editorHost');
-    if (editor) { editor.destroy(); editor = null; }
+    if (editor) { try { editor.destroy(); } catch (e) { } editor = null; }
     el.innerHTML = '';
+    editorBroken = false;
+    document.body.classList.remove('editor-broken');
     suppressDirty = true;
     quietText = null;
-    editor = new ToastEditor({
-      el,
-      height: '100%',
-      initialEditType: state.mode === 'source' ? 'markdown' : 'wysiwyg',
-      previewStyle: 'vertical',
-      initialValue: markdown || '',
-      language: state.lang === 'es' ? 'es-ES' : 'en-US',
-      theme: state.theme === 'dark' ? 'dark' : 'light',
-      usageStatistics: false,
-      hideModeSwitch: true,
-      autofocus: false,
-      plugins: [codeSyntaxHighlight],
-      toolbarItems: [],   // the toolbar is native (WPF)
-      events: {
-        change: () => {
-          if (!suppressDirty || (quietText !== null && editor.getMarkdown() !== quietText)) post({ type: 'dirty', words: countWords() });
-          scheduleOutline(); if (find.query) scheduleFind();
+    try {
+      editor = new ToastEditor({
+        el,
+        height: '100%',
+        initialEditType: state.mode === 'source' ? 'markdown' : 'wysiwyg',
+        previewStyle: 'vertical',
+        initialValue: markdown || '',
+        language: state.lang === 'es' ? 'es-ES' : 'en-US',
+        theme: state.theme === 'dark' ? 'dark' : 'light',
+        usageStatistics: false,
+        hideModeSwitch: true,
+        autofocus: false,
+        plugins: [codeSyntaxHighlight],
+        toolbarItems: [],   // the toolbar is native (WPF)
+        events: {
+          change: () => {
+            if (!suppressDirty || (quietText !== null && editor.getMarkdown() !== quietText)) post({ type: 'dirty', words: countWords() });
+            scheduleOutline(); if (find.query) scheduleFind();
+          },
         },
-      },
-    });
-    markGithubClass();
-    applyLock();
-    quietText = editor.getMarkdown();
+      });
+      markGithubClass();
+      applyLock();
+      quietText = editor.getMarkdown();
+    } catch (e) { editorFailed(e); }
     setTimeout(() => { suppressDirty = false; }, 50);
   }
 
@@ -166,7 +189,7 @@
   }, true);
 
   function countWords() {
-    const t = editor ? editor.getMarkdown().replace(/[#>*_`~\-\[\]()|]/g, ' ') : '';
+    const t = editorText().replace(/[#>*_`~\-\[\]()|]/g, ' ');
     const m = t.match(/[\p{L}\p{N}]+/gu); return m ? m.length : 0;
   }
 
@@ -187,9 +210,9 @@
     if (state.mode === 'preview') {
       await showPreview();
       document.getElementById('previewHost').scrollTop = 0;
-    } else {
-      editor.changeMode(state.mode === 'source' ? 'markdown' : 'wysiwyg', true);
-      markGithubClass(); applyLock();
+    } else if (editor) {
+      try { editor.changeMode(state.mode === 'source' ? 'markdown' : 'wysiwyg', true); markGithubClass(); applyLock(); }
+      catch (e) { editorFailed(e); }
     }
     if (find.query) runFind(0);
   }
@@ -340,7 +363,7 @@
   function scheduleOutline() { clearTimeout(outlineTimer); outlineTimer = setTimeout(sendOutline, 250); }
   function headings() {
     const out = []; let fence = false;
-    (editor ? editor.getMarkdown() : '').split('\n').forEach((line, i) => {
+    editorText().split('\n').forEach((line, i) => {
       if (/^\s*(```|~~~)/.test(line)) { fence = !fence; return; }
       if (fence) return;
       const m = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
@@ -371,7 +394,7 @@
       document.getElementById('docbase').href = docBase || 'https://app.local/';
       original = (markdown || '').replace(/\r\n/g, '\n');
       build(original);
-      baseline = editor.getMarkdown();
+      baseline = editorText();
       applyMode(); sendOutline();
       return true;
     },
@@ -384,8 +407,8 @@
       original = (markdown || '').replace(/\r\n/g, '\n');
       suppressDirty = true;
       quietText = null;
-      editor.setMarkdown(original, false);
-      baseline = editor.getMarkdown();
+      try { editor.setMarkdown(original, false); } catch (e) { editorFailed(e); }
+      baseline = editorText();
       quietText = baseline;
       setTimeout(() => { suppressDirty = false; }, 50);
       markGithubClass(); applyLock();
@@ -397,17 +420,17 @@
       sendOutline(); if (find.query) scheduleFind();
       return true;
     },
-    getMarkdown() { return editor ? editor.getMarkdown() : ''; },
-    getMarkdownPreserving() { return editor ? preserveFormatting(editor.getMarkdown()) : ''; },
-    markSaved(text) { original = text.replace(/\r\n/g, '\n'); const cur = editor.getMarkdown(); baseline = cur; },
-    setLang(lang) { const t = editor.getMarkdown(); state.lang = lang; build(t); applyMode(); },
-    setTheme(theme) { const t = editor.getMarkdown(); state.theme = theme; applyTheme(); build(t); applyMode(); },
+    getMarkdown() { return editorText(); },
+    getMarkdownPreserving() { return currentText(); },
+    markSaved(text) { original = text.replace(/\r\n/g, '\n'); baseline = editorText(); },
+    setLang(lang) { const t = editorText(); state.lang = lang; build(t); applyMode(); },
+    setTheme(theme) { const t = editorText(); state.theme = theme; applyTheme(); build(t); applyMode(); },
     setMode(mode) { state.mode = mode; applyMode(); },
     setSpell(on) { state.spell = !!on; applySpell(); },
     init(lang, theme, mode, spell, locked) { state = { lang, theme, mode, spell: spell !== false, locked: !!locked }; applyTheme(); build(''); applyMode(); },
     setLocked(on) { state.locked = !!on; applyLock(); },
-    exec(cmd, payload) { if (state.mode === 'preview' || state.locked) return; try { editor.exec(cmd, payload); } catch (e) { } editor.focus(); },
-    insertText(t) { if (!state.locked) editor.insertText(t); },
+    exec(cmd, payload) { if (!editor || state.mode === 'preview' || state.locked) return; try { editor.exec(cmd, payload); } catch (e) { } editor.focus(); },
+    insertText(t) { if (!state.locked && editor) editor.insertText(t); },
     words() { return countWords(); },
     selectedText() { try { return editor.getSelectedText() || ''; } catch (e) { return ''; } },
     focus() { if (editor && state.mode !== 'preview') editor.focus(); },
@@ -417,10 +440,11 @@
     replaceAll(q, cs, r) { find.query = q; find.cs = !!cs; return replaceAll(r); },
     scrollToHeading(i) { scrollToHeading(i); },
     _view() { return pmView(); },   // for tools/jstest.py
+    editorBroken() { return editorBroken; },
     async exportHtml(title) {
       const tmp = document.createElement('div'); tmp.className = 'markdown-body'; tmp.style.cssText = 'position:absolute;left:-99999px;width:980px';
       document.body.appendChild(tmp);
-      tmp.innerHTML = renderGithub(preserveFormatting(editor.getMarkdown()));
+      tmp.innerHTML = renderGithub(currentText());
       await runMermaid(tmp);
       const body = tmp.innerHTML; tmp.remove();
       post({ type: 'export', title, body, theme: state.theme, math: /class="katex/.test(body) });

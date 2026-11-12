@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.2 — 2026-11-12
+
+- A Markdown file with an HTML table whose `<tbody>` is empty (pandoc writes one for every one-row table of a Word
+  document) opened as a blank page, with no message. The editor library (TOAST UI Editor 3.2.2) failed on that table;
+  its code is now corrected in the bundle, and `build.ps1` corrects it again on every rebuild.
+- If the editor library ever fails on a document again, the GitHub view still shows all of it, the visual and Markdown
+  views say what happened instead of staying blank, and saving writes the file back exactly as it is on disk.
+
 ## 1.8.1 — 2026-11-10
 
 - In the dark theme, list items and table headers in the visual view were almost black on the dark page; they now

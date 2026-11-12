@@ -114,7 +114,7 @@ configuración se copia sola.
 
 ## Build tools / Herramientas de compilación
 
-Gryphmark 1.8.1 was built and tested with / se compiló y probó con:
+Gryphmark 1.8.2 was built and tested with / se compiló y probó con:
 
 | Tool | Version |
 |---|---|

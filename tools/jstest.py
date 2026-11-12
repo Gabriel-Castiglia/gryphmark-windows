@@ -146,6 +146,34 @@ js = """
     }
     out.dark_text_light = dim.length === 0;
     if (dim.length) out.dark_dim = dim.join(', ');
+    // a table with an empty <tbody> (pandoc writes one for every one-row table) opens in every view;
+    // 1.8.1 threw inside TOAST UI and showed a blank page
+    const EMPTY = '# Doc\\n\\n<table>\\n<colgroup>\\n<col style="width: 100%%" />\\n</colgroup>\\n<thead>\\n<tr>\\n<th>solo</th>\\n</tr>\\n</thead>\\n<tbody>\\n</tbody>\\n</table>\\n\\nafter\\n';
+    mdApp.setTheme('light');
+    const seen = {};
+    for (const mode of ['preview', 'visual', 'source']) {
+      mdApp.setMode(mode); mdApp.load(EMPTY, null);
+      await new Promise(r => setTimeout(r, 300));
+      const sel = { preview: '#preview', visual: '.toastui-editor-ww-container .ProseMirror', source: '.toastui-editor-md-container .ProseMirror' }[mode];
+      const el = document.querySelector(sel);
+      seen[mode] = !!(el && el.textContent.includes('solo')) && !mdApp.editorBroken() && mdApp.getMarkdownPreserving() === EMPTY;
+    }
+    out.empty_tbody_all_views = seen.preview && seen.visual && seen.source;
+    if (!out.empty_tbody_all_views) out.empty_tbody_seen = JSON.stringify(seen);
+    // if the editor library throws on a text, the GitHub view still shows it, the editor views say why,
+    // and saving gives back the text read from disk (never an empty document)
+    const RealEditor = window.ToastEditor;
+    window.ToastEditor = function () { throw new TypeError('forced editor failure'); };
+    mdApp.setMode('preview'); mdApp.load('# Kept\\n\\nbody text\\n', null);
+    await new Promise(r => setTimeout(r, 300));
+    out.broken_editor_preview_shows = document.getElementById('preview').textContent.includes('body text');
+    out.broken_editor_save_keeps_file = mdApp.getMarkdownPreserving() === '# Kept\\n\\nbody text\\n';
+    mdApp.setMode('visual');
+    const note = document.getElementById('editorError');
+    out.broken_editor_notice = !!note && getComputedStyle(note).display !== 'none' && note.textContent.length > 20;
+    window.ToastEditor = RealEditor;
+    mdApp.load('# Fine again\\n', null);
+    out.editor_recovers = !mdApp.editorBroken() && getComputedStyle(note).display === 'none';
   } catch (e) { out.err = String(e && e.stack || e); }
   document.getElementById('out').textContent = JSON.stringify(out);
 })();

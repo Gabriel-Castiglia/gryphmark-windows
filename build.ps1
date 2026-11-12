@@ -26,6 +26,14 @@ if (-not $SkipNpm) {
     if ($LASTEXITCODE) { throw "npm ci failed" }
     New-Item -ItemType Directory -Force (Join-Path $www "lib") | Out-Null
     npx esbuild entry.js --bundle --minify --format=iife --outfile="$www/lib/bundle.js"
+    # TOAST UI 3.2.2 reads the first row of a <tbody> without checking that there is one, so a table with an
+    # empty <tbody> (pandoc writes one for every one-row table) threw and left the page blank. Patched here;
+    # the build stops if the code it fixes is not found exactly once.
+    $bundle = "$www/lib/bundle.js"; $js = [IO.File]::ReadAllText($bundle)
+    $re = 'var (\w+)=(\w+)\.querySelectorAll\("tr"\),(\w+)=\1\[0\]\.children\.length'
+    if ([regex]::Matches($js, $re).Count -ne 1) { throw "TOAST UI <tbody> patch: the code to fix was not found once in bundle.js" }
+    $js = [regex]::Replace($js, $re, 'var $1=$2.querySelectorAll("tr"),$3=$1.length?$1[0].children.length:0')
+    [IO.File]::WriteAllText($bundle, $js, (New-Object System.Text.UTF8Encoding $false))
     $nm = "node_modules"
     Copy-Item "$nm/@toast-ui/editor/dist/toastui-editor.css", "$nm/@toast-ui/editor/dist/theme/toastui-editor-dark.css",
               "$nm/@toast-ui/editor-plugin-code-syntax-highlight/dist/toastui-editor-plugin-code-syntax-highlight.css",
