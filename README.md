@@ -119,12 +119,12 @@ Gryphmark 1.8.2 was built and tested with / se compiló y probó con:
 | Tool | Version |
 |---|---|
 | Windows 11 Pro | x64 |
-| .NET SDK / runtime (self-contained) | 10.0.403 / 10.0.14 |
+| .NET SDK / runtime (self-contained) | 10.0.404 / 10.0.15 |
 | Microsoft.Web.WebView2 (NuGet) | 1.0.2903.40 |
 | Node.js / npm | 26.12.1 / 11.20.0 |
 | esbuild | 0.25.5 |
 | Inno Setup | 6.7.3 |
-| Google Chrome (manual PDFs) | 157.0.8103.39 |
+| Google Chrome (manual PDFs) | 157.0.8103.51 |
 | Python (`-Art` only) | 3.13.17, Pillow 12.3.0, numpy 2.5.4, scipy 1.18.1, opencv-python 5.0.0 |
 
 Web libraries / Bibliotecas web (exact versions in `_npm/package-lock.json`): TOAST UI Editor 3.2.2,
