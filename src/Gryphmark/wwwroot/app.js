@@ -15,6 +15,7 @@
   // Anything the user types in that moment differs from it and still marks the document
   // modified, so a reload never hides an edit.
   let quietText = null;
+  let lastMarked = 0;        // blocks marked by the last reload (markChanges), for the tests
   let editSeq = 0;           // counts the user's edits; a save says which edit it holds (takeForSave)
   let original = '';        // text exactly as read from disk
   let baseline = '';        // the same text after the editor's normalisation (captured at load)
@@ -259,6 +260,34 @@
   function unescapeWiki(line) {
     return line.replace(/\\\[\\\[((?:\\.|[^\\\]\n])*?)\\\]\\\]/g, (m, inner) => '[[' + inner.replace(/\\(.)/g, '$1') + ']]');
   }
+  // An edited line takes only the user's change; the rest of it stays as written in the file. The editor
+  // rewrites a whole line in its own style when one character of it changes: \| and \. in a line with a
+  // pipe, *x* for _x_, \~ for ~, and an inline tag it does not know (<kbd>, <br>) dropped. O is the line in
+  // the file, B the editor's version of it when the file was read, C its version now. The change is what
+  // differs between B and C past their common start and end; aligning B with O letter by letter gives that
+  // stretch its place in O, where the new text goes.
+  function mergeLine(O, B, C) {
+    if (O === B) return unescapeWiki(C);
+    let p = 0; const max = Math.min(B.length, C.length);
+    while (p < max && B[p] === C[p]) p++;
+    let s = 0;
+    while (s < max - p && B[B.length - 1 - s] === C[C.length - 1 - s]) s++;
+    const bEnd = B.length - s, ins = unescapeWiki(C.slice(p, C.length - s));
+    const at = new Array(B.length).fill(-1);       // at[i]: where B[i] is in O, or -1 (only in B: an escape)
+    let bi = 0, oi = 0;
+    for (const part of diffArrays(B.split(''), O.split(''))) {
+      if (part.added) oi += part.count;              // only in O: kept wherever it is
+      else if (part.removed) bi += part.count;
+      else for (let k = 0; k < part.count; k++) at[bi++] = oi++;
+    }
+    let start = -1, end = -1;
+    for (let i = p; i < bEnd; i++) if (at[i] >= 0) { if (start < 0) start = at[i]; end = at[i] + 1; }
+    if (start < 0) {                                 // nothing of O in the stretch: an insertion after its last kept letter
+      let k = p - 1; while (k >= 0 && at[k] < 0) k--;
+      start = end = k >= 0 ? at[k] + 1 : 0;
+    }
+    return O.slice(0, start) + ins + O.slice(end);
+  }
   function preserveFormatting(current) {
     if (current === baseline) return original;
     const O = original.split('\n'), N = baseline.split('\n'), C = current.split('\n');
@@ -289,8 +318,14 @@
     const d2 = diffArrays(N, C);
     let n = 0;
     const plan = [];           // sequence of { kind: 'n', idx } | { kind: 'c', line }
-    for (const p of d2) {
-      if (p.added) { for (const line of p.value) plan.push({ kind: 'c', line }); }
+    for (let i = 0; i < d2.length; i++) {
+      const p = d2[i];
+      if (p.removed && d2[i + 1] && d2[i + 1].added && d2[i + 1].value.length === p.value.length) {
+        // lines changed one for one: each can keep the rest of its line as in the file (mergeLine)
+        d2[i + 1].value.forEach((line, k) => plan.push({ kind: 'm', idx: n + k, line }));
+        n += p.value.length; i++;
+      }
+      else if (p.added) { for (const line of p.value) plan.push({ kind: 'c', line }); }
       else if (p.removed) { n += p.value.length; }
       else { for (let k = 0; k < p.value.length; k++) { kept[n] = true; plan.push({ kind: 'n', idx: n++ }); } }
     }
@@ -299,6 +334,11 @@
     let prevKept = true;
     for (const step of plan) {
       if (step.kind === 'c') { out.push(unescapeWiki(step.line)); prevKept = false; continue; }
+      if (step.kind === 'm') {
+        const s = seg[segOfN[step.idx]];
+        out.push(s.o.length === 1 && s.n.length === 1 ? mergeLine(s.o[0], N[step.idx], step.line) : unescapeWiki(step.line));
+        prevKept = false; continue;
+      }
       const i = step.idx;
       if (prevKept && zeroBefore[i]) for (const z of zeroBefore[i]) out.push(...z.o);
       const s = seg[segOfN[i]];
@@ -354,9 +394,48 @@
     r.setStart(a.node, a.offset); r.setEnd(b.node, b.offset); return r;
   }
 
+  // ------------------------------------------------------------------ what another program changed
+  // After a reload, the blocks that are new or different are marked in green for a few seconds, in the
+  // view on screen, so the reader sees what the AI wrote. A highlight paints over the text and leaves the
+  // editor's own DOM alone. The blocks of each view are compared as text before and after the reload.
+  const changeRoots = () => ({
+    preview: ['#preview'],
+    visual: ['.toastui-editor-ww-container .ProseMirror'],
+    source: ['.toastui-editor-md-container .ProseMirror', '.toastui-editor-md-preview .toastui-editor-contents'],
+  }[state.mode] || []).map((sel) => document.querySelector(sel)).filter(Boolean);
+  // lists, tables and quotes count by item, so one point added to a list marks that point, not the list
+  const units = (root) => Array.from(root.children).flatMap((el) =>
+    /^(UL|OL|BLOCKQUOTE)$/.test(el.tagName) ? Array.from(el.children) : el.tagName === 'TABLE' ? Array.from(el.querySelectorAll('tr')) : [el]);
+  const blockTexts = (root) => units(root).map((el) => el.textContent);
+  let changeTimers = [];
+  function markChanges(before) {
+    if (!window.CSS || !CSS.highlights) return 0;
+    changeTimers.forEach(clearTimeout); changeTimers = [];
+    CSS.highlights.delete('gm-changed'); CSS.highlights.delete('gm-changed-fade');
+    const ranges = [];
+    changeRoots().forEach((root, i) => {
+      const old = before[i]; if (!old) return;
+      const kids = units(root);
+      let k = 0;
+      for (const part of diffArrays(old, kids.map((el) => el.textContent))) {
+        if (part.removed) continue;
+        if (part.added) for (let j = 0; j < part.count; j++) {
+          const el = kids[k + j];
+          if (el && el.textContent.trim()) { const r = new Range(); r.selectNodeContents(el); ranges.push(r); }
+        }
+        k += part.count;
+      }
+    });
+    if (!ranges.length) return 0;
+    CSS.highlights.set('gm-changed', new Highlight(...ranges));
+    changeTimers.push(setTimeout(() => { CSS.highlights.delete('gm-changed'); CSS.highlights.set('gm-changed-fade', new Highlight(...ranges)); }, 2500));
+    changeTimers.push(setTimeout(() => CSS.highlights.delete('gm-changed-fade'), 4000));
+    return ranges.length;
+  }
+
   function paint() {
     if (!window.CSS || !CSS.highlights) return;
-    CSS.highlights.clear();
+    CSS.highlights.delete('gm-find'); CSS.highlights.delete('gm-cur');   // not the marks of a reload
     const all = [], cur = [];
     find.matches.forEach((m, i) => { try { (i === find.cur ? cur : all).push(toRange(m)); } catch (e) { } });
     CSS.highlights.set('gm-find', new Highlight(...all));
@@ -533,6 +612,7 @@
     // swap the text in place and keep the reader where they were in every view.
     async reload(markdown) {
       if (!editor) { this.load(markdown); return true; }
+      const before = changeRoots().map(blockTexts);
       const panes = ['#previewHost', '#editorHost .toastui-editor-md-preview', '#editorHost .ProseMirror'];
       const kept = panes.map((sel) => Array.from(document.querySelectorAll(sel)).map((el) => el.scrollTop));
       original = (markdown || '').replace(/\r\n/g, '\n');
@@ -549,8 +629,12 @@
       }));
       restore(); requestAnimationFrame(() => { restore(); setTimeout(restore, 120); });
       sendOutline(); if (find.query) scheduleFind();
+      // the side preview of the Markdown view renders a moment later
+      await new Promise((r) => setTimeout(r, state.mode === 'source' ? 200 : 0));
+      lastMarked = markChanges(before);
       return true;
     },
+    changesMarked() { return lastMarked; },
     getMarkdown() { return editorText(); },
     getMarkdownPreserving() { return currentText(); },
     plainText(markdown) { return plainText(markdown); },

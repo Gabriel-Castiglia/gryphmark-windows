@@ -167,8 +167,8 @@ In GitHub preview, links to web pages open in your browser, links to other <code
 <table><tr><th>Feature</th><th>How it works</th></tr>
 <tr><td>Find / Replace</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> open a bar above the document. <kbd>F3</kbd> and <kbd>Shift</kbd>+<kbd>F3</kbd> jump between matches; <kbd>Esc</kbd> closes it. <i>Aa</i> matches case.</td></tr>
 <tr><td>Outline</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> or the outline button of the toolbar shows the headings in the sidebar, below the files; click one to jump to it. With the Files panel hidden, the outline fills the sidebar.</td></tr>
-<tr><td>Your formatting is kept</td><td>Only the lines you change are rewritten when you save: list markers, <code>__bold__</code>, table alignment, line endings (CRLF/LF) and BOM stay as they were.</td></tr>
-<tr><td>Changed outside</td><td>If another program modifies the open file, Gryphmark reloads it (or asks first if you have unsaved changes).</td></tr>
+<tr><td>Your formatting is kept</td><td>Only what you change is rewritten when you save, down to the part of a line you touched: list markers, <code>__bold__</code>, <code>_italics_</code>, tags such as <code>&lt;kbd&gt;</code>, table alignment, line endings (CRLF/LF) and BOM stay as they were.</td></tr>
+<tr><td>Changed outside</td><td>If another program modifies the open file, Gryphmark reloads it (or asks first if you have unsaved changes) and marks what changed in green for a few seconds: new or rewritten paragraphs, and only the point or row added to a list or a table.</td></tr>
 <tr><td>Crash recovery</td><td>Unsaved work is backed up every 20 seconds. If Gryphmark or Windows stops unexpectedly, the next start offers to recover it.</td></tr>
 <tr><td>Spell check</td><td><i>View → Spell check</i> underlines misspelled words, in the interface language (Windows dictionaries).</td></tr>
 <tr><td>One window per file</td><td>Opening a .md while Gryphmark is running brings the existing window forward instead of starting a second copy. <i>File → New window</i> still opens another one.</td></tr>
@@ -344,8 +344,8 @@ En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otro
 <table><tr><th>Función</th><th>Cómo funciona</th></tr>
 <tr><td>Buscar / Reemplazar</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> abren una barra sobre el documento. <kbd>F3</kbd> y <kbd>Mayús</kbd>+<kbd>F3</kbd> saltan entre coincidencias; <kbd>Esc</kbd> la cierra. <i>Aa</i> distingue mayúsculas.</td></tr>
 <tr><td>Esquema</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd> o el botón de esquema de la barra muestra los títulos en la barra lateral, debajo de los archivos; un clic salta a ese título. Con el panel de archivos oculto, el esquema ocupa toda la barra.</td></tr>
-<tr><td>Se respeta tu formato</td><td>Al guardar sólo se reescriben las líneas que cambiaste: viñetas, <code>__negrita__</code>, alineación de tablas, finales de línea (CRLF/LF) y BOM quedan como estaban.</td></tr>
-<tr><td>Cambios externos</td><td>Si otro programa modifica el archivo abierto, Gryphmark lo recarga (o pregunta antes si tenés cambios sin guardar).</td></tr>
+<tr><td>Se respeta tu formato</td><td>Al guardar sólo se reescribe lo que cambiaste, hasta la parte de la línea que tocaste: viñetas, <code>__negrita__</code>, <code>_cursiva_</code>, etiquetas como <code>&lt;kbd&gt;</code>, alineación de tablas, finales de línea (CRLF/LF) y BOM quedan como estaban.</td></tr>
+<tr><td>Cambios externos</td><td>Si otro programa modifica el archivo abierto, Gryphmark lo recarga (o pregunta antes si tenés cambios sin guardar) y marca en verde unos segundos lo que cambió: los párrafos nuevos o reescritos, y en una lista o una tabla solo el punto o la fila que se agregó.</td></tr>
 <tr><td>Recuperación</td><td>Lo no guardado se respalda cada 20 segundos. Si Gryphmark o Windows se cierran de golpe, al volver a abrir ofrece recuperarlo.</td></tr>
 <tr><td>Ortografía</td><td><i>Ver → Corrector ortográfico</i> subraya las palabras mal escritas, en el idioma de la interfaz (diccionarios de Windows).</td></tr>
 <tr><td>Una sola ventana</td><td>Abrir un .md con Gryphmark ya abierto trae al frente la ventana existente en vez de abrir otra copia. <i>Archivo → Nueva ventana</i> sigue abriendo otra.</td></tr>

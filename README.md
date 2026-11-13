@@ -16,8 +16,8 @@ Gryphmark is a Markdown viewer and editor for Windows. Format with buttons — h
 Gryphmark writes the Markdown tags for you. Documents are rendered exactly like GitHub, in light or dark theme.
 
 **Live reload.** When another program changes the open file, such as an AI assistant editing it, Gryphmark shows
-the new text at once and stays where you were reading. It also follows tools that save by writing a new file and
-renaming it over the old one.
+the new text at once and stays where you were reading, and marks what changed in green for a few seconds. It also
+follows tools that save by writing a new file and renaming it over the old one.
 
 **Download:** the setup is in [Releases](https://github.com/Gabriel-Castiglia/gryphmark-windows/releases/latest).
 
@@ -35,7 +35,7 @@ renaming it over the old one.
 - Find & replace, spell check; a sidebar with the files above and the outline below, as on the Mac (drag its edge and the line between them)
 - **Convert to TXT**: right-click a file in the Files panel; a .txt is written next to it, as the document reads in the GitHub view, and the Markdown file is not changed
 - **Autosave**, on by default: a file with a name saves itself a moment after you stop typing; the *Autosave* switch in the toolbar (also *File → Autosave*) turns it off. It never writes over a change made by another program
-- Keeps your formatting: only edited lines change on save (CRLF/BOM preserved)
+- Keeps your formatting: only what you edit changes on save, down to the part of a line you touched (CRLF/BOM preserved)
 - Links in a document open only web pages, e-mail, other Markdown files, pictures and PDFs; a link to any other file shows it in Explorer instead of running it
 - Crash recovery, single instance, update check
 - Export to self-contained HTML, print / save as PDF

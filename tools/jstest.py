@@ -221,6 +221,48 @@ js = """
     const wsaved = mdApp.getMarkdownPreserving();
     out.wiki_edit_keeps_brackets = wsaved.includes('Now See [[note-a]] · [[Note-A.md|same]] here') && !wsaved.includes('\\\\[');
     if (!out.wiki_edit_keeps_brackets) out.wiki_saved = wsaved;
+    // an edited line keeps the rest of itself as in the file: the editor rewrote the whole line (1.11.0 and
+    // earlier saved \\| and \\. in a line with a pipe, *x* for _x_, \\~ for ~, and dropped <kbd> tags)
+    const ML = 'Start | pipe _under_ and <kbd>K</kbd> mid ~t~ end.';
+    async function mfresh() {
+      mdApp.load('# T\\n\\n' + ML + '\\n\\nOther.\\n', null); mdApp.setMode('visual'); await new Promise(r => setTimeout(r, 80));
+      const v = toastView(); let pos = null;
+      v.state.doc.descendants((n, q) => { if (n.isTextblock && n.textContent.startsWith('Start')) pos = q; return pos === null; });
+      return [v, pos + 1, v.state.doc.nodeAt(pos).textContent];
+    }
+    const mline = () => mdApp.getMarkdownPreserving().split('\\n')[2];
+    let [mv, mb, mt] = await mfresh();
+    mv.dispatch(mv.state.tr.insertText('NEW ', mb + mt.indexOf('mid')));
+    out.merge_insert_keeps_line = mline() === 'Start | pipe _under_ and <kbd>K</kbd> NEW mid ~t~ end.';
+    [mv, mb, mt] = await mfresh();
+    mv.dispatch(mv.state.tr.delete(mb + mt.indexOf('mid'), mb + mt.indexOf('mid') + 4));
+    out.merge_delete_keeps_line = mline() === 'Start | pipe _under_ and <kbd>K</kbd> ~t~ end.';
+    [mv, mb, mt] = await mfresh();
+    mv.dispatch(mv.state.tr.insertText('X', mb + mt.indexOf('under') + 2));
+    out.merge_inside_emphasis = mline() === 'Start | pipe _unXder_ and <kbd>K</kbd> mid ~t~ end.';
+    [mv, mb, mt] = await mfresh();
+    mv.dispatch(mv.state.tr.setSelection(mv.state.selection.constructor.create(mv.state.doc, mb + mt.indexOf('pipe'), mb + mt.indexOf('pipe') + 4)));
+    mdApp.exec('bold');
+    out.merge_bold_applied = mline() === 'Start | **pipe** _under_ and <kbd>K</kbd> mid ~t~ end.';
+    if (!out.merge_bold_applied) out.merge_bold_line = mline();
+    // a reload marks in green what another program changed: one paragraph changed and one added are two
+    // marks in each view; a reload with the same text marks nothing
+    const R1 = '# Doc\\n\\nFirst para.\\n\\nSecond para.\\n\\nThird para.\\n';
+    const R2 = '# Doc\\n\\nFirst para.\\n\\nSecond para, rewritten by the AI.\\n\\nThird para.\\n\\nA new one.\\n';
+    const marks = {};
+    for (const mode of ['preview', 'visual', 'source']) {
+      mdApp.setMode(mode); mdApp.load(R1, null); await new Promise(r => setTimeout(r, 300));
+      await mdApp.reload(R2); const n = mdApp.changesMarked(), on = CSS.highlights.has('gm-changed');
+      await mdApp.reload(R2); marks[mode] = [n, on, mdApp.changesMarked()];
+    }
+    out.reload_marks_changes = ['preview', 'visual'].every(m => marks[m][0] === 2 && marks[m][1] && marks[m][2] === 0)
+      && marks.source[0] >= 2 && marks.source[1] && marks.source[2] === 0;
+    if (!out.reload_marks_changes) out.marks_seen = JSON.stringify(marks);
+    // one point added to a list marks that point, not the whole list
+    mdApp.setMode('visual'); mdApp.load('# L\\n\\n- one\\n- two\\n', null); await new Promise(r => setTimeout(r, 200));
+    await mdApp.reload('# L\\n\\n- one\\n- two\\n- three\\n');
+    out.reload_marks_list_item = mdApp.changesMarked() === 1;
+    mdApp.setMode('visual');
   } catch (e) { out.err = String(e && e.stack || e); }
   document.getElementById('out').textContent = JSON.stringify(out);
 })();

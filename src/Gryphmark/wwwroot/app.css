@@ -31,6 +31,11 @@ body.dark .toastui-editor-context-menu { border-color: #3A3A3C !important; backg
 ::highlight(gm-find) { background-color: rgba(255, 214, 10, .38); }
 ::highlight(gm-cur)  { background-color: rgba(255, 159, 10, .85); color: #1d1d1f; }
 body.dark ::highlight(gm-find) { background-color: rgba(255, 214, 10, .28); }
+/* What another program changed, for a few seconds after a reload (app.js markChanges) */
+::highlight(gm-changed) { background-color: rgba(46, 160, 67, .26); }
+::highlight(gm-changed-fade) { background-color: rgba(46, 160, 67, .10); }
+body.dark ::highlight(gm-changed) { background-color: rgba(46, 160, 67, .38); }
+body.dark ::highlight(gm-changed-fade) { background-color: rgba(46, 160, 67, .14); }
 
 /* Task lists in the GitHub view: crisp boxes instead of the greyed-out disabled checkbox */
 #preview .contains-task-list { padding-left: 1.6em; }

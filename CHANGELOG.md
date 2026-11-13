@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.12.0 — 2026-11-13
+
+- **What another program changed is marked in green** for a few seconds after a reload, in every view: new or
+  rewritten paragraphs, and only the point or row added to a list or a table.
+- **An edited line keeps all of itself but your change.** The visual editor rewrote the whole line in its own style
+  when one letter of it changed: `\|` and `\.` in a line with a pipe, `*x*` for `_x_`, `\~` for `~`, and inline tags
+  such as `<kbd>` were lost. Now only what you typed or deleted changes in the file.
+
 ## 1.11.0 — 2026-11-13
 
 - **One sidebar, as on the Mac**: the Files panel above and the outline below, with a line between them that can be
