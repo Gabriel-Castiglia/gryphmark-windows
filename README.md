@@ -32,7 +32,7 @@ renaming it over the old one.
 - **Themes**: light, dark or automatic (follows Windows), and a colour catalogue that changes the icon everywhere in Windows and the highlights of the app (*View → Theme…*)
 - **Dedicated instances**: open a file or folder in its own Gryphmark, separate from the main window (`--profile "Name"`, or right-click in the Files panel → desktop shortcut)
 - **Zoom bar** in the status bar (also `Ctrl` + mouse wheel); on a narrow window the buttons that do not fit go into a ⋯ menu
-- Find & replace, outline sidebar (drag its edge to make it wider), spell check
+- Find & replace, spell check; a sidebar with the files above and the outline below, as on the Mac (drag its edge and the line between them)
 - **Convert to TXT**: right-click a file in the Files panel; a .txt is written next to it, as the document reads in the GitHub view, and the Markdown file is not changed
 - **Autosave**, on by default: a file with a name saves itself a moment after you stop typing; the *Autosave* switch in the toolbar (also *File → Autosave*) turns it off. It never writes over a change made by another program
 - Keeps your formatting: only edited lines change on save (CRLF/BOM preserved)

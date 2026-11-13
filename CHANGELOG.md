@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.11.0 — 2026-11-13
+
+- **One sidebar, as on the Mac**: the Files panel above and the outline below, with a line between them that can be
+  dragged to change their heights. Each one still shows and hides on its own (`Ctrl+Shift+E`, `Ctrl+Shift+O`); the
+  one left on fills the sidebar. The sidebar's width and the split are kept. The Files panel is open the first time.
+- **The questions name their answers**, as on the Mac: when another program changes a file with unsaved changes,
+  *Reload* or *Keep my changes*; when closing, *Save*, *Don't save* or *Cancel* (they were Yes and No).
+- **Sharp on a second screen**: the app follows the scale of each monitor (per-monitor DPI). Before, on a screen with
+  another scale Windows stretched the whole window as a picture.
+- Editing in the Visual view a paragraph that holds `[[name]]` links keeps them as written; it saved them as
+  `\[\[name\]\]`.
+- The editor page is now the same file as in the macOS version (checked on every commit), and WebView2 SDK
+  1.0.4314.35.
+
 ## 1.10.0 — 2026-11-13
 
 - **Autosave**, on by default: a file with a name saves itself 1.5 seconds after you stop typing. A switch in the

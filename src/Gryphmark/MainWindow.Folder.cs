@@ -51,13 +51,14 @@ public partial class MainWindow
         FilesRefresh.Click += (_, _) => RefreshTree();
         FilesCollapse.Click += (_, _) => CollapseAllTrees();
         FilesOptions.Click += (_, _) => { var m = OptionsMenu(); m.PlacementTarget = FilesOptions; m.Placement = PlacementMode.Bottom; m.IsOpen = true; };
-        FilesSplitter.DragCompleted += (_, _) =>
+        SideSplitter.DragCompleted += (_, _) =>
         {
-            if (FilesColumn.ActualWidth > 0) { _settings.FilesWidth = Math.Round(FilesColumn.ActualWidth); _settings.Save(); }
+            if (SideColumn.ActualWidth > 0) { _settings.FilesWidth = Math.Round(SideColumn.ActualWidth); _settings.Save(); }
         };
-        OutlineSplitter.DragCompleted += (_, _) =>
+        PanesSplitter.DragCompleted += (_, _) =>
         {
-            if (OutlineColumn.ActualWidth > 0) { _settings.OutlineWidth = Math.Round(OutlineColumn.ActualWidth); _settings.Save(); }
+            double f = FilesRow.ActualHeight, o = OutlineRow.ActualHeight;
+            if (f > 0 && o > 0) { _settings.OutlineShare = Math.Round(o / (f + o), 3); _settings.Save(); ApplySideLayout(); }
         };
         // 1.4 and earlier kept a single folder
         if (_settings.Folders.Count == 0 && _settings.Folder != null) _settings.Folders.Add(_settings.Folder);
@@ -191,14 +192,30 @@ public partial class MainWindow
         ApplyFilesVisibility(); BuildMenu();
     }
 
+    /// <summary>The sidebar, as in the macOS version: Files above and Contents below with a divider between
+    /// them (OutlineShare of the height for Contents), or the one that is on filling it, or no sidebar.</summary>
+    private void ApplySideLayout()
+    {
+        bool files = _settings.FilesPanel, outline = _settings.Outline, any = files || outline;
+        SideColumn.MinWidth = any ? 180 : 0;
+        SideColumn.Width = new GridLength(any ? Math.Clamp(_settings.FilesWidth, 180, 700) : 0);
+        SideSplitterColumn.Width = new GridLength(any ? 5 : 0);
+        SideSplitter.Visibility = any ? Visibility.Visible : Visibility.Collapsed;
+        SideGrid.Visibility = SideSplitter.Visibility;
+        double share = Math.Clamp(_settings.OutlineShare, 0.1, 0.9);
+        FilesRow.MinHeight = files && outline ? 90 : 0;
+        OutlineRow.MinHeight = FilesRow.MinHeight;
+        FilesRow.Height = new GridLength(files ? (outline ? 1 - share : 1) : 0, GridUnitType.Star);
+        OutlineRow.Height = new GridLength(outline ? (files ? share : 1) : 0, GridUnitType.Star);
+        PanesSplitterRow.Height = new GridLength(files && outline ? 5 : 0);
+        PanesSplitter.Visibility = files && outline ? Visibility.Visible : Visibility.Collapsed;
+        FilesPane.Visibility = files ? Visibility.Visible : Visibility.Collapsed;
+        OutlinePane.Visibility = outline ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     private void ApplyFilesVisibility()
     {
-        bool show = _settings.FilesPanel;
-        FilesColumn.MinWidth = show ? 160 : 0;
-        FilesColumn.Width = new GridLength(show ? Math.Clamp(_settings.FilesWidth, 160, 600) : 0);
-        SplitterColumn.Width = new GridLength(show ? 5 : 0);
-        FilesPane.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-        FilesSplitter.Visibility = FilesPane.Visibility;
+        ApplySideLayout();
         bool open = _roots.Count > 0;
         FilesEmptyPanel.Visibility = open ? Visibility.Collapsed : Visibility.Visible;
         FilesTree.Visibility = open ? Visibility.Visible : Visibility.Collapsed;

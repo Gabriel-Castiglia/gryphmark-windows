@@ -36,9 +36,9 @@ public sealed class Settings
     /// <summary>Colour chosen by hand for a folder: path → hue in degrees.</summary>
     public Dictionary<string, string> FolderColorMap { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public List<string> RecentFolders { get; set; } = new();
-    public bool FilesPanel { get; set; }
-    public double FilesWidth { get; set; } = 260;
-    public double OutlineWidth { get; set; } = 250;
+    public bool FilesPanel { get; set; } = true;   // open by default, as the sidebar of the macOS version
+    public double FilesWidth { get; set; } = 260;       // width of the sidebar (Files over Contents), 180 to 700
+    public double OutlineShare { get; set; } = 0.45;    // part of the sidebar's height for Contents when both show
     public double Width { get; set; } = 1200;
     public double Height { get; set; } = 820;
     public bool Maximized { get; set; }
@@ -77,7 +77,7 @@ public sealed class Settings
     private static readonly HashSet<string> SessionKeys = new()
     {
         nameof(Folder), nameof(Folders), nameof(PinnedFolders), nameof(Width), nameof(Height), nameof(Maximized),
-        nameof(FilesPanel), nameof(FilesWidth), nameof(OutlineWidth), nameof(SampleShown),
+        nameof(FilesPanel), nameof(FilesWidth), nameof(OutlineShare), nameof(SampleShown),
     };
 
     /// <summary>Gryphmark was called Quillforge up to 1.1.1: copy its settings, recent files and recovery

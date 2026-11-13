@@ -208,6 +208,19 @@ js = """
     out.scrollbar_at_window_edge = innerWidth > 1100 && wide.scrolls && Math.abs(wide.right - wide.iw) < 1 && Math.abs(wide.col + wide.bar - 890) < 2;
     out.narrow_column_padding = Math.abs(narrow.right - 700) < 1 && narrow.pad === 45;
     if (!out.scrollbar_at_window_edge || !out.narrow_column_padding) out.scroll_seen = JSON.stringify({ wide, narrow });
+    // [[name]] links: the page is shared with the macOS app, which turns them into links; this app does
+    // not resolve them yet (init without wiki), so they stay text. Editing a paragraph that has one keeps
+    // it as written (1.10.0 saved it as \\[\\[note\\-a\\]\\]).
+    mdApp.load('# W\\n\\nSee [[note-a]] · [[Note-A.md|same]] here.\\n\\nOther line.\\n', null); mdApp.setMode('preview');
+    await new Promise(r => setTimeout(r, 300));
+    out.wiki_off_stays_text = !document.querySelector('#preview a.wikilink') && document.getElementById('preview').textContent.includes('[[note-a]]');
+    mdApp.setMode('visual'); await new Promise(r => setTimeout(r, 200));
+    const wv = toastView(); let wpos = null;
+    wv.state.doc.descendants((n, pos) => { if (n.isTextblock && n.textContent.startsWith('See ')) wpos = pos; return wpos === null; });
+    wv.dispatch(wv.state.tr.insertText('Now ', wpos + 1));
+    const wsaved = mdApp.getMarkdownPreserving();
+    out.wiki_edit_keeps_brackets = wsaved.includes('Now See [[note-a]] · [[Note-A.md|same]] here') && !wsaved.includes('\\\\[');
+    if (!out.wiki_edit_keeps_brackets) out.wiki_saved = wsaved;
   } catch (e) { out.err = String(e && e.stack || e); }
   document.getElementById('out').textContent = JSON.stringify(out);
 })();

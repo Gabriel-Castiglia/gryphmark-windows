@@ -11,10 +11,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>Gryphmark.ico</ApplicationIcon>
+    <!-- per-monitor DPI (v2): sharp on a second screen with another scale; WPF alone is system aware -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyName>Gryphmark</AssemblyName>
     <RootNamespace>Gryphmark</RootNamespace>
     <!-- The version is set here only: build.ps1, the installer and the About window read it. -->
-    <Version>1.10.0</Version>
+    <Version>1.11.0</Version>
     <Product>Gryphmark</Product>
     <Company>Gabriel Castiglia</Company>
     <Copyright>© 2026 Gabriel Castiglia</Copyright>
@@ -30,7 +32,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
   </ItemGroup>
 
   <ItemGroup>

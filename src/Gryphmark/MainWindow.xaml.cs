@@ -321,10 +321,10 @@ public partial class MainWindow : Window
         // changed it meanwhile: then the question below decides.
         if (CanAutoSave() && await SaveAsync(false, auto: true)) return true;
         var name = _path != null ? Path.GetFileName(_path) : Strings.Get("Untitled");
-        var r = MessageBox.Show(this, string.Format(Strings.Get("AskSave"), name), "Gryphmark",
-            MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
-        if (r == MessageBoxResult.Cancel) return false;
-        if (r == MessageBoxResult.Yes) return await SaveAsync(false);
+        // Don't save · Cancel · Save (default), as on the Mac
+        int r = ChoiceDialog.Ask(this, string.Format(Strings.Get("AskSave"), name), new[] { Strings.Get("DontSave"), Strings.Get("Cancel"), Strings.Get("SaveBtn") }, 1);
+        if (r == 1) return false;
+        if (r == 2) return await SaveAsync(false);
         return true;
     }
 

@@ -117,6 +117,39 @@
     const el = document.getElementById('preview');
     el.innerHTML = renderGithub(currentText());
     await runMermaid(el);
+    if (state.wiki) linkWiki(el);
+  }
+
+  // ------------------------------------------------------------------ [[name]] links (GitHub view only)
+  // [[name]], [[name|text]] and [[name#heading]] become links to the Markdown file of that name in the
+  // open folders; the host finds it, and says which names match no file (shown as missing). Only the
+  // view is changed, never the text, and an exported page keeps them as they are written.
+  const WIKI = /\[\[([^\[\]\n|#]+)(#[^\[\]\n|]*)?(?:\|([^\[\]\n]+))?\]\]/g;
+  function linkWiki(root) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => n.parentElement.closest('code, pre, a, kbd, .katex, .mermaid') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
+    });
+    const hits = [];
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) if (n.nodeValue.includes('[[')) hits.push(n);
+    hits.forEach((n) => {
+      const text = n.nodeValue; const frag = document.createDocumentFragment(); let last = 0; let m;
+      WIKI.lastIndex = 0;
+      while ((m = WIKI.exec(text))) {
+        if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+        const a = document.createElement('a');
+        a.className = 'wikilink'; a.href = '#'; a.dataset.wiki = m[1].trim();
+        a.textContent = (m[3] || (m[1] + (m[2] || ''))).trim();
+        frag.appendChild(a); last = WIKI.lastIndex;
+      }
+      if (last === 0) return;
+      if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+      n.parentNode.replaceChild(frag, n);
+    });
+    askWiki();
+  }
+  function askWiki() {
+    const names = Array.from(new Set(Array.from(document.querySelectorAll('#preview a.wikilink')).map((a) => a.dataset.wiki)));
+    if (names.length) post({ type: 'wikinames', names });
   }
 
   // ------------------------------------------------------------------ editor
@@ -221,6 +254,11 @@
   // ------------------------------------------------------------------ keep the original formatting
   // The visual editor rewrites Markdown in its own style. On save, every block the user did not
   // touch is written back exactly as it was on disk; only edited blocks take the new text.
+  // The visual editor escapes the brackets (and - . |) of a [[name]] in a block it rewrites:
+  // \[\[note\-a\]\] goes back to [[note-a]], so editing a paragraph never breaks its wiki links.
+  function unescapeWiki(line) {
+    return line.replace(/\\\[\\\[((?:\\.|[^\\\]\n])*?)\\\]\\\]/g, (m, inner) => '[[' + inner.replace(/\\(.)/g, '$1') + ']]');
+  }
   function preserveFormatting(current) {
     if (current === baseline) return original;
     const O = original.split('\n'), N = baseline.split('\n'), C = current.split('\n');
@@ -260,7 +298,7 @@
     const emitted = new Set();
     let prevKept = true;
     for (const step of plan) {
-      if (step.kind === 'c') { out.push(step.line); prevKept = false; continue; }
+      if (step.kind === 'c') { out.push(unescapeWiki(step.line)); prevKept = false; continue; }
       const i = step.idx;
       if (prevKept && zeroBefore[i]) for (const z of zeroBefore[i]) out.push(...z.o);
       const s = seg[segOfN[i]];
@@ -531,7 +569,8 @@
     setTheme(theme) { const t = editorText(); state.theme = theme; applyTheme(); build(t); applyMode(); },
     setMode(mode) { state.mode = mode; applyMode(); },
     setSpell(on) { state.spell = !!on; applySpell(); },
-    init(lang, theme, mode, spell, locked) { state = { lang, theme, mode, spell: spell !== false, locked: !!locked }; applyTheme(); build(''); applyMode(); },
+    // wiki: the host resolves [[name]] links (the macOS app does; until the Windows app does, they stay as text)
+    init(lang, theme, mode, spell, locked, wiki) { state = { lang, theme, mode, spell: spell !== false, locked: !!locked, wiki: !!wiki }; applyTheme(); build(''); applyMode(); },
     setLocked(on) { state.locked = !!on; applyLock(); },
     exec(cmd, payload) { if (!editor || state.mode === 'preview' || state.locked) return; try { editor.exec(cmd, payload); } catch (e) { } editor.focus(); },
     insertText(t) { if (!state.locked && editor) editor.insertText(t); },
@@ -554,6 +593,15 @@
       post({ type: 'export', title, body, theme: state.theme, math: /class="katex/.test(body) });
     },
     async preparePrint() { await showPreview(); post({ type: 'printReady' }); },
+    setBase(docBase) { document.getElementById('docbase').href = docBase || 'https://app.local/'; },
+    wikiState(found) {
+      document.querySelectorAll('#preview a.wikilink').forEach((a) => {
+        const missing = found[a.dataset.wiki] === false;
+        a.classList.toggle('missing', missing);
+        if (missing) a.title = a.dataset.wiki + '.md ?'; else a.removeAttribute('title');
+      });
+    },
+    refreshWikiLinks() { askWiki(); },
   };
 
   // ------------------------------------------------------------------ keyboard shortcuts while the page has focus
@@ -587,6 +635,7 @@
     const a = e.target.closest('a'); if (!a) return;
     const href = a.getAttribute('href') || '';
     e.preventDefault();
+    if (a.classList.contains('wikilink')) { post({ type: 'wikilink', name: a.dataset.wiki }); return; }
     if (href.startsWith('#')) { const t = document.getElementById(decodeURIComponent(href.slice(1))); if (t) t.scrollIntoView(); return; }
     post({ type: 'link', href: a.href });
   });

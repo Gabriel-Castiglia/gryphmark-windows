@@ -156,12 +156,7 @@ public partial class MainWindow
 
     private void ApplyOutlineVisibility()
     {
-        bool show = _settings.Outline;
-        OutlineColumn.MinWidth = show ? 160 : 0;
-        OutlineColumn.Width = new GridLength(show ? Math.Clamp(_settings.OutlineWidth, 160, 600) : 0);
-        OutlineSplitterColumn.Width = new GridLength(show ? 5 : 0);
-        OutlinePane.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-        OutlineSplitter.Visibility = OutlinePane.Visibility;
+        if (_folderInit) ApplySideLayout();   // the sidebar holds both panes (MainWindow.Folder.cs)
     }
 
     private void UpdateOutline(JsonElement items)
@@ -238,9 +233,10 @@ public partial class MainWindow
                 if (now == _diskText) continue;
                 if (_dirty)
                 {
-                    var r = MessageBox.Show(this, string.Format(Strings.Get("ChangedOnDisk"), Path.GetFileName(path)), "Gryphmark",
-                        MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (r != MessageBoxResult.Yes) { _diskText = now; return; }   // asked about this version; a newer one asks again
+                    // Keep my changes (Escape) · Reload (default), as on the Mac
+                    int r = ChoiceDialog.Ask(this, string.Format(Strings.Get("ChangedOnDisk"), Path.GetFileName(path)),
+                        new[] { Strings.Get("KeepMine"), Strings.Get("ReloadBtn") }, 0);
+                    if (r != 1) { _diskText = now; return; }   // asked about this version; a newer one asks again
                     _dirty = false;
                 }
                 if (await ReloadFromDiskAsync(path)) reloaded = true;
