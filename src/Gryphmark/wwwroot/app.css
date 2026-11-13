@@ -61,9 +61,11 @@ body.dark #preview .task-list-item.checked { color: var(--fgColor-muted, #9198a1
 body.dark ::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,.18); }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* Visual editor page: same column and spacing as github.com */
+/* Visual editor page: same column and spacing as github.com. This element is the one that scrolls,
+   so it fills the view and its scrollbar sits at the window's edge; the 980 px column comes from the
+   side padding. With max-width the scrollbar stood at the column's edge, far inside a wide window. */
 .toastui-editor-ww-container .toastui-editor-contents.markdown-body {
-  max-width: 980px; margin: 0 auto; padding: 24px 45px 64px; box-sizing: border-box;
+  margin: 0; padding: 24px max(45px, calc(50% - 445px)) 64px; box-sizing: border-box;
   font-size: 16px; line-height: 1.5;
 }
 /* Toast's own colours lose to GitHub's inside documents */

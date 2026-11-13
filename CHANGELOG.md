@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.10.0 — 2026-11-13
+
+- **Autosave**, on by default: a file with a name saves itself 1.5 seconds after you stop typing. A switch in the
+  toolbar, and File → Autosave, turn it on and off. It never writes over a change made by another program (the
+  live reload asks first), and never a new untitled document: that one is saved by itself once it has a name.
+  Closing a window or opening another file saves without asking when autosave is on.
+- **The scrollbar of the Visual view is at the window's edge.** In a window wider than the 980 px text column
+  (maximised, or dragged until Windows enlarged it) it stood at the edge of the column, with a wide empty margin to
+  its right. The column is the same width as before.
+- Saving takes the text and marks it saved in one step: a key pressed while a save was under way could be left out
+  of the file and of the next save.
+- The live reload tells our own saves apart by their text, not by the time since saving: a change written by
+  another program in the two seconds after a save was ignored.
+
 ## 1.9.0 — 2026-11-12
 
 - **Convert to TXT**: right-click a file in the Files panel. A .txt is written next to it as the document reads in the

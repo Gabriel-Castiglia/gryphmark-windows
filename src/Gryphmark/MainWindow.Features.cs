@@ -20,7 +20,10 @@ public partial class MainWindow
 {
     private bool _crlf, _bom;
     private FileSystemWatcher? _watcher;
-    private DateTime _suppressWatchUntil;
+    private string? _diskText;    // the text last read from or written to disk: the same text again is not a change
+    private long _lastEditSeq;     // the last edit the page reported (app.js editSeq)
+    private bool _saving;
+    private readonly DispatcherTimer _autoSaveTimer = new() { Interval = TimeSpan.FromSeconds(1.5) };
     private readonly DispatcherTimer _recoveryTimer = new() { Interval = TimeSpan.FromSeconds(20) };
     private readonly DispatcherTimer _statusTimer = new() { Interval = TimeSpan.FromSeconds(4) };
     private readonly string _recoveryId = Guid.NewGuid().ToString("N");
@@ -53,6 +56,7 @@ public partial class MainWindow
         _recoveryTimer.Tick += async (_, _) => await SaveRecoveryAsync();
         _recoveryTimer.Start();
         _statusTimer.Tick += (_, _) => { _statusTimer.Stop(); UpdateStatus(); };
+        _autoSaveTimer.Tick += async (_, _) => await AutoSaveAsync();
         ApplyOutlineVisibility();
         LocalizeFeatures();
         Loaded += (_, _) => Dispatcher.BeginInvoke(async () =>
@@ -80,6 +84,7 @@ public partial class MainWindow
     private void StopFeatures()
     {
         _recoveryTimer.Stop();
+        _autoSaveTimer.Stop();
         _watcher?.Dispose(); _watcher = null;
     }
 
@@ -215,9 +220,10 @@ public partial class MainWindow
     private bool _changePending, _changeAgain;
     private async void OnExternalChange(string path)
     {
-        if (DateTime.UtcNow < _suppressWatchUntil || !string.Equals(path, _path, StringComparison.OrdinalIgnoreCase)) return;
-        if (_changePending) { _changeAgain = true; return; }   // a burst of writes: reload once more at the end
+        if (!string.Equals(path, _path, StringComparison.OrdinalIgnoreCase)) return;
+        if (_changePending) { _changeAgain = true; return; }   // a burst of writes: read once more at the end
         _changePending = true;
+        bool reloaded = false;
         try
         {
             do
@@ -225,18 +231,38 @@ public partial class MainWindow
                 _changeAgain = false;
                 await Task.Delay(250);   // let the other program finish writing
                 if (!File.Exists(path) || !string.Equals(path, _path, StringComparison.OrdinalIgnoreCase)) return;
+                var now = PeekDocument(path);
+                if (now == null) { _changeAgain = true; await Task.Delay(250); continue; }   // still being written
+                // Our own save (autosave writes often), or a touch without a change. Comparing the text
+                // and not the time since the last save: another program may write a second after us.
+                if (now == _diskText) continue;
                 if (_dirty)
                 {
                     var r = MessageBox.Show(this, string.Format(Strings.Get("ChangedOnDisk"), Path.GetFileName(path)), "Gryphmark",
                         MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (r != MessageBoxResult.Yes) return;
+                    if (r != MessageBoxResult.Yes) { _diskText = now; return; }   // asked about this version; a newer one asks again
                     _dirty = false;
                 }
-                if (!await ReloadFromDiskAsync(path)) { _changeAgain = true; await Task.Delay(250); }
+                if (await ReloadFromDiskAsync(path)) reloaded = true;
+                else { _changeAgain = true; await Task.Delay(250); }
             } while (_changeAgain);
-            Flash(Strings.Get("Reloaded"));
+            if (reloaded) Flash(Strings.Get("Reloaded"));
         }
         finally { _changePending = false; _changeAgain = false; }
+    }
+
+    /// <summary>The text on disk as ReadDocument gives it, without touching the document's state;
+    /// null while another program holds the file or when it is gone.</summary>
+    private static string? PeekDocument(string path)
+    {
+        try
+        {
+            var bytes = File.ReadAllBytes(path);
+            bool bom = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF;
+            return new UTF8Encoding(false).GetString(bytes, bom ? 3 : 0, bytes.Length - (bom ? 3 : 0));
+        }
+        catch (IOException) { return null; }
+        catch (UnauthorizedAccessException) { return null; }
     }
 
     /// <summary>Reads the file again and swaps the text in place, keeping the scroll position of
@@ -247,11 +273,44 @@ public partial class MainWindow
         try { text = ReadDocument(path); }
         catch (IOException) { return false; }
         catch (UnauthorizedAccessException) { return false; }
+        _diskText = text;
         await Js($"mdApp.reload({Q(text)})");
         _dirty = false;
         _words = int.TryParse(await Js("mdApp.words()"), out var n) ? n : 0;
         UpdateTitle(); UpdateStatus();
         return true;
+    }
+
+    // ------------------------------------------------------------------ autosave
+    // On by default: a document with a name is written 1.5 s after the typing stops. It never writes
+    // over a change made by another program (the live reload asks first), never a new untitled
+    // document or the sample, and never while saving or reloading.
+    private bool CanAutoSave() =>
+        _settings.AutoSave && _ready && _path != null && !_isSample && !_saving && !_changePending
+        && PeekDocument(_path) is { } now && now == _diskText;
+
+    private void ScheduleAutoSave()
+    {
+        if (!_settings.AutoSave || _path == null) return;
+        _autoSaveTimer.Stop(); _autoSaveTimer.Start();   // restarts with every edit
+    }
+
+    private async Task AutoSaveAsync()
+    {
+        _autoSaveTimer.Stop();
+        if (!_dirty || _path == null) return;
+        if (_saving || _changePending || (File.Exists(_path) && PeekDocument(_path) == null)) { ScheduleAutoSave(); return; }   // busy: later
+        if (CanAutoSave()) await SaveAsync(false, auto: true);
+    }
+
+    private async Task SetAutoSave(bool on)
+    {
+        _settings.AutoSave = on; _settings.Save();
+        AutoSaveBtn.IsChecked = on;
+        BuildMenu();
+        Flash(Strings.Get(on ? "AutoSaveOn" : "AutoSaveOff"));
+        if (on && _dirty) await AutoSaveAsync();
+        else if (!on) _autoSaveTimer.Stop();
     }
 
     // ------------------------------------------------------------------ crash recovery

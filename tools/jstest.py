@@ -63,7 +63,7 @@ def page(extra_js):
     f = pathlib.Path(tempfile.gettempdir()) / "gm_jstest.html"
     f.write_text(html, encoding="utf-8")
     r = subprocess.run([edge, "--headless=new", "--disable-gpu", "--no-first-run",
-                        "--user-data-dir=" + str(pathlib.Path(tempfile.gettempdir()) / "gm_jstest_profile"), "--allow-file-access-from-files", "--virtual-time-budget=6000", "--dump-dom", f.as_uri()],
+                        "--user-data-dir=" + str(pathlib.Path(tempfile.gettempdir()) / "gm_jstest_profile"), "--allow-file-access-from-files", "--window-size=1600,900", "--virtual-time-budget=15000", "--dump-dom", f.as_uri()],
                        capture_output=True, text=True, encoding="utf-8", errors="replace")
     s = r.stdout
     i = s.find("<pre id=\"out\">"); j = s.find("</pre>", i)
@@ -177,6 +177,37 @@ js = """
     // Convert to TXT: the text as it reads in the GitHub view, without the Markdown marks
     out.plain_text = mdApp.plainText('# Title\\n\\n- one\\n- **two**\\n\\n| a | b |\\n|---|---|\\n| 1 | 2 |\\n')
       === 'Title\\n=====\\n\\n\u2022 one\\n\u2022 two\\n\\na  b\\n-  -\\n1  2\\n';
+    // a save takes the text and marks it saved in one step (takeForSave): an edit typed after it is
+    // not in that text, keeps the document modified (a higher seq) and is in the next save
+    mdApp.setMode('visual'); mdApp.load('# Save\\n\\none\\n', null);
+    await new Promise(r => setTimeout(r, 200));
+    let lastSeq = 0;
+    const saveHost = window.chrome.webview.postMessage;
+    window.chrome.webview.postMessage = (m) => { if (m && m.type === 'dirty') lastSeq = m.seq; saveHost(m); };
+    mdApp.focus(); mdApp.insertText('first ');
+    await new Promise(r => setTimeout(r, 100));
+    const s1 = mdApp.takeForSave();
+    mdApp.insertText('second ');
+    await new Promise(r => setTimeout(r, 100));
+    const s2 = mdApp.takeForSave();
+    window.chrome.webview.postMessage = saveHost;
+    out.save_seq_marks_later_edit = s1.seq > 0 && lastSeq > s1.seq && s2.seq === lastSeq;
+    out.save_keeps_later_edit = s1.text.includes('first') && !s1.text.includes('second') && s2.text.includes('first second');
+    out.save_ends_with_newline = s1.text.endsWith('\\n') && s2.text.endsWith('\\n');
+    // the visual view scrolls in an element as wide as the window, so its scrollbar is at the window's
+    // edge; the text keeps GitHub's 980 px column (1.9.0 put the scrollbar at the column's edge)
+    mdApp.load(LONG, null);
+    await new Promise(r => setTimeout(r, 300));
+    const sc = document.querySelector('.toastui-editor-ww-container .ProseMirror');
+    const colW = (el) => { const cs = getComputedStyle(el); return el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight); };
+    const wide = { right: sc.getBoundingClientRect().right, iw: innerWidth, scrolls: sc.scrollHeight > sc.clientHeight, col: colW(sc), bar: sc.offsetWidth - sc.clientWidth };
+    document.body.style.width = '700px';
+    await new Promise(r => setTimeout(r, 200));
+    const narrow = { right: sc.getBoundingClientRect().right, col: colW(sc), pad: parseFloat(getComputedStyle(sc).paddingLeft) };
+    document.body.style.width = '';
+    out.scrollbar_at_window_edge = innerWidth > 1100 && wide.scrolls && Math.abs(wide.right - wide.iw) < 1 && Math.abs(wide.col + wide.bar - 890) < 2;
+    out.narrow_column_padding = Math.abs(narrow.right - 700) < 1 && narrow.pad === 45;
+    if (!out.scrollbar_at_window_edge || !out.narrow_column_padding) out.scroll_seen = JSON.stringify({ wide, narrow });
   } catch (e) { out.err = String(e && e.stack || e); }
   document.getElementById('out').textContent = JSON.stringify(out);
 })();

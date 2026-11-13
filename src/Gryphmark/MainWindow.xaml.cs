@@ -138,6 +138,7 @@ public partial class MainWindow : Window
             case "ready":
                 await Js($"mdApp.init({Q(_settings.Lang)},{Q(IsDark ? "dark" : "light")},{Q(_settings.Mode)},{(_settings.Spell ? "true" : "false")},{(_settings.ReadOnly ? "true" : "false")})");
                 _ready = true;
+                _lastEditSeq = 0;   // a new page counts its edits from zero
                 if (_restore is { } r) { _restore = null; await RestoreDocAsync(r.Text, r.Dirty); }
                 else if (_pendingOpen != null) { var p = _pendingOpen; _pendingOpen = null; await LoadFileAsync(p); }
                 else if (!_settings.SampleShown && SamplePath != null) { _settings.SampleShown = true; _settings.Save(); await LoadSampleAsync(); }
@@ -146,8 +147,10 @@ public partial class MainWindow : Window
                 break;
             case "dirty":
                 if (root.TryGetProperty("words", out var w)) _words = w.GetInt32();
+                if (root.TryGetProperty("seq", out var sq)) _lastEditSeq = Math.Max(_lastEditSeq, sq.GetInt64());
                 if (!_dirty) { _dirty = true; UpdateTitle(); }
                 UpdateStatus();
+                ScheduleAutoSave();
                 break;
             case "lockedHint":
                 Flash(Strings.Get("LockedHint"));
@@ -248,7 +251,7 @@ public partial class MainWindow : Window
             Web.CoreWebView2.ClearVirtualHostNameToFolderMapping("doc.local");
             Web.CoreWebView2.SetVirtualHostNameToFolderMapping("doc.local", dir, CoreWebView2HostResourceAccessKind.Allow);
             await Js($"mdApp.load({Q(text)},'https://doc.local/')");
-            _path = path; _dirty = false; _isSample = false;
+            _path = path; _dirty = false; _isSample = false; _diskText = text;
             Watch(path);
             _words = int.TryParse(await Js("mdApp.words()"), out var n) ? n : 0;
             _settings.AddRecent(path); _settings.Save();
@@ -260,7 +263,9 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task<bool> SaveAsync(bool forceDialog)
+    /// <summary>Writes the document. auto: an autosave, which reports a failure in the status bar
+    /// instead of a dialog.</summary>
+    private async Task<bool> SaveAsync(bool forceDialog, bool auto = false)
     {
         var target = _path;
         if (forceDialog || target == null)
@@ -275,17 +280,21 @@ public partial class MainWindow : Window
             if (dlg.ShowDialog(this) != true) return false;
             target = dlg.FileName;
         }
+        _saving = true;
         try
         {
-            // untouched blocks keep their original Markdown; line endings and BOM as the file had them
-            var md = JsonSerializer.Deserialize<string>(await Js("mdApp.getMarkdownPreserving()")) ?? "";
-            if (!md.EndsWith('\n')) md += "\n";
-            await Js($"mdApp.markSaved({Q(md)})");
+            // untouched blocks keep their original Markdown; line endings and BOM as the file had them.
+            // The text is taken and marked as saved in one call; seq is the last edit it holds.
+            using var snap = JsonDocument.Parse(await Js("mdApp.takeForSave()"));
+            var md = snap.RootElement.GetProperty("text").GetString() ?? "";
+            long seq = snap.RootElement.GetProperty("seq").GetInt64();
             var disk = _crlf ? md.Replace("\r\n", "\n").Replace("\n", "\r\n") : md;
-            _suppressWatchUntil = DateTime.UtcNow.AddSeconds(2);
             File.WriteAllText(target!, disk, new UTF8Encoding(_bom));
+            _diskText = disk;   // the watcher sees this write; the same text on disk is not a change
             bool moved = !string.Equals(target, _path, StringComparison.OrdinalIgnoreCase);
-            _path = target; _dirty = false;
+            _path = target;
+            _dirty = _lastEditSeq > seq;   // typed while saving: still modified, and saved again shortly
+            if (_dirty) ScheduleAutoSave();
             Watch(target!); ClearRecovery();
             if (moved)
             {
@@ -298,14 +307,19 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, string.Format(Strings.Get("ErrSave"), ex.Message), "Gryphmark", MessageBoxButton.OK, MessageBoxImage.Error);
+            if (auto) Flash(string.Format(Strings.Get("ErrAutoSave"), ex.Message));
+            else MessageBox.Show(this, string.Format(Strings.Get("ErrSave"), ex.Message), "Gryphmark", MessageBoxButton.OK, MessageBoxImage.Error);
             return false;
         }
+        finally { _saving = false; }
     }
 
     private async Task<bool> ConfirmDiscardAsync()
     {
         if (!_dirty) return true;
+        // With autosave on, a file with a name is saved without asking, unless another program
+        // changed it meanwhile: then the question below decides.
+        if (CanAutoSave() && await SaveAsync(false, auto: true)) return true;
         var name = _path != null ? Path.GetFileName(_path) : Strings.Get("Untitled");
         var r = MessageBox.Show(this, string.Format(Strings.Get("AskSave"), name), "Gryphmark",
             MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
@@ -557,6 +571,7 @@ public partial class MainWindow : Window
         ["Task"] = "", ["CodeBlock"] = "", ["Hr"] = "",
         ["ModeVisual"] = "", ["ModeSource"] = "", ["ModePreview"] = "",
         ["Dark"] = "", ["ZoomIn"] = "", ["ZoomOut"] = "", ["ZoomReset"] = "",
+        ["AutoSave"] = "\uE895",
         ["OpenDir"] = "\uE838", ["Files"] = "\uE8B7", ["CloseDir"] = "\uE711", ["Sample"] = "\uE736", ["Manual"] = "", ["Guide"] = "", ["About"] = "",
         ["Find"] = "", ["Replace"] = "", ["FindNext"] = "", ["Outline"] = "", ["CheckUpdates"] = "", ["RecentClear"] = "",
     };
@@ -641,6 +656,7 @@ public partial class MainWindow : Window
         file.Items.Add(new Separator());
         file.Items.Add(Item("Save", ctrl + "S", () => RunCommand("save")));
         file.Items.Add(Item("SaveAs", ctrl + "Shift+S", () => RunCommand("saveas")));
+        file.Items.Add(Item("AutoSave", null, () => SetAutoSave(!_settings.AutoSave), _settings.AutoSave));
         file.Items.Add(new Separator());
         file.Items.Add(Item("ExportHtml", null, () => RunCommand("export")));
         file.Items.Add(Item("Print", ctrl + "P", () => RunCommand("print")));
@@ -812,6 +828,9 @@ public partial class MainWindow : Window
         SegPreview.ToolTip = SegTip("ModePreview", "TipPreview", "Ctrl+3");
         if (ZoomSlider != null && ToolsMore.ToolTip != null) LocalizeFit();
         Dispatcher.BeginInvoke(FitToolbar);
+        AutoSaveBtn.Content = Strings.Plain("AutoSave");
+        AutoSaveBtn.ToolTip = SegTip("AutoSave", "TipAutoSave", "");
+        AutoSaveBtn.IsChecked = _settings.AutoSave;
         SegEdit.Content = SegLabel("\uE70F", "SegEdit");
         SegRead.Content = SegLabel("\uE72E", "SegRead");
         SegEdit.ToolTip = SegTip("SegEdit", "TipEdit", "Ctrl+Shift+L");
@@ -825,6 +844,9 @@ public partial class MainWindow : Window
             SegPreview.Checked += async (_, _) => { if (_settings.Mode != "preview") await SetMode("preview"); };
             SegEdit.Checked += async (_, _) => { if (_settings.ReadOnly) await SetReadOnly(false); };
             SegRead.Checked += async (_, _) => { if (!_settings.ReadOnly) await SetReadOnly(true); };
+            // Checked/Unchecked, not Click: the switch also turns by keyboard and by accessibility tools
+            AutoSaveBtn.Checked += async (_, _) => { if (!_settings.AutoSave) await SetAutoSave(true); };
+            AutoSaveBtn.Unchecked += async (_, _) => { if (_settings.AutoSave) await SetAutoSave(false); };
         }
     }
 
@@ -840,7 +862,7 @@ public partial class MainWindow : Window
     internal static object SegTip(string nameKey, string tipKey, string gesture)
     {
         var p = new StackPanel { MaxWidth = 380 };
-        p.Children.Add(new TextBlock { Text = Strings.Plain(nameKey) + "   " + gesture, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 3) });
+        p.Children.Add(new TextBlock { Text = (Strings.Plain(nameKey) + "   " + gesture).TrimEnd(), FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 3) });
         p.Children.Add(new TextBlock { Text = Strings.Get(tipKey), TextWrapping = TextWrapping.Wrap });
         return p;
     }

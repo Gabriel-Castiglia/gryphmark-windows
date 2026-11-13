@@ -153,7 +153,7 @@ Recent folders are listed in <i>File → Open recent</i>.</p>
 <tr><td>Save / Save as</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. New files are saved as UTF-8 without BOM, the same as GitHub; existing files keep their encoding and line endings.</td></tr>
 <tr><td>New / New window</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> starts an empty document; <i>New window</i> opens a second Gryphmark.</td></tr>
 <tr><td>Show in folder</td><td>Opens Explorer with the file selected.</td></tr></table>
-<p>If you close a document with unsaved changes, Gryphmark asks whether to save them.</p>
+<p><b>Autosave</b> is on by default: a file with a name saves itself a moment after you stop typing, and closing it or opening another file saves without asking. The <i>Autosave</i> switch in the toolbar (also <i>File → Autosave</i>) turns it off; then only Save writes the file, and if you close a document with unsaved changes, Gryphmark asks whether to save them. Autosave never writes over a change made by another program: Gryphmark asks first. A new document is saved by itself once it has a name.</p>
 <h3>Images and links</h3>
 <p>Relative paths work as on GitHub: <code>![diagram](img/diagram.png)</code> shows the image stored next to the .md file.
 In GitHub preview, links to web pages open in your browser, links to other <code>.md</code> files open in Gryphmark, and
@@ -330,7 +330,7 @@ Las carpetas recientes aparecen en <i>Archivo → Abrir reciente</i>.</p>
 <tr><td>Guardar / Guardar como</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. Los archivos nuevos se guardan en UTF-8 sin BOM, igual que GitHub; los existentes conservan su codificación y finales de línea.</td></tr>
 <tr><td>Nuevo / Nueva ventana</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> empieza un documento vacío; <i>Nueva ventana</i> abre otro Gryphmark.</td></tr>
 <tr><td>Mostrar en la carpeta</td><td>Abre el Explorador con el archivo seleccionado.</td></tr></table>
-<p>Si cerrás un documento con cambios sin guardar, Gryphmark pregunta si querés guardarlos.</p>
+<p>El <b>autoguardado</b> viene encendido: un archivo con nombre se guarda solo un momento después de que dejás de escribir, y al cerrarlo o abrir otro se guarda sin preguntar. El interruptor <i>Autoguardado</i> de la barra (también <i>Archivo → Autoguardado</i>) lo apaga; entonces solo Guardar escribe el archivo, y si cerrás un documento con cambios sin guardar, Gryphmark pregunta si querés guardarlos. El autoguardado nunca escribe encima de un cambio hecho por otro programa: Gryphmark pregunta antes. Un documento nuevo se guarda solo cuando ya tiene nombre.</p>
 <h3>Imágenes y enlaces</h3>
 <p>Las rutas relativas funcionan como en GitHub: <code>![diagrama](img/diagrama.png)</code> muestra la imagen que está junto al .md.
 En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otros <code>.md</code> se abren en Gryphmark y los

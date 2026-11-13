@@ -44,6 +44,7 @@ public sealed class Settings
     public bool Maximized { get; set; }
     public bool Outline { get; set; } = true;
     public bool Spell { get; set; } = true;
+    public bool AutoSave { get; set; } = true;   // saves a moment after the typing stops (MainWindow.AutoSave)
     /// <summary>The sample document was opened once on first start.</summary>
     public bool SampleShown { get; set; }
     /// <summary>The user hid the sample from File → Open recent (Help → Sample document still opens it).</summary>

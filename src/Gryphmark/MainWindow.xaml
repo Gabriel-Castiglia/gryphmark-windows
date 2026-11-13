@@ -19,20 +19,23 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <!-- formatting buttons: the ones that do not fit go into the ⋯ menu (MainWindow.Fit.cs) -->
                 <Border x:Name="ToolsHost" Grid.Column="0" ClipToBounds="True">
                     <StackPanel x:Name="Tools" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" />
                 </Border>
                 <Button x:Name="ToolsMore" Grid.Column="1" Style="{DynamicResource Gm.ToolButton}" Content="&#xE712;" Visibility="Collapsed" Margin="0,0,8,0" />
-                <Border Grid.Column="3" Style="{DynamicResource Gm.SegmentHost}" VerticalAlignment="Center">
+                <Border Grid.Column="4" Style="{DynamicResource Gm.SegmentHost}" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton x:Name="SegVisual" Style="{DynamicResource Gm.Segment}" GroupName="mode" />
                         <RadioButton x:Name="SegSource" Style="{DynamicResource Gm.Segment}" GroupName="mode" />
                         <RadioButton x:Name="SegPreview" Style="{DynamicResource Gm.Segment}" GroupName="mode" />
                     </StackPanel>
                 </Border>
-                <Border Grid.Column="2" Style="{DynamicResource Gm.SegmentHost}" VerticalAlignment="Center" Margin="0,0,8,0">
+                <!-- autosave switch, on by default (MainWindow.Features.cs, autosave) -->
+                <ToggleButton x:Name="AutoSaveBtn" Grid.Column="2" Style="{DynamicResource Gm.Switch}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <Border Grid.Column="3" Style="{DynamicResource Gm.SegmentHost}" VerticalAlignment="Center" Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton x:Name="SegEdit" Style="{DynamicResource Gm.Segment}" GroupName="lock" />
                         <RadioButton x:Name="SegRead" Style="{DynamicResource Gm.Segment}" GroupName="lock" />

@@ -15,6 +15,7 @@
   // Anything the user types in that moment differs from it and still marks the document
   // modified, so a reload never hides an edit.
   let quietText = null;
+  let editSeq = 0;           // counts the user's edits; a save says which edit it holds (takeForSave)
   let original = '';        // text exactly as read from disk
   let baseline = '';        // the same text after the editor's normalisation (captured at load)
   // The editor library (TOAST UI) can throw on a text it cannot parse (1.8.1 and 1.1.1 showed a blank page
@@ -148,7 +149,7 @@
         toolbarItems: [],   // the toolbar is native (WPF)
         events: {
           change: () => {
-            if (!suppressDirty || (quietText !== null && editor.getMarkdown() !== quietText)) post({ type: 'dirty', words: countWords() });
+            if (!suppressDirty || (quietText !== null && editor.getMarkdown() !== quietText)) post({ type: 'dirty', words: countWords(), seq: ++editSeq });
             scheduleOutline(); if (find.query) scheduleFind();
           },
         },
@@ -516,6 +517,16 @@
     getMarkdownPreserving() { return currentText(); },
     plainText(markdown) { return plainText(markdown); },
     markSaved(text) { original = text.replace(/\r\n/g, '\n'); baseline = editorText(); },
+    // What a save writes, taken and marked as saved in one step. Taking the text and marking it in two
+    // calls let an edit typed in between enter the new baseline without being in the saved text, and
+    // the next save then dropped it. seq is the last edit the text holds: an edit after it keeps the
+    // document modified.
+    takeForSave() {
+      let t = currentText();
+      if (!t.endsWith('\n')) t += '\n';
+      original = t; baseline = editorText();
+      return { text: t, seq: editSeq };
+    },
     setLang(lang) { const t = editorText(); state.lang = lang; build(t); applyMode(); },
     setTheme(theme) { const t = editorText(); state.theme = theme; applyTheme(); build(t); applyMode(); },
     setMode(mode) { state.mode = mode; applyMode(); },

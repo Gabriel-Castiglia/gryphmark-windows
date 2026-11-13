@@ -34,6 +34,7 @@ renaming it over the old one.
 - **Zoom bar** in the status bar (also `Ctrl` + mouse wheel); on a narrow window the buttons that do not fit go into a ⋯ menu
 - Find & replace, outline sidebar (drag its edge to make it wider), spell check
 - **Convert to TXT**: right-click a file in the Files panel; a .txt is written next to it, as the document reads in the GitHub view, and the Markdown file is not changed
+- **Autosave**, on by default: a file with a name saves itself a moment after you stop typing; the *Autosave* switch in the toolbar (also *File → Autosave*) turns it off. It never writes over a change made by another program
 - Keeps your formatting: only edited lines change on save (CRLF/BOM preserved)
 - Links in a document open only web pages, e-mail, other Markdown files, pictures and PDFs; a link to any other file shows it in Explorer instead of running it
 - Crash recovery, single instance, update check
