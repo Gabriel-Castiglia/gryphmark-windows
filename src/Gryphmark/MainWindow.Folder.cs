@@ -110,7 +110,12 @@ public partial class MainWindow
         return string.IsNullOrEmpty(name) ? dir : name;
     }
 
-    private void SaveRoots() { _settings.Folders = _roots.ToList(); _settings.Save(); }
+    private void SaveRoots()
+    {
+        _settings.Folders = _roots.ToList(); _settings.Save();
+        // the open folders are where [[name]] links are looked up: the GitHub view asks again
+        if (_ready) { Wiki.Forget(); _ = Js("mdApp.refreshWikiLinks()"); }
+    }
 
     // ------------------------------------------------------------------ open / close
     private void PickFolder()

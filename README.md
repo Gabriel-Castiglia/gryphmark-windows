@@ -36,6 +36,7 @@ follows tools that save by writing a new file and renaming it over the old one.
 - **Convert to TXT**: right-click a file in the Files panel; a .txt is written next to it, as the document reads in the GitHub view, and the Markdown file is not changed
 - **Autosave**, on by default: a file with a name saves itself a moment after you stop typing; the *Autosave* switch in the toolbar (also *File → Autosave*) turns it off. It never writes over a change made by another program
 - Keeps your formatting: only what you edit changes on save, down to the part of a line you touched (CRLF/BOM preserved)
+- **[[name]] links** in the GitHub view open the Markdown file of that name in the open folders, as in a wiki (a missing one is red), as on the Mac
 - Links in a document open only web pages, e-mail, other Markdown files, pictures and PDFs; a link to any other file shows it in Explorer instead of running it
 - Crash recovery, single instance, update check
 - Export to self-contained HTML, print / save as PDF

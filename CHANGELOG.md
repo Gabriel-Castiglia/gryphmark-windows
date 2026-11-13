@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.13.0 — 2026-11-14
+
+- **[[name]] links**, as on the Mac: in the GitHub view `[[name]]`, `[[name|text]]` and `[[name#heading]]` open the
+  Markdown file of that name in the open folders (the nearest one wins); a name that matches no file is shown in red.
+- **Reading at the end, you follow the end**: when another program adds text at the bottom of the file and you were
+  at the end of the view, the view goes down with it, as in a terminal. Anywhere else you stay where you were.
+- A self-test in the real window, out of sight (`--self-test <log>`): per-monitor DPI, the sidebar, autosave and its
+  switch, the live reload and its green marks, [[name]] links.
+
 ## 1.12.0 — 2026-11-13
 
 - **What another program changed is marked in green** for a few seconds after a reload, in every view: new or

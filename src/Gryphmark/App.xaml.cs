@@ -38,6 +38,20 @@ public partial class App : Application
             Shutdown();
             return;
         }
+        int st = Array.IndexOf(e.Args, "--self-test");
+        if (st >= 0)
+        {
+            // out of sight: off the screen, never activated, a throw-away profile (MainWindow.SelfTest.cs)
+            Settings.Profile = "SelfTest-" + Guid.NewGuid().ToString("N")[..8];
+            var t = new MainWindow(null)
+            {
+                Left = -20000, Top = -20000, ShowActivated = false, ShowInTaskbar = false, WindowStartupLocation = WindowStartupLocation.Manual,
+                WindowState = WindowState.Normal, Width = 1200, Height = 820,   // never the saved maximised window
+                SelfTestLog = st + 1 < e.Args.Length ? e.Args[st + 1] : Path.Combine(Path.GetTempPath(), "gryphmark-selftest.log"),
+            };
+            t.Show();
+            return;
+        }
         var profile = ProfileArg(e.Args, out int skip);
         if (!string.IsNullOrWhiteSpace(profile)) Settings.Profile = profile.Trim();
         var path = e.Args.Where((a, i) => i != skip && !a.StartsWith('-')).FirstOrDefault();

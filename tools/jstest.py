@@ -262,6 +262,17 @@ js = """
     mdApp.setMode('visual'); mdApp.load('# L\\n\\n- one\\n- two\\n', null); await new Promise(r => setTimeout(r, 200));
     await mdApp.reload('# L\\n\\n- one\\n- two\\n- three\\n');
     out.reload_marks_list_item = mdApp.changesMarked() === 1;
+    // a reader at the end follows what the AI appends; a reader in the middle stays where they were
+    const FE = Array.from({ length: 200 }, (_, i) => 'Line ' + i).join('\\n\\n');
+    mdApp.setMode('preview'); mdApp.load(FE, null); await new Promise(r => setTimeout(r, 300));
+    const ph = document.getElementById('previewHost');
+    ph.scrollTop = ph.scrollHeight;
+    await mdApp.reload(FE + '\\n\\nAppended 1\\n\\nAppended 2\\n\\nAppended 3\\n'); await new Promise(r => setTimeout(r, 300));
+    const endGap = ph.scrollHeight - ph.scrollTop - ph.clientHeight;
+    ph.scrollTop = 1500;
+    await mdApp.reload(FE + '\\n\\nAppended 1\\n\\nAppended 2\\n\\nAppended 3\\n\\nAppended 4\\n'); await new Promise(r => setTimeout(r, 300));
+    out.follow_end = endGap < 2 && Math.abs(ph.scrollTop - 1500) < 5;
+    if (!out.follow_end) out.follow_seen = JSON.stringify({ endGap, mid: ph.scrollTop });
     mdApp.setMode('visual');
   } catch (e) { out.err = String(e && e.stack || e); }
   document.getElementById('out').textContent = JSON.stringify(out);

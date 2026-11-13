@@ -615,6 +615,9 @@
       const before = changeRoots().map(blockTexts);
       const panes = ['#previewHost', '#editorHost .toastui-editor-md-preview', '#editorHost .ProseMirror'];
       const kept = panes.map((sel) => Array.from(document.querySelectorAll(sel)).map((el) => el.scrollTop));
+      // a reader at the end of a view follows the end: what the AI appends comes into sight (as in a terminal)
+      const atEnd = panes.map((sel) => Array.from(document.querySelectorAll(sel)).map((el) =>
+        el.scrollHeight > el.clientHeight + 2 && el.scrollHeight - el.scrollTop - el.clientHeight < 40));
       original = (markdown || '').replace(/\r\n/g, '\n');
       suppressDirty = true;
       quietText = null;
@@ -625,7 +628,8 @@
       markGithubClass(); applyLock();
       if (state.mode === 'preview') await showPreview();
       const restore = () => panes.forEach((sel, i) => document.querySelectorAll(sel).forEach((el, j) => {
-        if (kept[i][j] !== undefined) el.scrollTop = kept[i][j];
+        if (atEnd[i][j]) el.scrollTop = el.scrollHeight;
+        else if (kept[i][j] !== undefined) el.scrollTop = kept[i][j];
       }));
       restore(); requestAnimationFrame(() => { restore(); setTimeout(restore, 120); });
       sendOutline(); if (find.query) scheduleFind();

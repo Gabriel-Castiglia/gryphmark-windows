@@ -211,6 +211,7 @@ public static class Strings
         ["Modified"] = ("Modified", "Modificado"),
         ["Saved"] = ("Saved", "Guardado"),
         ["Words"] = ("{0} words", "{0} palabras"),
+        ["WikiMissing"] = ("No file called “{0}.md” in the open folders.", "No hay ningún archivo «{0}.md» en las carpetas abiertas."),
     };
 
     public static string Lang { get; set; } = "en";

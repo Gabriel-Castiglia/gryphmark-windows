@@ -136,13 +136,14 @@ public partial class MainWindow : Window
         switch (root.GetProperty("type").GetString())
         {
             case "ready":
-                await Js($"mdApp.init({Q(_settings.Lang)},{Q(IsDark ? "dark" : "light")},{Q(_settings.Mode)},{(_settings.Spell ? "true" : "false")},{(_settings.ReadOnly ? "true" : "false")})");
+                await Js($"mdApp.init({Q(_settings.Lang)},{Q(IsDark ? "dark" : "light")},{Q(_settings.Mode)},{(_settings.Spell ? "true" : "false")},{(_settings.ReadOnly ? "true" : "false")},true)");
                 _ready = true;
                 _lastEditSeq = 0;   // a new page counts its edits from zero
                 if (_restore is { } r) { _restore = null; await RestoreDocAsync(r.Text, r.Dirty); }
                 else if (_pendingOpen != null) { var p = _pendingOpen; _pendingOpen = null; await LoadFileAsync(p); }
                 else if (!_settings.SampleShown && SamplePath != null) { _settings.SampleShown = true; _settings.Save(); await LoadSampleAsync(); }
                 else UpdateStatus();
+                if (SelfTestLog != null) { _ = Dispatcher.BeginInvoke(async () => await RunSelfTestAsync()); break; }
                 await OfferRecoveryAsync();
                 break;
             case "dirty":
@@ -173,6 +174,16 @@ public partial class MainWindow : Window
             case "link":
                 OpenLink(root.GetProperty("href").GetString() ?? "");
                 break;
+            case "wikilink":
+                OpenWiki(root.GetProperty("name").GetString() ?? "");
+                break;
+            case "wikinames":
+                var names = root.GetProperty("names").EnumerateArray().Select(n => n.GetString() ?? "").ToList();
+                string? docDir = _path != null ? Path.GetDirectoryName(_path) : null;
+                var panel = _roots.ToList();
+                var found = await Task.Run(() => Wiki.Exist(names, docDir, panel));   // a disk walk: off the window's thread
+                if (_ready) await Js($"mdApp.wikiState({JsonSerializer.Serialize(found)})");
+                break;
         }
     }
 
@@ -201,6 +212,15 @@ public partial class MainWindow : Window
                 Process.Start(new ProcessStartInfo(u.AbsoluteUri) { UseShellExecute = true });
         }
         catch { /* nothing sensible to do with a broken link */ }
+    }
+
+    /// <summary>A [[name]] link of the GitHub view: the file of that name in the open folders (Wiki.cs).</summary>
+    private void OpenWiki(string name)
+    {
+        Wiki.Forget();
+        var f = Wiki.Resolve(name, _path != null ? Path.GetDirectoryName(_path) : null, _roots);
+        if (f != null) OpenPath(f);
+        else Flash(string.Format(Strings.Get("WikiMissing"), Wiki.Key(name)));
     }
 
     private static bool IsViewable(string p) =>
