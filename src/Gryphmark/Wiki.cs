@@ -81,8 +81,50 @@ public static class Wiki
         return roots;
     }
 
-    private static bool Inside(string path, string root) =>
-        PathCmp.Equals(path, root) || path.StartsWith(root + "\\", StringComparison.OrdinalIgnoreCase);
+    internal static bool Inside(string path, string root) =>
+        PathCmp.Equals(path, root) || path.StartsWith(root.TrimEnd('\\') + "\\", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>What a document may reach, as Wiki.swift's reach: its own folder, and every folder of the Files panel
+    /// when the document is inside one of them.</summary>
+    public static List<string> Reach(string? docFolder, IEnumerable<string> panel)
+    {
+        if (docFolder == null) return new();
+        var d = Path.GetFullPath(docFolder).TrimEnd('\\');
+        var roots = panel.Select(p => Path.GetFullPath(p).TrimEnd('\\')).ToList();
+        return roots.Any(r => Inside(d, r)) ? new[] { d }.Concat(roots).ToList() : new() { d };
+    }
+
+    /// <summary>The file a ![[name]] picture points to: that file name (or the end of that path) in the folders
+    /// searched for [[name]], the nearest to the document first; null when there is none.</summary>
+    public static string? FindFile(string name, string? docFolder, IEnumerable<string> panel)
+    {
+        var want = name.Replace('/', '\\').Trim().TrimStart('\\');
+        var file = Path.GetFileName(want);
+        if (file.Length == 0) return null;
+        var hits = new List<string>();
+        void Look(string dir, int depth)
+        {
+            if (depth > 12 || hits.Count > 50) return;
+            try
+            {
+                foreach (var f in Directory.EnumerateFiles(dir, file))
+                    if (f.EndsWith("\\" + want, StringComparison.OrdinalIgnoreCase)) hits.Add(f);
+                foreach (var d in Directory.EnumerateDirectories(dir))
+                {
+                    if (Path.GetFileName(d).StartsWith('.')) continue;
+                    try { if (new DirectoryInfo(d).Attributes.HasFlag(FileAttributes.Hidden)) continue; } catch { continue; }
+                    Look(d, depth + 1);
+                }
+            }
+            catch { }   // unreadable folder: skipped
+        }
+        foreach (var root in Searched(docFolder, panel)) Look(root, 0);
+        if (hits.Count == 0) return null;
+        if (docFolder == null) return hits[0];
+        var dir0 = Path.GetFullPath(docFolder).TrimEnd('\\').Split('\\');
+        int Shared(string f) => Path.GetDirectoryName(f)!.Split('\\').Zip(dir0).TakeWhile(p => PathCmp.Equals(p.First, p.Second)).Count();
+        return hits.Distinct(PathCmp).OrderByDescending(Shared).ThenBy(f => f.Split('\\').Length).First();
+    }
 
     /// <summary>The file a [[name]] points to, or null.</summary>
     public static string? Resolve(string name, string? docFolder, IEnumerable<string> panel)

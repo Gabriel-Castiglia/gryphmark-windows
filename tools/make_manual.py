@@ -97,11 +97,19 @@ pastel colour and a stripe on its left edge, so you see at a glance where one tr
 <figure><img src="{img('files_panel_light.png')}" style="width:260px"><figcaption>Two folders open; the open file is marked.</figcaption></figure>
 <table><tr><th>Action</th><th>How</th></tr>
 <tr><td>Open a folder</td><td>The <b>+</b> button of the panel, <i>File → Open folder…</i>, the <b>Open folder…</b> button of the empty panel, dropping a folder on the window, or right-clicking a folder in Explorer → <i>Open with Gryphmark</i> (installer option; in Windows 11 it is under <i>Show more options</i>). Each new folder is added below the others.</td></tr>
-<tr><td>Show / hide the panel</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>, the folder button at the left of the toolbar, or <i>View → Files panel</i>. It shares the sidebar with the outline: the files above, the outline below. Drag the right edge of the sidebar to make it wider, and the line between the two to change their heights; both are kept.</td></tr>
+<tr><td>Show / hide the panel</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>, the folder button at the left of the toolbar, or <i>View → Files panel</i>. It shares the sidebar with the outline: the files above, the outline below. Drag the right edge of the sidebar to make it wider, and the line between the two to change their heights; both are kept. <i>View → Layout</i> offers two other arrangements: <b>Files and Outline side by side</b> (two columns on the left of the text) and <b>Outline on the right of the text</b>. Each layout keeps its own widths, and each dedicated instance its own layout.</td></tr>
 <tr><td>Browse</td><td>Click a folder to open or close it; click a file to open it. <kbd>Enter</kbd> does the same on the selected row.</td></tr>
 <tr><td>Right-click a folder's title</td><td><b>Pin to top</b> / <b>Unpin</b>, <b>Close this folder</b>, <b>Colour</b> (twelve pastel colours or <i>Automatic</i>), <b>Move up</b> / <b>Move down</b> (in opening order), show in folder, copy path, refresh.</td></tr>
-<tr><td>Right-click inside a tree</td><td>On a file: open, open in a new window, show in folder, copy path, and <b>Convert to TXT</b>, which writes a .txt next to it as the document reads in the GitHub view (headings, lists, tables and links in plain text) and leaves the Markdown file as it is. On a folder: show in folder, copy path, refresh.</td></tr>
-<tr><td>Panel buttons</td><td><b>+</b> add folder, refresh, collapse all, and <b>⋯</b>: the order, the colours and what opens at start.</td></tr></table>
+<tr><td>Right-click inside a tree</td><td>On a file: open, open in a new window, show in folder, copy path, and <b>Convert to TXT</b>, which writes a .txt next to it as the document reads in the GitHub view (headings, lists, tables and links in plain text) and leaves the Markdown file as it is. On a folder: show in folder, copy path, refresh. On both: <b>Rename</b> (also <kbd>F2</kbd>).</td></tr>
+<tr><td>Panel buttons</td><td>The two arrows undo and redo renames and moves; the padlock locks or unlocks the tree for dragging; <b>+</b> add folder, refresh, collapse all, and <b>⋯</b>: the order, the colours and what opens at start.</td></tr></table>
+<h3>Renaming and moving files</h3>
+<p>Changes made from the tree happen on disk. <kbd>F2</kbd> or right-click → <b>Rename</b> renames the selected file or folder.
+To move files and folders, click the <b>padlock</b> in the panel header to unlock the tree, then drag them onto a folder (or onto a file in
+that folder); the target folder is highlighted while you drag. Click the padlock again to lock the tree, so a slip of the mouse moves nothing.
+Each rename and move can be undone with the <b>←</b> arrow of the header and redone with <b>→</b>, or with <kbd>Ctrl</kbd>+<kbd>Z</kbd> /
+<kbd>Ctrl</kbd>+<kbd>Y</kbd> while the tree has the focus; the arrow's tooltip says what it will undo or redo. If the open document is
+renamed or moved, it stays open at its new place, saved first if it had changes. The open folders themselves are not renamed or moved
+from the tree, and a name already taken in the target folder is refused.</p>
 <h3>Order, colours and pins</h3>
 <p>The <b>⋯</b> button of the panel sorts the folders: <i>Order opened</i> (the default), <i>Name A → Z</i>, <i>Name Z → A</i> or
 <i>Recently modified first</i>. <b>Pinned</b> folders (📌) always stay on top, in the order you pinned them. Colours: <i>Tones of the theme colour</i>
@@ -143,7 +151,7 @@ Recent folders are listed in <i>File → Open recent</i>.</p>
 <tr><td>Image</td><td>Insert image from URL or file name</td><td><code>![alt](file.png)</code></td></tr>
 <tr><td>Link</td><td>Insert link</td><td><code>[text](https://…)</code></td></tr>
 <tr><td>&lt;/&gt;</td><td>Inline code</td><td><code>`code`</code></td></tr>
-<tr><td>CB</td><td>Code block (choose language for colouring)</td><td><code>```python</code></td></tr></table>
+<tr><td>CB</td><td>Code block (choose language for colouring); what you paste inside it goes in as plain text</td><td><code>```python</code></td></tr></table>
 <p>The same actions are in the <b>Format</b> menu. Right-click inside a table to add or delete rows and columns, or to align a column.</p>
 """),
    ("Files", """
@@ -166,10 +174,14 @@ In GitHub preview, links to web pages open in your browser, links to other <code
    ("Working tools", """
 <table><tr><th>Feature</th><th>How it works</th></tr>
 <tr><td>Find / Replace</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> open a bar above the document. <kbd>F3</kbd> and <kbd>Shift</kbd>+<kbd>F3</kbd> jump between matches; <kbd>Esc</kbd> closes it. <i>Aa</i> matches case.</td></tr>
-<tr><td>Outline</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> or the outline button of the toolbar shows the headings in the sidebar, below the files; click one to jump to it. With the Files panel hidden, the outline fills the sidebar.</td></tr>
+<tr><td>Outline</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> or the outline button of the toolbar shows the headings in the sidebar, below the files; click one to jump to it. With the Files panel hidden, the outline fills the sidebar. <i>View → Layout</i> can put it beside the files or on the right of the text.</td></tr>
 <tr><td>Your formatting is kept</td><td>Only what you change is rewritten when you save, down to the part of a line you touched: list markers, <code>__bold__</code>, <code>_italics_</code>, tags such as <code>&lt;kbd&gt;</code>, table alignment, line endings (CRLF/LF) and BOM stay as they were.</td></tr>
 <tr><td>Changed outside</td><td>If another program modifies the open file, Gryphmark reloads it (or asks first if you have unsaved changes) and marks what changed in green for a few seconds: new or rewritten paragraphs, and only the point or row added to a list or a table.</td></tr>
 <tr><td>Reading at the end</td><td>If you are at the end of a view when another program adds text at the bottom, the view goes down with it. Anywhere else you stay where you were.</td></tr>
+<tr><td>Text width</td><td><i>View → Text width</i>: <b>Normal</b> (980 px, as on GitHub), <b>Wide</b> (1280 px), <b>Very wide</b> (1600 px) or <b>The whole window</b>, for the Visual and GitHub views. The choice is remembered per profile; printing and exported pages keep GitHub's width.</td></tr>
+<tr><td>Pictures</td><td>Beside the document or in another folder (<code>../img/a.png</code>). In the GitHub view also by an absolute path (<code>C:\\Pics\\a.png</code>, <code>\\\\server\\share\\a.png</code>) or a <code>file:</code> address, with spaces in the path, and as <code>![[picture.png]]</code> or <code>![[picture.png|300]]</code>, looked for in the open folders; <code>![alt|300](a.png)</code> sets the width. A picture that is not found shows its name in a dashed box; a click on a picture opens it in its viewer.</td></tr>
+<tr><td>Tables</td><td>A long path, address or piece of code in a cell breaks where it has to, so the table fits the column instead of hiding behind a scrollbar; plain words stay whole. A table of eight columns or more takes less padding.</td></tr>
+<tr><td>Properties at the top</td><td>A block between two <code>---</code> lines at the start of a file (front matter, as GitHub, Jekyll or Obsidian use) is shown as properties, not as text: in the Visual view a grey box folded to its first lines, which opens while the cursor is in it; in the GitHub view a table under a <b>Properties</b> line, closed until clicked. The block is saved exactly as it was written.</td></tr>
 <tr><td>[[name]] links</td><td>In the GitHub view, <code>[[name]]</code> (also <code>[[name|text]]</code> and <code>[[name#heading]]</code>) links to the Markdown file of that name in the open folders, as in a wiki; the nearest one wins. A name that matches no file is shown in red. The text of the file does not change.</td></tr>
 <tr><td>Crash recovery</td><td>Unsaved work is backed up every 20 seconds. If Gryphmark or Windows stops unexpectedly, the next start offers to recover it.</td></tr>
 <tr><td>Spell check</td><td><i>View → Spell check</i> underlines misspelled words, in the interface language (Windows dictionaries).</td></tr>
@@ -191,7 +203,8 @@ Start-menu shortcuts, <code>.md</code> files — and colours the folders of the 
 The default is dark gold. Shortcuts you made with an icon of your own are not changed.</p>
 <figure><img src="{img('theme_en_light.png')}" style="width:520px"><figcaption>The theme window.</figcaption></figure>
 <p>Zoom with the <b>zoom bar</b> at the right of the status bar (−, slider, +; click the percentage to go back to 100 %), <kbd>Ctrl</kbd> + mouse wheel, <kbd>Ctrl</kbd>+<kbd>+</kbd>,
-<kbd>Ctrl</kbd>+<kbd>-</kbd> and <kbd>Ctrl</kbd>+<kbd>0</kbd>. Language, theme, mode, zoom and window size are remembered.</p>
+<kbd>Ctrl</kbd>+<kbd>-</kbd> and <kbd>Ctrl</kbd>+<kbd>0</kbd>. Language, theme, mode and zoom are remembered, and the window opens again with the size, place and
+maximized state it had when it was closed (centred if that place is no longer on a screen).</p>
 <figure><img src="{img('preview_dark_es.png')}"><figcaption>GitHub dark theme.</figcaption></figure>
 """),
    ("Keyboard shortcuts", """
@@ -276,11 +289,19 @@ color pastel y una franja en el borde izquierdo, así ves de un vistazo dónde t
 <figure><img src="{img('files_panel_light.png')}" style="width:260px"><figcaption>Dos carpetas abiertas; el archivo abierto queda marcado.</figcaption></figure>
 <table><tr><th>Acción</th><th>Cómo</th></tr>
 <tr><td>Abrir una carpeta</td><td>El botón <b>+</b> del panel, <i>Archivo → Abrir carpeta…</i>, el botón <b>Abrir carpeta…</b> del panel vacío, arrastrando una carpeta a la ventana, o con clic derecho sobre una carpeta en el Explorador → <i>Abrir con Gryphmark</i> (opción del instalador; en Windows 11 está en <i>Mostrar más opciones</i>). Cada carpeta nueva se agrega debajo de las otras.</td></tr>
-<tr><td>Mostrar / ocultar el panel</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>E</kbd>, el botón de carpeta a la izquierda de la barra, o <i>Ver → Panel de archivos</i>. Comparte la barra lateral con el esquema: los archivos arriba y el esquema abajo. Arrastrando el borde derecho de la barra se ensancha, y arrastrando la línea entre los dos cambia cuánto alto tiene cada uno; las dos medidas se recuerdan.</td></tr>
+<tr><td>Mostrar / ocultar el panel</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>E</kbd>, el botón de carpeta a la izquierda de la barra, o <i>Ver → Panel de archivos</i>. Comparte la barra lateral con el esquema: los archivos arriba y el esquema abajo. Arrastrando el borde derecho de la barra se ensancha, y arrastrando la línea entre los dos cambia cuánto alto tiene cada uno; las dos medidas se recuerdan. <i>Ver → Disposición</i> ofrece otras dos: <b>Archivos e índice lado a lado</b> (dos columnas a la izquierda del texto) e <b>Índice a la derecha del texto</b>. Cada disposición recuerda sus propios anchos, y cada instancia dedicada su propia disposición.</td></tr>
 <tr><td>Recorrer</td><td>Clic en una carpeta la abre o la cierra; clic en un archivo lo abre. <kbd>Enter</kbd> hace lo mismo sobre la fila seleccionada.</td></tr>
 <tr><td>Clic derecho en el título de una carpeta</td><td><b>Fijar arriba</b> / <b>Desfijar</b>, <b>Cerrar esta carpeta</b>, <b>Color</b> (doce colores pastel o <i>Automático</i>), <b>Subir</b> / <b>Bajar</b> (en orden de apertura), mostrar en la carpeta, copiar ruta, actualizar.</td></tr>
-<tr><td>Clic derecho dentro de un árbol</td><td>Sobre un archivo: abrir, abrir en otra ventana, mostrar en la carpeta, copiar ruta y <b>Convertir a TXT</b>, que escribe un .txt al lado como se lee el documento en la vista GitHub (títulos, listas, tablas y enlaces en texto plano) y deja el archivo Markdown como está. Sobre una carpeta: mostrar en la carpeta, copiar ruta, actualizar.</td></tr>
-<tr><td>Botones del panel</td><td><b>+</b> agregar carpeta, actualizar, contraer todo, y <b>⋯</b>: el orden, los colores y qué se abre al iniciar.</td></tr></table>
+<tr><td>Clic derecho dentro de un árbol</td><td>Sobre un archivo: abrir, abrir en otra ventana, mostrar en la carpeta, copiar ruta y <b>Convertir a TXT</b>, que escribe un .txt al lado como se lee el documento en la vista GitHub (títulos, listas, tablas y enlaces en texto plano) y deja el archivo Markdown como está. Sobre una carpeta: mostrar en la carpeta, copiar ruta, actualizar. En los dos: <b>Cambiar nombre</b> (también <kbd>F2</kbd>).</td></tr>
+<tr><td>Botones del panel</td><td>Las dos flechas deshacen y rehacen los cambios de nombre y los movimientos; el candado bloquea o desbloquea el árbol para arrastrar; <b>+</b> agregar carpeta, actualizar, contraer todo, y <b>⋯</b>: el orden, los colores y qué se abre al iniciar.</td></tr></table>
+<h3>Cambiar de nombre y mover archivos</h3>
+<p>Lo que se hace desde el árbol pasa en el disco. <kbd>F2</kbd> o clic derecho → <b>Cambiar nombre</b> renombra el archivo o la carpeta seleccionada.
+Para mover archivos y carpetas, hacé clic en el <b>candado</b> de la cabecera del panel para desbloquear el árbol y arrastralos sobre una carpeta
+(o sobre un archivo de esa carpeta); mientras arrastrás, la carpeta de destino queda marcada. Otro clic en el candado vuelve a bloquear el árbol, así un
+descuido con el mouse no mueve nada. Cada cambio de nombre y cada movimiento se deshace con la flecha <b>←</b> de la cabecera y se rehace con
+<b>→</b>, o con <kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd> con el foco en el árbol; el globo de ayuda de cada flecha dice qué va a deshacer
+o rehacer. Si el documento abierto cambia de nombre o de lugar, sigue abierto en su lugar nuevo, y antes se guarda si tenía cambios. Las carpetas abiertas
+en sí no se renombran ni se mueven desde el árbol, y un nombre que ya existe en la carpeta de destino se rechaza.</p>
 <h3>Orden, colores y fijadas</h3>
 <p>El botón <b>⋯</b> del panel ordena las carpetas: <i>Orden de apertura</i> (por defecto), <i>Nombre A → Z</i>, <i>Nombre Z → A</i> o
 <i>Modificadas recientemente primero</i>. Las carpetas <b>fijadas</b> (📌) quedan siempre arriba, en el orden en que las fijaste. Colores: <i>Tonos del color del tema</i>
@@ -322,7 +343,7 @@ Las carpetas recientes aparecen en <i>Archivo → Abrir reciente</i>.</p>
 <tr><td>Imagen</td><td>Insertar imagen por URL o nombre de archivo</td><td><code>![alt](archivo.png)</code></td></tr>
 <tr><td>Enlace</td><td>Insertar enlace</td><td><code>[texto](https://…)</code></td></tr>
 <tr><td>&lt;/&gt;</td><td>Código en línea</td><td><code>`código`</code></td></tr>
-<tr><td>CB</td><td>Bloque de código (elegís el lenguaje para los colores)</td><td><code>```python</code></td></tr></table>
+<tr><td>CB</td><td>Bloque de código (elegís el lenguaje para los colores); lo que pegás adentro entra como texto sin formato</td><td><code>```python</code></td></tr></table>
 <p>Las mismas acciones están en el menú <b>Formato</b>. Con clic derecho dentro de una tabla se agregan o borran filas y columnas, o se alinea una columna.</p>
 """),
    ("Archivos", """
@@ -345,10 +366,14 @@ En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otro
    ("Herramientas de trabajo", """
 <table><tr><th>Función</th><th>Cómo funciona</th></tr>
 <tr><td>Buscar / Reemplazar</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> abren una barra sobre el documento. <kbd>F3</kbd> y <kbd>Mayús</kbd>+<kbd>F3</kbd> saltan entre coincidencias; <kbd>Esc</kbd> la cierra. <i>Aa</i> distingue mayúsculas.</td></tr>
-<tr><td>Esquema</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd> o el botón de esquema de la barra muestra los títulos en la barra lateral, debajo de los archivos; un clic salta a ese título. Con el panel de archivos oculto, el esquema ocupa toda la barra.</td></tr>
+<tr><td>Esquema</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd> o el botón de esquema de la barra muestra los títulos en la barra lateral, debajo de los archivos; un clic salta a ese título. Con el panel de archivos oculto, el esquema ocupa toda la barra. <i>Ver → Disposición</i> lo pone al lado de los archivos o a la derecha del texto.</td></tr>
 <tr><td>Se respeta tu formato</td><td>Al guardar sólo se reescribe lo que cambiaste, hasta la parte de la línea que tocaste: viñetas, <code>__negrita__</code>, <code>_cursiva_</code>, etiquetas como <code>&lt;kbd&gt;</code>, alineación de tablas, finales de línea (CRLF/LF) y BOM quedan como estaban.</td></tr>
 <tr><td>Cambios externos</td><td>Si otro programa modifica el archivo abierto, Gryphmark lo recarga (o pregunta antes si tenés cambios sin guardar) y marca en verde unos segundos lo que cambió: los párrafos nuevos o reescritos, y en una lista o una tabla solo el punto o la fila que se agregó.</td></tr>
 <tr><td>Leer el final</td><td>Si estás al final de una vista cuando otro programa agrega texto abajo, la vista baja con lo nuevo. En cualquier otro lugar te quedás donde estabas.</td></tr>
+<tr><td>Ancho del texto</td><td><i>Ver → Ancho del texto</i>: <b>Normal</b> (980 px, como GitHub), <b>Ancho</b> (1280 px), <b>Muy ancho</b> (1600 px) o <b>Toda la ventana</b>, para las vistas Visual y GitHub. La elección se recuerda por perfil; la impresión y las páginas exportadas mantienen el ancho de GitHub.</td></tr>
+<tr><td>Imágenes</td><td>Al lado del documento o en otra carpeta (<code>../img/a.png</code>). En la vista GitHub también con una ruta absoluta (<code>C:\\Imagenes\\a.png</code>, <code>\\\\servidor\\carpeta\\a.png</code>) o una dirección <code>file:</code>, con espacios en la ruta, y como <code>![[imagen.png]]</code> o <code>![[imagen.png|300]]</code>, que se buscan en las carpetas abiertas; <code>![alt|300](a.png)</code> fija el ancho. Una imagen que no se encuentra muestra su nombre en un recuadro punteado; un clic en una imagen la abre en su visor.</td></tr>
+<tr><td>Tablas</td><td>Una ruta, una dirección o un código largo dentro de una celda se corta donde hace falta, así la tabla entra en la columna en vez de quedar detrás de una barra de desplazamiento; las palabras comunes quedan enteras. Una tabla de ocho columnas o más lleva menos relleno.</td></tr>
+<tr><td>Propiedades al principio</td><td>Un bloque entre dos líneas <code>---</code> al comienzo del archivo (front matter, como lo usan GitHub, Jekyll u Obsidian) se muestra como propiedades y no como texto: en la vista Visual, un recuadro gris plegado a sus primeras líneas, que se abre mientras el cursor está adentro; en la vista GitHub, una tabla bajo una línea <b>Propiedades</b>, cerrada hasta que se hace clic. El bloque se guarda exactamente como estaba escrito.</td></tr>
 <tr><td>Enlaces [[nombre]]</td><td>En la vista GitHub, <code>[[nombre]]</code> (también <code>[[nombre|texto]]</code> y <code>[[nombre#título]]</code>) lleva al archivo Markdown de ese nombre en las carpetas abiertas, como en una wiki; gana el más cercano. Un nombre sin archivo sale en rojo. El texto del archivo no cambia.</td></tr>
 <tr><td>Recuperación</td><td>Lo no guardado se respalda cada 20 segundos. Si Gryphmark o Windows se cierran de golpe, al volver a abrir ofrece recuperarlo.</td></tr>
 <tr><td>Ortografía</td><td><i>Ver → Corrector ortográfico</i> subraya las palabras mal escritas, en el idioma de la interfaz (diccionarios de Windows).</td></tr>
@@ -370,7 +395,8 @@ escritorio y del menú Inicio, archivos <code>.md</code> — y colorea las carpe
 El color por defecto es el dorado oscuro. Los accesos directos que armaste con un ícono propio no se tocan.</p>
 <figure><img src="{img('theme_es_light.png')}" style="width:520px"><figcaption>La ventana de tema.</figcaption></figure>
 <p>Zoom con la <b>barra de zoom</b> a la derecha de la barra de estado (−, deslizador, +; clic en el porcentaje vuelve a 100 %), <kbd>Ctrl</kbd> + rueda del mouse, <kbd>Ctrl</kbd>+<kbd>+</kbd>,
-<kbd>Ctrl</kbd>+<kbd>-</kbd> y <kbd>Ctrl</kbd>+<kbd>0</kbd>. Idioma, tema, modo, zoom y tamaño de ventana quedan recordados.</p>
+<kbd>Ctrl</kbd>+<kbd>-</kbd> y <kbd>Ctrl</kbd>+<kbd>0</kbd>. Idioma, tema, modo y zoom quedan recordados, y la ventana vuelve a abrirse con el tamaño, el lugar y
+el estado maximizado que tenía al cerrarla (centrada si ese lugar ya no está en ninguna pantalla).</p>
 <figure><img src="{img('preview_dark_es.png')}"><figcaption>Tema oscuro de GitHub.</figcaption></figure>
 """),
    ("Atajos de teclado", """

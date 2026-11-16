@@ -65,7 +65,12 @@
                 <ColumnDefinition x:Name="SideColumn" Width="0" MaxWidth="700" />
                 <ColumnDefinition x:Name="SideSplitterColumn" Width="0" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition x:Name="RightSplitterColumn" Width="0" />
+                <ColumnDefinition x:Name="RightColumn" Width="0" MaxWidth="700" />
             </Grid.ColumnDefinitions>
+            <!-- Layout (Settings.SideLayout, MainWindow.Folder.cs ApplySideLayout):
+                 stacked = Files above Contents in the sidebar; columns = Files | Contents side by side;
+                 right = Files on the left, Contents in RightHost on the right of the text. -->
             <!-- Sidebar, as in the macOS version: Files above, Contents below, a divider between them
                  (MainWindow.Folder.cs ApplySideLayout). Either part can be hidden; the other then fills it. -->
             <Grid x:Name="SideGrid" Grid.Column="0" Background="{DynamicResource Gm.Chrome}">
@@ -74,11 +79,19 @@
                     <RowDefinition x:Name="PanesSplitterRow" Height="0" />
                     <RowDefinition x:Name="OutlineRow" Height="*" />
                 </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="FilesCol" Width="*" />
+                    <ColumnDefinition x:Name="PanesSplitterCol" Width="0" />
+                    <ColumnDefinition x:Name="OutlineCol" Width="0" />
+                </Grid.ColumnDefinitions>
                 <!-- Files panel (folder tree) -->
                 <Border x:Name="FilesPane" Grid.Row="0" Background="{DynamicResource Gm.Chrome}" Visibility="Collapsed">
                     <DockPanel>
                         <DockPanel DockPanel.Dock="Top" Margin="18,8,6,4" MinHeight="30">
                             <StackPanel x:Name="FilesHeaderButtons" DockPanel.Dock="Right" Orientation="Horizontal">
+                                <Button x:Name="FilesUndo" Style="{DynamicResource Gm.ToolButton}" Content="&#xE7A7;" FontSize="12" IsEnabled="False" />
+                                <Button x:Name="FilesRedo" Style="{DynamicResource Gm.ToolButton}" Content="&#xE7A6;" FontSize="12" IsEnabled="False" />
+                                <Button x:Name="FilesLock" Style="{DynamicResource Gm.ToolButton}" Content="&#xE72E;" FontSize="12" />
                                 <Button x:Name="FilesAdd" Style="{DynamicResource Gm.ToolButton}" Content="&#xE710;" FontSize="12" />
                                 <Button x:Name="FilesRefresh" Style="{DynamicResource Gm.ToolButton}" Content="&#xE72C;" FontSize="12" />
                                 <Button x:Name="FilesCollapse" Style="{DynamicResource Gm.ToolButton}" Content="&#xF165;" FontSize="12" />
@@ -105,6 +118,17 @@
                         </ControlTemplate>
                     </GridSplitter.Template>
                 </GridSplitter>
+                <!-- divider between Files and Contents when they sit side by side (SideLayout = columns) -->
+                <GridSplitter x:Name="ColsSplitter" Grid.Column="1" Grid.RowSpan="3" HorizontalAlignment="Stretch" Cursor="SizeWE" Focusable="False"
+                              ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Visibility="Collapsed">
+                    <GridSplitter.Template>
+                        <ControlTemplate TargetType="GridSplitter">
+                            <Border Background="Transparent">
+                                <Rectangle Width="1" HorizontalAlignment="Center" Fill="{DynamicResource Gm.ChromeBorder}" />
+                            </Border>
+                        </ControlTemplate>
+                    </GridSplitter.Template>
+                </GridSplitter>
                 <!-- Outline -->
                 <Border x:Name="OutlinePane" Grid.Row="2" Background="{DynamicResource Gm.Chrome}">
                     <DockPanel>
@@ -126,6 +150,17 @@
                     </ControlTemplate>
                 </GridSplitter.Template>
             </GridSplitter>
+            <GridSplitter x:Name="RightSplitter" Grid.Column="3" HorizontalAlignment="Stretch" Cursor="SizeWE" Focusable="False"
+                          ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Visibility="Collapsed">
+                <GridSplitter.Template>
+                    <ControlTemplate TargetType="GridSplitter">
+                        <Border Background="Transparent">
+                            <Rectangle Width="1" HorizontalAlignment="Center" Fill="{DynamicResource Gm.ChromeBorder}" />
+                        </Border>
+                    </ControlTemplate>
+                </GridSplitter.Template>
+            </GridSplitter>
+            <Border x:Name="RightHost" Grid.Column="4" Background="{DynamicResource Gm.Chrome}" Visibility="Collapsed" />
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />

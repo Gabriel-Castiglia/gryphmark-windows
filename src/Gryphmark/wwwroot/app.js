@@ -53,6 +53,22 @@
         if (m && nameToEmoji[m[1]]) return { type: 'emoji', raw: m[0], ch: nameToEmoji[m[1]] };
       },
       renderer(t) { return t.ch; },
+    }, {
+      // Pictures many editors write and CommonMark does not take: ![alt](a path with spaces.png), which wants
+      // <...> around the path, and ![[picture.png]] or ![[picture.png|300]] (Obsidian), the picture of that name.
+      name: 'gmImage', level: 'inline',
+      start(src) { const i = src.indexOf('!['); return i < 0 ? undefined : i; },
+      tokenizer(src) {
+        let m = /^!\[([^\]\n]*)\]\(([^()<>\n"]*\s[^()<>\n"]*?\.(?:png|jpe?g|gif|webp|svg|bmp|avif|ico))\s*(?:"([^"\n]*)")?\)/i.exec(src);
+        if (m && m[2].trim()) return { type: 'gmImage', raw: m[0], href: m[2].trim(), alt: m[1], title: m[3] || '' };
+        m = /^!\[\[([^\[\]\n|#]+?\.(?:png|jpe?g|gif|webp|svg|bmp|avif|ico))(?:\|(\d+)(?:x(\d+))?)?\]\]/i.exec(src);
+        if (m) return { type: 'gmImage', raw: m[0], href: m[1].trim(), alt: m[1].trim().split('/').pop(), title: '', embed: m[1].trim(), w: m[2], h: m[3] };
+      },
+      renderer(t) {
+        const src = /^([A-Za-z]:[\\/]|\\\\|file:)/i.test(t.href) ? t.href : t.href.split('/').map(encodeURIComponent).join('/');
+        return '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(t.alt) + '"' + (t.title ? ' title="' + escapeHtml(t.title) + '"' : '') +
+          (t.w ? ' width="' + t.w + '"' : '') + (t.h ? ' height="' + t.h + '"' : '') + (t.embed ? ' data-embed="' + escapeHtml(t.embed) + '"' : '') + '>';
+      },
     }],
   });
   const slugCount = {};
@@ -83,7 +99,8 @@
 
   function renderGithub(text) {
     for (const k in slugCount) delete slugCount[k];
-    let html = DOMPurify.sanitize(md.parse(text || ''), PURIFY);
+    const fm = splitFrontMatter(text || '');
+    let html = DOMPurify.sanitize((fm.yaml !== null ? frontMatterBlock(fm.yaml) : '') + md.parse(fm.body), PURIFY);
     html = html.replace(/<input (checked="" )?disabled="" type="checkbox">/g, (m, c) => '<input type="checkbox" disabled ' + (c ? 'checked ' : '') + 'class="task-list-item-checkbox">');
     // GitHub's classes on task items and their lists: no bullet under the box (styled in app.css)
     const tmp = document.createElement('div');
@@ -94,7 +111,58 @@
       if (box.checked) li.classList.add('checked');
       li.parentElement.classList.add('contains-task-list');
     });
+    tmp.querySelectorAll('img').forEach(sizeImage);
     return tmp.innerHTML;
+  }
+
+  // ------------------------------------------------------------------ pictures
+  // An absolute path of this computer (C:\…, \\server\share\…, a file: address) is loaded through the host, as the
+  // document's own files are: <origin of the page base>/<path>, the path with forward slashes and a UNC path as
+  // UNC/server/share/…. A path that starts with / is left to the page base (on the Mac it is the disk's root).
+  function localFileUrl(src) {
+    let p = String(src || '').trim();
+    if (/^[A-Za-z]:%5C/i.test(p) || /^%5C%5C/i.test(p)) { try { p = decodeURI(p).replace(/%5C/gi, '\\'); } catch (e) { return null; } }   // marked writes \ as %5C
+    if (/^file:/i.test(p)) { try { p = decodeURIComponent(p.replace(/^file:(?:\/\/localhost)?\/*/i, '/')); } catch (e) { return null; } }
+    else if (!/^([A-Za-z]:[\\/]|\\\\)/.test(p)) return null;
+    p = p.replace(/\\/g, '/');
+    if (/^\/[A-Za-z]:\//.test(p)) p = p.slice(1);
+    if (p.startsWith('//')) p = 'UNC/' + p.slice(2);
+    const base = (/^([a-z][\w+.-]*:\/\/[^/]+)\//i.exec(document.getElementById('docbase').href) || [])[1];
+    if (!base || /\/\/app\.local$/i.test(base)) return null;
+    return base + '/' + p.replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/');
+  }
+  // The sanitiser drops a src such as C:\… or file:… (and the Mac's gm-doc: scheme): a picture's local path is
+  // turned into the host's address first, and that address, made here, is kept.
+  DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
+    if (node.nodeName !== 'IMG' || data.attrName !== 'src') return;
+    const local = localFileUrl(data.attrValue);
+    if (local) { node.setAttribute('src', local); data.attrValue = local; data.forceKeepAttr = true; }   // forceKeepAttr keeps the node's own value
+  });
+  // "alt|300" or "alt|300x200" (as Obsidian writes it) gives the size.
+  function sizeImage(img) {
+    const m = /^(.*?)\|(\d+)(?:x(\d+))?$/.exec(img.getAttribute('alt') || '');
+    if (m) { img.setAttribute('alt', m[1].trim()); img.setAttribute('width', m[2]); if (m[3]) img.setAttribute('height', m[3]); }
+  }
+  // A picture that does not load: a ![[name]] is looked for by the host in the open folders (fileFound); any
+  // other, or one the host does not find, becomes a dashed box with its name instead of a broken icon.
+  function watchImages(root) {
+    root.querySelectorAll('img').forEach((img) => {
+      const miss = () => {
+        if (img.dataset.embed && !img.dataset.asked) { img.dataset.asked = 'wait'; post({ type: 'findfile', name: img.dataset.embed }); return; }
+        if (img.dataset.asked !== 'wait') markMissing(img);   // while the host looks for it, its answer decides
+      };
+      img.addEventListener('error', miss);
+      if (img.complete && img.getAttribute('src') && img.naturalWidth === 0) miss();
+    });
+  }
+  function markMissing(img) {
+    if (!img.isConnected) return;
+    const s = document.createElement('span');
+    let name = img.getAttribute('alt') || '';
+    try { name = name || decodeURIComponent((img.getAttribute('src') || '').split('/').pop()); } catch (e) { }
+    s.className = 'gm-img-missing'; s.textContent = name || '?';
+    s.title = (state.lang === 'es' ? 'No se encuentra la imagen: ' : 'Picture not found: ') + (img.dataset.embed || img.getAttribute('src') || '');
+    img.replaceWith(s);
   }
 
   let mermaidLoading = null;
@@ -117,6 +185,7 @@
   async function showPreview() {
     const el = document.getElementById('preview');
     el.innerHTML = renderGithub(currentText());
+    watchImages(el);
     await runMermaid(el);
     if (state.wiki) linkWiki(el);
   }
@@ -167,6 +236,7 @@
     document.body.classList.remove('editor-broken');
     suppressDirty = true;
     quietText = null;
+    frontMatterFor(markdown);
     try {
       editor = new ToastEditor({
         el,
@@ -181,11 +251,14 @@
         autofocus: false,
         plugins: [codeSyntaxHighlight],
         toolbarItems: [],   // the toolbar is native (WPF)
+        frontMatter: true,  // a block of properties at the top (--- ... ---) stays one block, kept as written
         events: {
           change: () => {
             if (!suppressDirty || (quietText !== null && editor.getMarkdown() !== quietText)) post({ type: 'dirty', words: countWords(), seq: ++editSeq });
             scheduleOutline(); if (find.query) scheduleFind();
+            foldFrontMatter();
           },
+          caretChange: () => foldFrontMatter(),
         },
       });
       markGithubClass();
@@ -193,6 +266,84 @@
       quietText = editor.getMarkdown();
     } catch (e) { editorFailed(e); }
     setTimeout(() => { suppressDirty = false; }, 50);
+  }
+
+  // ------------------------------------------------------------------ properties at the top (front matter)
+  // In the visual view the block is shown folded (its first lines, in grey) and opens while the cursor is in
+  // it. The class goes on the body, outside ProseMirror: a class on the block itself would be read back by the
+  // editor as a change of the document.
+  function foldFrontMatter() {
+    let open = false;
+    const v = state.mode === 'visual' ? pmView() : null;
+    if (v) { const $f = v.state.selection.$from; open = $f.depth > 0 && $f.node(1).type.name === 'frontMatter'; }
+    document.body.classList.toggle('gm-fm-open', open);
+  }
+
+  // Leading properties block of a text, by the editor's own rule: the first line is exactly ---, +++ or ;;;
+  // and the block ends at the next line that is exactly one of them. It counts only when it closes and, for
+  // ---, holds a key (name: value). The editor alone (before 2.0.0) also took an opening line that never closes, or
+  // closes with "...", and then the whole document went into the folded box; and a file that starts with a
+  // rule (---, a paragraph, ---) had that paragraph read as properties. Both views now use this test, and the
+  // editor's parser follows it for each text it reads whole (frontMatterFor).
+  const FRONT = /^(---|\+\+\+|;;;)\n(?:([\s\S]*?)\n)?(?:---|\+\+\+|;;;)(?:\n|$)/;
+  function frontMatterMatch(text) {
+    const m = FRONT.exec(text);
+    if (!m) return null;
+    const body = m[2] || '';
+    if (m[1] === '---' ? !/^[^\s#:-][^:\n]*:(?:[ \t]|$)/m.test(body) : !body.trim()) return null;
+    return m;
+  }
+  function splitFrontMatter(text) {
+    const m = frontMatterMatch(text);
+    return m ? { yaml: m[2] || '', body: text.slice(m[0].length) } : { yaml: null, body: text };
+  }
+  // The editor's parser reads a properties block only when the text has one by the rule above. Its option
+  // frontMatter is read once, when the first editor is made, and adds the rule for good; the bundle is patched
+  // so that the rule also asks window.gmFrontMatter (web.sh / build.ps1). Set before each whole read of a text
+  // (load, reload); while typing it stays as it was, so a --- typed on the first line hides nothing.
+  function frontMatterFor(text) { window.gmFrontMatter = !!frontMatterMatch(text || ''); }
+  function yamlScalar(s) {
+    s = s.trim();
+    if (s.length > 1 && s[0] === '"' && s.endsWith('"'))
+      return s.slice(1, -1).replace(/\\(u[0-9a-fA-F]{4}|.)/g, (m, c) => c.length > 1 ? String.fromCharCode(parseInt(c.slice(1), 16)) : ({ n: '\n', t: '\t', '0': '\0' }[c] || c));
+    if (s.length > 1 && s[0] === "'" && s.endsWith("'")) return s.slice(1, -1).replace(/''/g, "'");
+    return s;
+  }
+  // The YAML a properties block usually holds (keys, nested keys, lists, quoted values) as a tree of
+  // { key, value, kids }; key is null for a list item. Lines it does not understand continue the value above.
+  function parseFrontMatter(yaml) {
+    const root = { kids: [], indent: -1 }; const stack = [root]; let last = null;
+    for (const raw of yaml.split('\n')) {
+      if (!raw.trim() || /^\s*#/.test(raw)) continue;
+      const indent = raw.length - raw.trimStart().length; const line = raw.trim();
+      let m = /^-(?:\s+(.*))?$/.exec(line), node = null;
+      if (m) {
+        const kv = m[1] && /^("[^"]*"|'[^']*'|[^:"'][^:]*?):(?:\s+(.*))?$/.exec(m[1]);
+        node = kv ? { key: null, value: '', kids: [{ key: yamlScalar(kv[1]), value: yamlScalar(kv[2] || ''), kids: [] }] } : { key: null, value: yamlScalar(m[1] || ''), kids: [] };
+      } else if ((m = /^("[^"]*"|'[^']*'|[^:"'\s][^:]*?):(?:\s+(.*))?$/.exec(line))) {
+        node = { key: yamlScalar(m[1]), value: yamlScalar(m[2] || ''), kids: [] };
+      } else if (last) { last.value += (last.value ? ' ' : '') + yamlScalar(line); continue; }
+      else continue;
+      while (stack.length > 1 && indent <= stack[stack.length - 1].indent) stack.pop();
+      node.indent = indent;
+      stack[stack.length - 1].kids.push(node);
+      stack.push(node); last = node;
+    }
+    return root.kids;
+  }
+  function frontMatterHtml(nodes) {
+    const list = nodes.length && nodes.every((n) => n.key === null);
+    if (list) return '<ul>' + nodes.map((n) => '<li>' + escapeHtml(n.value) + (n.kids.length ? frontMatterHtml(n.kids) : '') + '</li>').join('') + '</ul>';
+    return '<table><tbody>' + nodes.map((n) => '<tr><th>' + escapeHtml(n.key === null ? '-' : n.key) + '</th><td>' +
+      escapeHtml(n.value) + (n.kids.length ? frontMatterHtml(n.kids) : '') + '</td></tr>').join('') + '</tbody></table>';
+  }
+  // GitHub view: the properties as a table, folded under a "Properties" line that names their keys.
+  function frontMatterBlock(yaml) {
+    const nodes = parseFrontMatter(yaml);
+    const title = state.lang === 'es' ? 'Propiedades' : 'Properties';
+    const keys = nodes.filter((n) => n.key !== null).map((n) => n.key).join(', ');
+    const inner = nodes.length ? frontMatterHtml(nodes) : '<pre>' + escapeHtml(yaml) + '</pre>';
+    return '<details class="gm-frontmatter"><summary>' + title + (keys ? ' <span>' + escapeHtml(keys) + '</span>' : '') + '</summary>' + inner + '</details>';
   }
 
   // ------------------------------------------------------------------ read-only ("Read only" switch)
@@ -222,6 +373,34 @@
   document.addEventListener('paste', (e) => {
     if (state.locked && e.target.closest && e.target.closest('#editorHost')) { e.preventDefault(); post({ type: 'lockedHint' }); }
   }, true);
+
+  // ------------------------------------------------------------------ paste inside a code block
+  // In the visual view, whatever is pasted inside a code block goes in as plain text. ProseMirror only takes
+  // the clipboard's plain text there when it has some: a clipboard that carries HTML alone (e.g. "[ ] - " as
+  // <div>[ ] - </div><div><br></div>) was read as paragraphs, which closed the block at the cursor and turned
+  // the rest of it into one paragraph, line breaks lost (1.13.0 and earlier). Files (images) are left to the editor.
+  document.addEventListener('paste', (e) => {
+    if (e.defaultPrevented || state.locked || state.mode !== 'visual' || !editor) return;
+    const view = pmView(), cd = e.clipboardData;
+    if (!view || !cd || !view.dom.contains(e.target)) return;
+    const { $from, $to } = view.state.selection;
+    if (!$from.parent.type.spec.code || !$from.sameParent($to)) return;
+    if (Array.from(cd.items || []).some((i) => i.kind === 'file')) return;
+    let text = cd.getData('text/plain');
+    if (!text) { const html = cd.getData('text/html'); if (!html) return; text = htmlToText(html); }
+    e.preventDefault(); e.stopPropagation();
+    view.dispatch(view.state.tr.insertText(text.replace(/\r\n?/g, '\n')).scrollIntoView()
+      .setMeta('paste', true).setMeta('uiEvent', 'paste'));
+  }, true);
+
+  /** The text of pasted HTML, one line per block or <br>, as it reads (DOMParser runs no script). */
+  function htmlToText(html) {
+    const body = new DOMParser().parseFromString(html, 'text/html').body;
+    body.querySelectorAll('script,style,template').forEach((n) => n.remove());
+    body.querySelectorAll('br').forEach((n) => n.replaceWith('\n'));
+    body.querySelectorAll('p,div,li,tr,pre,blockquote,h1,h2,h3,h4,h5,h6').forEach((n) => n.after('\n'));
+    return body.textContent.replace(/ /g, ' ').replace(/\n+$/, '');
+  }
 
   function countWords() {
     const t = editorText().replace(/[#>*_`~\-\[\]()|]/g, ' ');
@@ -481,13 +660,26 @@
   function scheduleOutline() { clearTimeout(outlineTimer); outlineTimer = setTimeout(sendOutline, 250); }
   function headings() {
     const out = []; let fence = false;
-    editorText().split('\n').forEach((line, i) => {
+    const text = editorText();
+    const fm = frontMatterMatch(text);
+    const skip = fm ? fm[0].replace(/\n$/, '').split('\n').length : 0;   // lines of the properties block
+    text.split('\n').forEach((line, i) => {
+      if (i < skip) return;
       if (/^\s*(```|~~~)/.test(line)) { fence = !fence; return; }
       if (fence) return;
       const m = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
-      if (m) out.push({ level: m[1].length, text: m[2].replace(/[*_`~]/g, ''), line: i });
+      if (m) out.push({ level: m[1].length, text: headingText(m[2]), line: i });
     });
     return out;
+  }
+  // A heading as it reads: without emphasis and code marks, with escaped characters as themselves.
+  // An underscore inside a word (IMG_1915) is text, not a mark; the editor writes it as \_ (1.14.0 showed
+  // "IMG\1915": the mark was dropped and the backslash kept).
+  function headingText(s) {
+    const kept = [];
+    s = s.replace(/\\([\\`*_{}\[\]()#+\-.!~|<>])/g, (m, c) => { kept.push(c); return '\u0000' + (kept.length - 1) + '\u0000'; });
+    s = s.replace(/[*`~]/g, '').replace(/(^|[^\p{L}\p{N}])_+|_+(?=[^\p{L}\p{N}]|$)/gu, '$1');
+    return s.replace(/\u0000(\d+)\u0000/g, (m, i) => kept[+i]);
   }
   function sendOutline() { post({ type: 'outline', items: headings() }); }
 
@@ -621,6 +813,7 @@
       original = (markdown || '').replace(/\r\n/g, '\n');
       suppressDirty = true;
       quietText = null;
+      frontMatterFor(original);
       try { editor.setMarkdown(original, false); } catch (e) { editorFailed(e); }
       baseline = editorText();
       quietText = baseline;
@@ -657,6 +850,11 @@
     setTheme(theme) { const t = editorText(); state.theme = theme; applyTheme(); build(t); applyMode(); },
     setMode(mode) { state.mode = mode; applyMode(); },
     setSpell(on) { state.spell = !!on; applySpell(); },
+    // Width of the text column in the Visual and GitHub views, in px; 0 = the whole window.
+    setWidth(px) {
+      px = Number(px) || 0;
+      document.body.style.setProperty('--gm-col', (px > 0 ? Math.max(600, px) : 100000) + 'px');
+    },
     // wiki: the host resolves [[name]] links (the macOS app does; until the Windows app does, they stay as text)
     init(lang, theme, mode, spell, locked, wiki) { state = { lang, theme, mode, spell: spell !== false, locked: !!locked, wiki: !!wiki }; applyTheme(); build(''); applyMode(); },
     setLocked(on) { state.locked = !!on; applyLock(); },
@@ -671,6 +869,7 @@
     replaceAll(q, cs, r) { find.query = q; find.cs = !!cs; return replaceAll(r); },
     scrollToHeading(i) { scrollToHeading(i); },
     _view() { return pmView(); },   // for tools/jstest.py
+    _headingText(s) { return headingText(s); },
     editorBroken() { return editorBroken; },
     async exportHtml(title) {
       const tmp = document.createElement('div'); tmp.className = 'markdown-body'; tmp.style.cssText = 'position:absolute;left:-99999px;width:980px';
@@ -690,6 +889,14 @@
       });
     },
     refreshWikiLinks() { askWiki(); },
+    // The host's answer to a ![[name]] that did not load: its address, or null when no open folder has it.
+    fileFound(name, url) {
+      document.querySelectorAll('#preview img[data-embed]').forEach((img) => {
+        if (img.dataset.embed !== name || img.dataset.asked !== 'wait') return;
+        img.dataset.asked = 'done';
+        if (url) img.setAttribute('src', url); else markMissing(img);
+      });
+    },
   };
 
   // ------------------------------------------------------------------ keyboard shortcuts while the page has focus
@@ -720,6 +927,9 @@
 
   // ------------------------------------------------------------------ links in the GitHub view
   document.getElementById('preview').addEventListener('click', (e) => {
+    // a picture that is not a link opens in its viewer
+    const img = e.target.closest('img');
+    if (img && !img.closest('a') && img.currentSrc) { e.preventDefault(); post({ type: 'link', href: img.currentSrc }); return; }
     const a = e.target.closest('a'); if (!a) return;
     const href = a.getAttribute('href') || '';
     e.preventDefault();

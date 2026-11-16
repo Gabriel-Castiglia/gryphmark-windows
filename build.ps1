@@ -33,6 +33,12 @@ if (-not $SkipNpm) {
     $re = 'var (\w+)=(\w+)\.querySelectorAll\("tr"\),(\w+)=\1\[0\]\.children\.length'
     if ([regex]::Matches($js, $re).Count -ne 1) { throw "TOAST UI <tbody> patch: the code to fix was not found once in bundle.js" }
     $js = [regex]::Replace($js, $re, 'var $1=$2.querySelectorAll("tr"),$3=$1.length?$1[0].children.length:0')
+    # Properties at the top: TOAST UI takes a first line --- (+++ or ;;;) as the start of a front matter block even when
+    # nothing closes it, and the whole document went into one hidden block. The rule also asks window.gmFrontMatter,
+    # which app.js sets from its own test (closed, and with a key); same stop as above.
+    $re = '(\w+)\.type==="document"&&(\w+)\.test\((\w+)\)\)\{(\w+)\.closeUnmatchedBlocks\(\);var (\w+)=\4\.addChild\("frontMatter"'
+    if ([regex]::Matches($js, $re).Count -ne 1) { throw "TOAST UI front matter patch: the code to fix was not found once in bundle.js" }
+    $js = [regex]::Replace($js, $re, 'window.gmFrontMatter!==false&&$0')
     [IO.File]::WriteAllText($bundle, $js, (New-Object System.Text.UTF8Encoding $false))
     $nm = "node_modules"
     Copy-Item "$nm/@toast-ui/editor/dist/toastui-editor.css", "$nm/@toast-ui/editor/dist/theme/toastui-editor-dark.css",

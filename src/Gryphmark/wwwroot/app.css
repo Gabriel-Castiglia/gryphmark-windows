@@ -12,7 +12,9 @@ body.mode-preview #editorHost { display: none; }
 body.mode-preview #previewHost { display: block; }
 
 /* GitHub page layout for the read-only view */
-#preview { box-sizing: border-box; max-width: 980px; margin: 0 auto; padding: 32px 45px 64px; }
+/* --gm-col: width of the text column (View -> Text width, app.js setWidth); 980 px is GitHub's */
+body { --gm-col: 980px; }
+#preview { box-sizing: border-box; max-width: var(--gm-col); margin: 0 auto; padding: 32px 45px 64px; }
 
 /* Toast UI frame tuned to look like a document, not a widget */
 .toastui-editor-defaultUI { border: none !important; border-radius: 0 !important; }
@@ -70,7 +72,7 @@ body.dark ::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,.18); }
    so it fills the view and its scrollbar sits at the window's edge; the 980 px column comes from the
    side padding. With max-width the scrollbar stood at the column's edge, far inside a wide window. */
 .toastui-editor-ww-container .toastui-editor-contents.markdown-body {
-  margin: 0; padding: 24px max(45px, calc(50% - 445px)) 64px; box-sizing: border-box;
+  margin: 0; padding: 24px max(45px, calc(50% - var(--gm-col) / 2 + 45px)) 64px; box-sizing: border-box;
   font-size: 16px; line-height: 1.5;
 }
 /* Toast's own colours lose to GitHub's inside documents */
@@ -123,3 +125,50 @@ body.dark #preview a.wikilink.missing { color: #ff7b72; }
   border: 1px solid #d4a72c; background: #fff8c5; color: #3b2300; }
 body.dark #editorError { border-color: #9e6a03; background: #2d2208; color: #f0d68a; }
 body.editor-broken:not(.mode-preview) #editorError { display: block; }
+
+/* Tables fit the column instead of hiding behind a scrollbar: a long path, address or piece of code inside a cell
+   breaks where it has to (plain words stay whole), so the columns can share the width. Measured on 58 notes with
+   such tables: 6 scrolled in a 1200 px window and 8 in an 800 px one (up to 427 px too wide). The scrollbar stays
+   as a last resort, for a table of many columns. Same rule in the Visual and GitHub views. */
+.markdown-body td code, .markdown-body th code, .markdown-body td a, .markdown-body th a { overflow-wrap: anywhere; }
+/* A table of eight columns or more takes less padding in its cells (6 px instead of 13 at each side): a 20-column
+   table spent 520 px on padding alone. */
+.markdown-body table:has(tr > :nth-child(8)) th, .markdown-body table:has(tr > :nth-child(8)) td,
+.toastui-editor-contents.markdown-body table:has(tr > :nth-child(8)) th,
+.toastui-editor-contents.markdown-body table:has(tr > :nth-child(8)) td { padding: 4px 6px; }
+
+/* Pictures of the GitHub view: a click opens one in its viewer, and one that cannot be found is a dashed box with its
+   name instead of a broken icon (app.js watchImages). */
+#preview img:not(a img) { cursor: zoom-in; }
+#preview .gm-img-missing { display: inline-block; padding: 2px 8px; border: 1px dashed #cf222e; border-radius: 6px; color: #cf222e; font-size: 13px; }
+body.dark #preview .gm-img-missing { border-color: #ff7b72; color: #ff7b72; }
+
+/* Properties at the top of a file (front matter). Visual view: folded to its first lines, in grey, and open
+   while the cursor is in it (body.gm-fm-open, app.js foldFrontMatter). */
+.toastui-editor-ww-container [data-front-matter] {
+  position: relative; margin: 0 0 16px; padding: 8px 12px; border-radius: 6px;
+  font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+  color: #59636e; background: #f6f8fa; border: 1px solid #d1d9e0;
+  white-space: pre; overflow: hidden; max-height: calc(4 * 1.5em); cursor: text;
+}
+.toastui-editor-ww-container [data-front-matter]::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2.2em; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(246, 248, 250, 0), #f6f8fa);
+}
+body.gm-fm-open .toastui-editor-ww-container [data-front-matter] { white-space: pre-wrap; word-break: break-word; max-height: none; }
+body.gm-fm-open .toastui-editor-ww-container [data-front-matter]::after { display: none; }
+body.dark .toastui-editor-ww-container [data-front-matter] { color: #9198a1; background: #151b23; border-color: #3d444d; }
+body.dark .toastui-editor-ww-container [data-front-matter]::after { background: linear-gradient(to bottom, rgba(21, 27, 35, 0), #151b23); }
+
+/* GitHub view: the properties as a table under a folded "Properties" line */
+.markdown-body details.gm-frontmatter { margin: 0 0 16px; padding: 6px 12px; border: 1px solid #d1d9e0; border-radius: 6px; background: #f6f8fa; font-size: 13px; }
+.markdown-body details.gm-frontmatter > summary { cursor: pointer; color: #59636e; font-weight: 600; }
+.markdown-body details.gm-frontmatter > summary span { font-weight: 400; margin-left: .4em; }
+.markdown-body details.gm-frontmatter[open] > summary { margin-bottom: 8px; }
+.markdown-body details.gm-frontmatter table { display: table; width: 100%; margin: 0; font-size: 12px; }
+.markdown-body details.gm-frontmatter th { text-align: left; vertical-align: top; white-space: nowrap; width: 1%; }
+.markdown-body details.gm-frontmatter td { word-break: break-word; }
+.markdown-body details.gm-frontmatter td table { margin-top: 4px; }
+.markdown-body details.gm-frontmatter ul { margin: 0; }
+body.dark .markdown-body details.gm-frontmatter { border-color: #3d444d; background: #151b23; }
+body.dark .markdown-body details.gm-frontmatter > summary { color: #9198a1; }

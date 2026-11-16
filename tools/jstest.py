@@ -10,7 +10,8 @@ import os
 edge = next((p for p in (os.path.expandvars(x) for x in (
     r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe", r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe",
     r"%ProgramFiles%\Google\Chrome\Application\chrome.exe", r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe",
-    r"%ProgramFiles%\BraveSoftware\Brave-Browser\Application\brave.exe", r"%LOCALAPPDATA%\BraveSoftware\Brave-Browser\Application\brave.exe"))
+    r"%ProgramFiles%\BraveSoftware\Brave-Browser\Application\brave.exe", r"%LOCALAPPDATA%\BraveSoftware\Brave-Browser\Application\brave.exe",
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"))
     if os.path.exists(p)), None)   # any Chromium browser
 if not edge:
     sys.exit("No Chromium browser (Edge, Chrome or Brave) found")
@@ -35,6 +36,9 @@ Footnote here[^1] :rocket: and $E=mc^2$.
 
 [^1]: The note.
 """
+
+# a memory file with properties at the top: backslashes, a very long quoted value, nested keys, a list
+fm_sample = (root / "tools" / "frontmatter_sample.md").read_text(encoding="utf-8")
 
 test = """
 <script>
@@ -273,6 +277,126 @@ js = """
     await mdApp.reload(FE + '\\n\\nAppended 1\\n\\nAppended 2\\n\\nAppended 3\\n\\nAppended 4\\n'); await new Promise(r => setTimeout(r, 300));
     out.follow_end = endGap < 2 && Math.abs(ph.scrollTop - 1500) < 5;
     if (!out.follow_end) out.follow_seen = JSON.stringify({ endGap, mid: ph.scrollTop });
+    // a paste inside a code block goes in as plain text: a clipboard with HTML alone (block markup, no
+    // text/plain) split the block at the cursor and made the rest one paragraph (1.13.0)
+    const CB = '# P\\n\\n```text\\n[ ] WEB\\n    \\n    [ ] - next\\n\\n[ ] Other\\n```\\n';
+    const pasted = {};
+    for (const [name, data] of Object.entries({
+      html_only: { 'text/html': '<div>[ ] - </div><div><br></div>' },
+      html_and_text: { 'text/plain': '[ ] - ', 'text/html': '<div>[ ] - </div><div><br></div>' },
+      text_only: { 'text/plain': '[ ] - ' } })) {
+      mdApp.setMode('visual'); mdApp.load(CB, null); await new Promise(r => setTimeout(r, 150));
+      const v = mdApp._view(); let at = null;
+      v.state.doc.descendants((n, p) => { if (at === null && n.type.name === 'codeBlock') at = p + 1 + n.textContent.indexOf('    \\n') + 4; return at === null; });
+      v.dispatch(v.state.tr.setSelection(v.state.selection.constructor.create(v.state.doc, at))); v.focus();
+      const dt = new DataTransfer(); for (const [k, val] of Object.entries(data)) dt.setData(k, val);
+      v.dom.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+      await new Promise(r => setTimeout(r, 100));
+      const top = []; v.state.doc.forEach(n => top.push(n.type.name));
+      pasted[name] = top.join(',') === 'heading,codeBlock'
+        && mdApp.getMarkdownPreserving() === CB.replace('    \\n    [ ]', '    [ ] - \\n    [ ]');
+    }
+    out.paste_in_code_block_plain = Object.values(pasted).every(Boolean);
+    if (!out.paste_in_code_block_plain) out.paste_seen = JSON.stringify(pasted);
+    // properties at the top (front matter): one folded block in the visual view, a table in the GitHub view,
+    // out of the outline, and the file saved as it was (1.14.0 showed them as one huge bold heading)
+    const FM = %(fm)s;
+    const fmSeen = {};
+    mdApp.setMode('visual'); mdApp.load(FM, null); await new Promise(r => setTimeout(r, 200));
+    let fv = mdApp._view();
+    fmSeen.first_block = fv.state.doc.firstChild.type.name === 'frontMatter';
+    fmSeen.no_yaml_heading = !Array.from(fv.dom.querySelectorAll('h1,h2,h3,h4,h5,h6')).some(h => /index_line|originSessionId/.test(h.textContent));
+    fmSeen.unchanged = mdApp.getMarkdownPreserving() === FM;
+    const box = fv.dom.querySelector('[data-front-matter]');
+    fmSeen.folded = !!box && getComputedStyle(box).maxHeight !== 'none' && box.clientHeight < 100;
+    fv.dispatch(fv.state.tr.setSelection(fv.state.selection.constructor.create(fv.state.doc, 5)));
+    await new Promise(r => setTimeout(r, 50));
+    fmSeen.opens = document.body.classList.contains('gm-fm-open') && getComputedStyle(box).maxHeight === 'none';
+    let bpos = null;
+    fv.state.doc.descendants((n, p) => { if (bpos === null && n.isTextblock && n.textContent.startsWith('Notes on what')) bpos = p; return bpos === null; });
+    fv.dispatch(fv.state.tr.setSelection(fv.state.selection.constructor.create(fv.state.doc, bpos + 1)));
+    fv.dispatch(fv.state.tr.insertText('X '));
+    await new Promise(r => setTimeout(r, 50));
+    fmSeen.closes = !document.body.classList.contains('gm-fm-open');
+    const fsaved = mdApp.getMarkdownPreserving();
+    fmSeen.edit_keeps_rest = fsaved === FM.replace('Notes on what', 'X Notes on what');
+    let outline = null;
+    const oh = window.chrome.webview.postMessage;
+    window.chrome.webview.postMessage = (m) => { if (m && m.type === 'outline') outline = m.items; oh(m); };
+    mdApp.load(FM, null); await new Promise(r => setTimeout(r, 400));
+    window.chrome.webview.postMessage = oh;
+    fmSeen.outline = !!outline && outline[0].text === 'Spring garden' && outline.some(h => h.text.includes('IMG_0412'));
+    fmSeen.outline_escaped = mdApp._headingText('foto IMG\\\\_1915 and **bold** _em_ `c` a\\\\*b') === 'foto IMG_1915 and bold em c a*b';
+    mdApp.setMode('source'); await new Promise(r => setTimeout(r, 100));
+    fmSeen.source_unchanged = mdApp.getMarkdownPreserving() === FM;
+    mdApp.setMode('preview'); await new Promise(r => setTimeout(r, 300));
+    const pv = document.getElementById('preview');
+    const det = pv.querySelector('details.gm-frontmatter');
+    fmSeen.preview_table = !!det && !det.open && /^Properties name, description, metadata/.test(det.querySelector('summary').textContent)
+      && !!det.querySelector('th') && det.querySelector('th').textContent === 'name';
+    fmSeen.preview_no_yaml_heading = !Array.from(pv.querySelectorAll('h1,h2,h3')).some(h => /index_line/.test(h.textContent))
+      && pv.querySelector('h1').textContent === 'Spring garden';
+    const tds = Array.from(det ? det.querySelectorAll('td') : []).map(t => t.textContent);
+    fmSeen.preview_values = tds.some(t => t === 'active') && tds.some(t => t.includes('C:\\\\Garden\\\\Seeds\\\\2026') && t.includes('`\\\\\\\\nas\\\\share') && !t.includes('Garden\\\\\\\\'))
+      && !!det.querySelector('td ul') && det.querySelector('td ul').textContent.includes('Spring/Summer');
+    if (!fmSeen.preview_values) out.fm_tds = JSON.stringify(tds);
+    // a --- further down is still a rule, and a --- at the top that never closes is text
+    mdApp.load('# A\\n\\ntext\\n\\n---\\n\\nmore\\n', null); await new Promise(r => setTimeout(r, 200));
+    fmSeen.later_rule = !!pv.querySelector('hr') && !pv.querySelector('details.gm-frontmatter');
+    const OPEN = '---\\nname: x\\n\\nno end\\n';
+    mdApp.load(OPEN, null); await new Promise(r => setTimeout(r, 200));
+    fmSeen.unclosed = !pv.querySelector('details.gm-frontmatter') && mdApp.getMarkdownPreserving() === OPEN && !mdApp.editorBroken();
+    // the two views agree on what is a properties block: it closes, and a --- block holds a key. An unclosed ---
+    // line, a "..." close or a file that starts with a rule keep their text in sight (before 2.0.0 they hid the whole
+    // document in the Visual view); a +++ block (TOML) is properties in both.
+    for (const [k, t, want] of [['unclosed', '---\\nname: x\\n\\n# Title\\n\\nBody.\\n', false],
+        ['dots', '---\\nname: x\\n...\\n\\n# T\\n', false], ['rule_first', '---\\n\\nIntro.\\n\\n---\\n\\n# T\\n', false],
+        ['trailing_space', '--- \\nname: x\\n---\\n\\n# T\\n', false], ['toml', '+++\\ntitle = "x"\\n+++\\n\\n# T\\n', true],
+        ['yaml', '---\\nname: x\\n---\\n\\n# T\\n', true]]) {
+      mdApp.setMode('visual'); mdApp.load(t, null); await new Promise(r => setTimeout(r, 150));
+      const isFm = mdApp._view().state.doc.firstChild.type.name === 'frontMatter';
+      mdApp.setMode('preview'); await new Promise(r => setTimeout(r, 150));
+      const gh = !!pv.querySelector('details.gm-frontmatter');
+      fmSeen['agree_' + k] = isFm === want && gh === want && mdApp.getMarkdownPreserving() === t;
+    }
+    out.front_matter = Object.values(fmSeen).every(v => v === true);
+    // View -> Text width: the column of the Visual and GitHub views follows it; 0 = the whole window
+    const widths = {};
+    mdApp.load(LONG, null);
+    for (const px of [1280, 0, 980]) {
+      mdApp.setWidth(px);
+      mdApp.setMode('visual'); await new Promise(r => setTimeout(r, 150));
+      const wsc = document.querySelector('.toastui-editor-ww-container .ProseMirror');
+      const vis = colW(wsc) + wsc.offsetWidth - wsc.clientWidth;
+      mdApp.setMode('preview'); await new Promise(r => setTimeout(r, 150));
+      widths[px] = [Math.round(vis), Math.round(document.getElementById('preview').getBoundingClientRect().width)];
+    }
+    out.text_width = Math.abs(widths[1280][0] - 1190) < 2 && widths[1280][1] === 1280
+      && Math.abs(widths[0][0] - (innerWidth - 90)) < 2 && widths[0][1] > 1500
+      && Math.abs(widths[980][0] - 890) < 2 && widths[980][1] === 980;
+    if (!out.text_width) out.text_width_seen = JSON.stringify(widths);
+    if (!out.front_matter) out.front_matter_seen = JSON.stringify(fmSeen);
+    // pictures: a local absolute path goes through the host, a path with spaces and ![[name|300]] are pictures,
+    // alt|300 gives the width, a ![[name]] that does not load is asked to the host and the answer is used
+    window.__gmMsgs = [];
+    const imgPost = window.chrome.webview.postMessage;
+    window.chrome.webview.postMessage = (m) => { window.__gmMsgs.push(m); imgPost(m); };
+    const IMG = '![w](C:\\\\Pics\\\\a.png)\\n\\n![f](' + 'file:' + '///C:/x/b%%20c.png)\\n\\n![s](my pic.png)\\n\\n![z|300](d.png)\\n\\n![[e f.png|200x100]]\\n\\n`![[g.png]]`\\n';
+    mdApp.setMode('preview'); await new Promise(r => setTimeout(r, 50));
+    mdApp.load(IMG, 'https://doc.local/C%%3A/Docs/');   // read at once: the addresses fail to load here, and a failed one is boxed
+    const im = Array.from(pv.querySelectorAll('img')).map(i => [i.getAttribute('alt'), i.getAttribute('src'), i.getAttribute('width') || '']);
+    const want = JSON.stringify([['w', 'https://doc.local/C%%3A/Pics/a.png', ''], ['f', 'https://doc.local/C%%3A/x/b%%20c.png', ''], ['s', 'my%%20pic.png', ''], ['z', 'd.png', '300'], ['e f.png', 'e%%20f.png', '200']]);
+    const embed = pv.querySelector('img[data-embed]');
+    embed.dispatchEvent(new Event('error'));
+    const asked = window.__gmMsgs.some(m => m && m.type === 'findfile' && m.name === 'e f.png');
+    mdApp.fileFound('e f.png', 'https://doc.local/C%%3A/Docs/att/e%%20f.png');
+    const found = embed.getAttribute('src') === 'https://doc.local/C%%3A/Docs/att/e%%20f.png';
+    embed.dispatchEvent(new Event('error'));
+    const boxed = !!pv.querySelector('.gm-img-missing') && !embed.isConnected && pv.querySelector('code').textContent === '![[g.png]]';
+    window.chrome.webview.postMessage = imgPost;
+    out.pictures = JSON.stringify(im) === want && asked && found && boxed;
+    if (!out.pictures) out.pictures_seen = JSON.stringify({ im, asked, found, boxed });
+
     mdApp.setMode('visual');
   } catch (e) { out.err = String(e && e.stack || e); }
   document.getElementById('out').textContent = JSON.stringify(out);
@@ -283,7 +407,7 @@ function toastView() {
 
 }
 </script>
-""" % {"orig": json.dumps(original)}
+""" % {"orig": json.dumps(original), "fm": json.dumps(fm_sample)}
 
 # capture 'find' messages: chrome.webview is absent, so hook post via a fake host
 fake = "<script>window.chrome={webview:{postMessage:(m)=>{if(m&&m.type==='find')window.__lastFind=m;}}};</script>"

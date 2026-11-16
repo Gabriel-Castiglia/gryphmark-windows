@@ -36,8 +36,12 @@ public partial class MainWindow : Window
         string? startFolder = null;
         if (startPath != null && Directory.Exists(startPath)) { startFolder = startPath; startPath = null; }
         _pendingOpen = startPath;
-        Width = _settings.Width; Height = _settings.Height;
-        if (_settings.Maximized) WindowState = WindowState.Maximized;
+        ApplySavedBounds();
+        if (Application.Current != null)
+        {
+            Application.Current.SessionEnding += OnSessionEnding;
+            Closed += (_, _) => Application.Current.SessionEnding -= OnSessionEnding;
+        }
         if (!_settings.AccentChosen) _settings.Accent = Accents.Default;
         ThemeManager.Apply(this, IsDark, _settings.Accent);
         Icon = Accents.WindowIcon(_settings.Accent) ?? Icon;
@@ -105,6 +109,7 @@ public partial class MainWindow : Window
         }
         var core = Web.CoreWebView2;
         core.SetVirtualHostNameToFolderMapping("app.local", Path.Combine(AppDir, "wwwroot"), CoreWebView2HostResourceAccessKind.Allow);
+        InitDocFiles(core);
         core.Settings.AreDevToolsEnabled = false;
         core.Settings.IsStatusBarEnabled = false;
         core.Settings.AreDefaultContextMenusEnabled = true;
@@ -137,6 +142,7 @@ public partial class MainWindow : Window
         {
             case "ready":
                 await Js($"mdApp.init({Q(_settings.Lang)},{Q(IsDark ? "dark" : "light")},{Q(_settings.Mode)},{(_settings.Spell ? "true" : "false")},{(_settings.ReadOnly ? "true" : "false")},true)");
+                await Js($"mdApp.setWidth({_settings.TextWidth})");
                 _ready = true;
                 _lastEditSeq = 0;   // a new page counts its edits from zero
                 if (_restore is { } r) { _restore = null; await RestoreDocAsync(r.Text, r.Dirty); }
@@ -177,6 +183,9 @@ public partial class MainWindow : Window
             case "wikilink":
                 OpenWiki(root.GetProperty("name").GetString() ?? "");
                 break;
+            case "findfile":
+                await FindFileAsync(root.GetProperty("name").GetString() ?? "");
+                break;
             case "wikinames":
                 var names = root.GetProperty("names").EnumerateArray().Select(n => n.GetString() ?? "").ToList();
                 string? docDir = _path != null ? Path.GetDirectoryName(_path) : null;
@@ -192,22 +201,22 @@ public partial class MainWindow : Window
         if (string.IsNullOrEmpty(uri)) return;
         try
         {
-            if (uri.StartsWith("https://doc.local/", StringComparison.OrdinalIgnoreCase) && _path != null)
+            if (uri.StartsWith(DocHost, StringComparison.OrdinalIgnoreCase))
             {
-                var rel = Uri.UnescapeDataString(new Uri(uri).AbsolutePath.TrimStart('/'));
-                var local = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(_path)!, rel));
-                if (IsMarkdown(local) && File.Exists(local)) { OpenPath(local); return; }
-                // A document must never be able to run a program: only pictures and PDFs open
-                // with their viewer; any other file (.exe, .bat, .lnk...) is shown in Explorer.
-                if (File.Exists(local))
-                {
-                    if (IsViewable(local)) Process.Start(new ProcessStartInfo(local) { UseShellExecute = true });
-                    else Process.Start("explorer.exe", $"/select,\"{local}\"");
-                    return;
-                }
+                var local = DocPath(uri);
+                if (local == null) return;
+                // A document must never be able to run a program: a Markdown file it may reach opens here, a
+                // picture opens in its viewer (from anywhere, as the page may show it), a PDF it may reach too;
+                // any other file it may reach (.exe, .bat, .lnk...) is only shown in Explorer; the rest is ignored.
+                if (IsPicture(local) && File.Exists(local)) { Process.Start(new ProcessStartInfo(local) { UseShellExecute = true }); return; }
+                if (!InReach(local)) return;
+                if (Directory.Exists(local)) { Process.Start("explorer.exe", $"\"{local}\""); return; }
+                if (!File.Exists(local)) return;
+                if (IsMarkdown(local)) { OpenPath(local); return; }
+                if (IsViewable(local)) Process.Start(new ProcessStartInfo(local) { UseShellExecute = true });
+                else Process.Start("explorer.exe", $"/select,\"{local}\"");
                 return;
             }
-            if (uri.StartsWith("https://doc.local/", StringComparison.OrdinalIgnoreCase)) return;   // no document folder
             if (Uri.TryCreate(uri, UriKind.Absolute, out var u) && (u.Scheme == Uri.UriSchemeHttp || u.Scheme == Uri.UriSchemeHttps || u.Scheme == Uri.UriSchemeMailto))
                 Process.Start(new ProcessStartInfo(u.AbsoluteUri) { UseShellExecute = true });
         }
@@ -268,9 +277,7 @@ public partial class MainWindow : Window
             }
             string text = ReadDocument(path);
             var dir = Path.GetDirectoryName(path)!;
-            Web.CoreWebView2.ClearVirtualHostNameToFolderMapping("doc.local");
-            Web.CoreWebView2.SetVirtualHostNameToFolderMapping("doc.local", dir, CoreWebView2HostResourceAccessKind.Allow);
-            await Js($"mdApp.load({Q(text)},'https://doc.local/')");
+            await Js($"mdApp.load({Q(text)},{DocBaseJs(path)})");
             _path = path; _dirty = false; _isSample = false; _diskText = text;
             Watch(path);
             _words = int.TryParse(await Js("mdApp.words()"), out var n) ? n : 0;
@@ -316,11 +323,7 @@ public partial class MainWindow : Window
             _dirty = _lastEditSeq > seq;   // typed while saving: still modified, and saved again shortly
             if (_dirty) ScheduleAutoSave();
             Watch(target!); ClearRecovery();
-            if (moved)
-            {
-                Web.CoreWebView2.ClearVirtualHostNameToFolderMapping("doc.local");
-                Web.CoreWebView2.SetVirtualHostNameToFolderMapping("doc.local", Path.GetDirectoryName(target)!, CoreWebView2HostResourceAccessKind.Allow);
-            }
+            if (moved) await Js($"mdApp.setBase({DocBaseJs(target)})");
             _settings.AddRecent(target!); _settings.Save();
             BuildMenu(); UpdateTitle(); UpdateStatus();
             return true;
@@ -348,10 +351,52 @@ public partial class MainWindow : Window
         return true;
     }
 
+    // ------------------------------------------------------------------ Window size and position
+    // The next start opens where the window was closed: same size, same place, maximized or not.
+    // A position that no longer falls on a screen (a monitor was unplugged) is dropped: centred instead.
+    private void ApplySavedBounds()
+    {
+        Width = Math.Max(MinWidth, _settings.Width);
+        Height = Math.Max(MinHeight, _settings.Height);
+        if (_settings.Left is double l && _settings.Top is double t && IsOnScreen(l, t, Width))
+        {
+            if (Settings.IsSecondary) { l += 32; t += 32; }   // an extra window, not right on top of the first
+            if (!IsOnScreen(l, t, Width)) { l -= 32; t -= 32; }
+            WindowStartupLocation = WindowStartupLocation.Manual;
+            Left = l; Top = t;
+        }
+        if (_settings.Maximized) WindowState = WindowState.Maximized;   // on the monitor of the saved place
+    }
+
+    /// <summary>True when the title bar would be on the desktop, so the window can be grabbed.</summary>
+    private static bool IsOnScreen(double left, double top, double width)
+    {
+        double vl = SystemParameters.VirtualScreenLeft, vt = SystemParameters.VirtualScreenTop;
+        double vr = vl + SystemParameters.VirtualScreenWidth, vb = vt + SystemParameters.VirtualScreenHeight;
+        return left + width - 120 >= vl && left + 120 <= vr && top >= vt - 8 && top + 40 <= vb;
+    }
+
+    private void SaveBounds()
+    {
+        // Maximized or minimized: RestoreBounds is the normal size and place it goes back to
+        var b = WindowState == WindowState.Normal ? new Rect(Left, Top, ActualWidth, ActualHeight) : RestoreBounds;
+        if (WindowState != WindowState.Minimized) _settings.Maximized = WindowState == WindowState.Maximized;
+        if (b.IsEmpty || double.IsNaN(b.Left) || b.Width < MinWidth / 2 || !IsOnScreen(b.Left, b.Top, b.Width)) return;
+        _settings.Width = b.Width; _settings.Height = b.Height;
+        _settings.Left = b.Left; _settings.Top = b.Top;
+    }
+
+    // Logging off or shutting down with the window open: keep its place too
+    private void OnSessionEnding(object? sender, SessionEndingCancelEventArgs e)
+    {
+        SaveBounds();
+        if (_ready) _settings.Zoom = Web.ZoomFactor;
+        _settings.Save();
+    }
+
     private async void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        _settings.Maximized = WindowState == WindowState.Maximized;
-        if (WindowState == WindowState.Normal) { _settings.Width = Width; _settings.Height = Height; }
+        SaveBounds();
         if (_ready) _settings.Zoom = Web.ZoomFactor;
         _settings.Save();
         if (_closingConfirmed || !_dirty) { Hide(); ClearRecovery(); StopFeatures(); return; }
@@ -390,7 +435,6 @@ public partial class MainWindow : Window
         try
         {
             var text = File.ReadAllText(p, Encoding.UTF8);
-            Web.CoreWebView2.ClearVirtualHostNameToFolderMapping("doc.local");
             await Js($"mdApp.load({Q(text)}, null)");
             _path = null; _dirty = false; _crlf = false; _bom = false; _isSample = true;
             Watch(null); ClearRecovery();
@@ -406,7 +450,6 @@ public partial class MainWindow : Window
     private async Task NewDocAsync()
     {
         if (!await ConfirmDiscardAsync()) return;
-        Web.CoreWebView2.ClearVirtualHostNameToFolderMapping("doc.local");
         await Js("mdApp.load('', null)");
         _path = null; _dirty = false; _words = 0; _crlf = false; _bom = false; _isSample = false;
         Watch(null); ClearRecovery();
@@ -734,6 +777,20 @@ public partial class MainWindow : Window
         view.Items.Add(new Separator());
         view.Items.Add(Item("Files", ctrl + "Shift+E", () => { ToggleFiles(); return Task.CompletedTask; }, _settings.FilesPanel));
         view.Items.Add(Item("Outline", ctrl + "Shift+O", () => { ToggleOutline(); return Task.CompletedTask; }, _settings.Outline));
+        var layoutMenu = new MenuItem { Header = Strings.Get("Layout") };
+        foreach (var (key, code) in new[] { ("LayoutStacked", "stacked"), ("LayoutColumns", "columns"), ("LayoutRight", "right") })
+            layoutMenu.Items.Add(Item(key, null, () => { SetSideLayout(code); return Task.CompletedTask; },
+                (_settings.SideLayout is "columns" or "right" ? _settings.SideLayout : "stacked") == code));
+        view.Items.Add(layoutMenu);
+        var widthMenu = new MenuItem { Header = Strings.Get("TextWidth") };
+        foreach (var (key, px) in new[] { ("WidthNormal", 980), ("WidthWide", 1280), ("WidthWider", 1600), ("WidthFull", 0) })
+            widthMenu.Items.Add(Item(key, null, async () =>
+            {
+                _settings.TextWidth = px; _settings.Save();
+                if (_ready) await Js($"mdApp.setWidth({px})");
+                BuildMenu();
+            }, _settings.TextWidth == px));
+        view.Items.Add(widthMenu);
         view.Items.Add(Item("Spell", null, async () =>
         {
             _settings.Spell = !_settings.Spell; _settings.Save();
@@ -999,9 +1056,7 @@ public partial class MainWindow : Window
     private async Task RestoreDocAsync(string text, bool dirty)
     {
         if (_isSample && _path == null && !dirty) { await LoadSampleAsync(); return; }
-        if (_path != null)
-            Web.CoreWebView2.SetVirtualHostNameToFolderMapping("doc.local", Path.GetDirectoryName(_path)!, CoreWebView2HostResourceAccessKind.Allow);
-        await Js($"mdApp.load({Q(text)},{(_path != null ? "'https://doc.local/'" : "null")})");
+        await Js($"mdApp.load({Q(text)},{DocBaseJs(_path)})");
         _dirty = dirty;
         _words = int.TryParse(await Js("mdApp.words()"), out var n) ? n : 0;
         UpdateTitle(); UpdateStatus();

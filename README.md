@@ -25,7 +25,9 @@ follows tools that save by writing a new file and renaming it over the old one.
 
 - Visual editor, Markdown source with live preview, and read-only GitHub preview (`Ctrl+1/2/3`)
 - English and Spanish interface, switchable at runtime
-- Relative images and links, `.md` links open in Gryphmark
+- Relative images and links, also in other folders (`../`); `.md` links open in Gryphmark
+- Pictures by absolute path or `file:` address, with spaces in the path, as `![[picture.png|300]]` (Obsidian, looked for in the open folders) or `![alt|300](a.png)`; a missing one shows its name in a dashed box, a click opens it in its viewer
+- Tables fit the column: a long path or piece of code in a cell breaks where it has to instead of pushing the table behind a scrollbar
 - GitHub alerts, Mermaid diagrams, math, footnotes and emoji
 - **Files panel**: open a whole folder and browse its Markdown files in a tree beside the document, like VS Code or Obsidian (`Ctrl+Shift+E`); several folders at once, each with its own colour, pinning, sorting and a choice of what opens at start
 - **Read only**: the *Edit | Read only* switch in the toolbar locks the text so nothing changes by mistake (`Ctrl+Shift+L`)
@@ -33,6 +35,9 @@ follows tools that save by writing a new file and renaming it over the old one.
 - **Dedicated instances**: open a file or folder in its own Gryphmark, separate from the main window (`--profile "Name"`, or right-click in the Files panel → desktop shortcut)
 - **Zoom bar** in the status bar (also `Ctrl` + mouse wheel); on a narrow window the buttons that do not fit go into a ⋯ menu
 - Find & replace, spell check; a sidebar with the files above and the outline below, as on the Mac (drag its edge and the line between them)
+- Layouts and text width: *View → Layout* puts the files and the outline side by side, or the outline on the right of the text; *View → Text width* widens the column up to the whole window
+- Rename and move files and folders from the Files panel (`F2`, or drag them with the padlock open), with undo and redo; the open document follows its file
+- Properties at the top of a file (front matter) shown as a folded box and as a table, saved as written
 - **Convert to TXT**: right-click a file in the Files panel; a .txt is written next to it, as the document reads in the GitHub view, and the Markdown file is not changed
 - **Autosave**, on by default: a file with a name saves itself a moment after you stop typing; the *Autosave* switch in the toolbar (also *File → Autosave*) turns it off. It never writes over a change made by another program
 - Keeps your formatting: only what you edit changes on save, down to the part of a line you touched (CRLF/BOM preserved)
@@ -74,16 +79,23 @@ que guardan escribiendo un archivo nuevo y renombrándolo encima del viejo.
 
 - Editor visual, código Markdown con vista previa en vivo y vista GitHub de solo lectura (`Ctrl+1/2/3`)
 - Interfaz en inglés y en español, se cambia sin reiniciar
-- Imágenes y enlaces relativos; los enlaces a `.md` se abren en Gryphmark
+- Imágenes y enlaces relativos, también en otras carpetas (`../`); los enlaces a `.md` se abren en Gryphmark
+- Imágenes con ruta absoluta o dirección `file:`, con espacios en la ruta, como `![[imagen.png|300]]` (Obsidian, se buscan en las carpetas abiertas) o `![alt|300](a.png)`; una que falta muestra su nombre en un recuadro punteado, y un clic la abre en su visor
+- Las tablas entran en la columna: una ruta o un código largo dentro de una celda se corta donde hace falta, en vez de mandar la tabla detrás de una barra de desplazamiento
 - Avisos de GitHub, diagramas Mermaid, fórmulas, notas al pie y emojis
 - **Panel de archivos**: abrís una carpeta entera y recorrés sus archivos Markdown en un árbol al costado del documento, como en VS Code u Obsidian (`Ctrl+Shift+E`); varias carpetas a la vez, cada una con su color, fijado, orden y qué se abre al iniciar
 - **Solo lectura**: el selector *Editar | Solo lectura* de la barra bloquea el texto para que nada cambie por error (`Ctrl+Shift+L`)
 - **Temas**: claro, oscuro o automático (sigue a Windows), y un catálogo de colores que cambia el ícono en todo Windows y el resaltado de la app (*Ver → Tema…*)
 - **Instancias dedicadas**: abrir un archivo o una carpeta en su propio Gryphmark, separado de la ventana principal (`--profile "Nombre"`, o clic derecho en el panel de archivos → acceso directo en el escritorio)
 - **Barra de zoom** en la barra de estado (también `Ctrl` + rueda del mouse); con la ventana angosta, los botones que no entran van a un menú ⋯
-- Buscar y reemplazar, esquema lateral (se ensancha arrastrando su borde), revisión ortográfica
+- Buscar y reemplazar, revisión ortográfica; una barra lateral con los archivos arriba y el esquema abajo, como en la Mac (se arrastran su borde y la línea entre los dos)
+- Disposición y ancho del texto: *Ver → Disposición* pone los archivos y el esquema lado a lado, o el esquema a la derecha del texto; *Ver → Ancho del texto* ensancha la columna hasta toda la ventana
+- Cambiar nombre y mover archivos y carpetas desde el panel de archivos (`F2`, o arrastrándolos con el candado abierto), con deshacer y rehacer; el documento abierto sigue a su archivo
+- Propiedades al principio de un archivo (front matter) como un recuadro plegado y como una tabla, guardadas tal como estaban
 - **Convertir a TXT**: clic derecho en un archivo del panel de archivos; se escribe un .txt al lado, como se lee el documento en la vista GitHub, y el archivo Markdown no cambia
-- Respeta tu formato: al guardar sólo cambian las líneas editadas (conserva CRLF/BOM)
+- Autoguardado, activado de entrada: un archivo con nombre se guarda solo un momento después de que dejás de escribir; el interruptor *Autoguardado* de la barra (también *Archivo → Autoguardado*) lo apaga. Nunca escribe encima de un cambio hecho por otro programa
+- Respeta tu formato: al guardar solo cambia lo que editaste, hasta la parte de la línea que tocaste (conserva CRLF/BOM)
+- Enlaces `[[nombre]]` en la vista GitHub: abren el archivo Markdown de ese nombre en las carpetas abiertas, como en una wiki (uno que falta se ve en rojo), como en la Mac
 - Los enlaces de un documento solo abren páginas web, correo, otros archivos Markdown, imágenes y PDF; un enlace a cualquier otro archivo lo muestra en el Explorador en vez de ejecutarlo
 - Recuperación ante cierres, instancia única, aviso de actualizaciones
 - Exportar a HTML autónomo, imprimir o guardar como PDF

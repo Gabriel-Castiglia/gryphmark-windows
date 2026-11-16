@@ -39,9 +39,18 @@ public sealed class Settings
     public bool FilesPanel { get; set; } = true;   // open by default, as the sidebar of the macOS version
     public double FilesWidth { get; set; } = 260;       // width of the sidebar (Files over Contents), 180 to 700
     public double OutlineShare { get; set; } = 0.45;    // part of the sidebar's height for Contents when both show
+    public bool TreeLocked { get; set; } = true;        // unlocked: files and folders can be dragged in the tree (moved on disk)
+    public int TextWidth { get; set; } = 980;           // text column in px (980 = GitHub's); 0 = the whole window
+    public string SideLayout { get; set; } = "stacked"; // stacked | columns (Files | Contents) | right (Contents right of the text)
+    public double SideWidthColumns { get; set; } = 520; // sidebar width when Files and Contents sit side by side
+    public double OutlineShareColumns { get; set; } = 0.45; // part of that width for Contents
+    public double OutlineWidthRight { get; set; } = 260; // width of Contents on the right
     public double Width { get; set; } = 1200;
     public double Height { get; set; } = 820;
     public bool Maximized { get; set; }
+    /// <summary>Position of the window when it was last closed (null: centred on the screen).</summary>
+    public double? Left { get; set; }
+    public double? Top { get; set; }
     public bool Outline { get; set; } = true;
     public bool Spell { get; set; } = true;
     public bool AutoSave { get; set; } = true;   // saves a moment after the typing stops (MainWindow.AutoSave)
@@ -76,7 +85,7 @@ public sealed class Settings
     /// <summary>The session of one window: what an extra window must not write over.</summary>
     private static readonly HashSet<string> SessionKeys = new()
     {
-        nameof(Folder), nameof(Folders), nameof(PinnedFolders), nameof(Width), nameof(Height), nameof(Maximized),
+        nameof(Folder), nameof(Folders), nameof(PinnedFolders), nameof(Width), nameof(Height), nameof(Left), nameof(Top), nameof(Maximized),
         nameof(FilesPanel), nameof(FilesWidth), nameof(OutlineShare), nameof(SampleShown),
     };
 

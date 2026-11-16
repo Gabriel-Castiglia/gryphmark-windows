@@ -50,10 +50,23 @@ public partial class MainWindow
         FilesAdd.Click += (_, _) => PickFolder();
         FilesRefresh.Click += (_, _) => RefreshTree();
         FilesCollapse.Click += (_, _) => CollapseAllTrees();
+        InitFileOps();
         FilesOptions.Click += (_, _) => { var m = OptionsMenu(); m.PlacementTarget = FilesOptions; m.Placement = PlacementMode.Bottom; m.IsOpen = true; };
         SideSplitter.DragCompleted += (_, _) =>
         {
-            if (SideColumn.ActualWidth > 0) { _settings.FilesWidth = Math.Round(SideColumn.ActualWidth); _settings.Save(); }
+            if (SideColumn.ActualWidth <= 0) return;
+            if (ColsSplitter.Visibility == Visibility.Visible) _settings.SideWidthColumns = Math.Round(SideColumn.ActualWidth);
+            else _settings.FilesWidth = Math.Round(SideColumn.ActualWidth);
+            _settings.Save();
+        };
+        RightSplitter.DragCompleted += (_, _) =>
+        {
+            if (RightColumn.ActualWidth > 0) { _settings.OutlineWidthRight = Math.Round(RightColumn.ActualWidth); _settings.Save(); }
+        };
+        ColsSplitter.DragCompleted += (_, _) =>
+        {
+            double f = FilesCol.ActualWidth, o = OutlineCol.ActualWidth;
+            if (f > 0 && o > 0) { _settings.OutlineShareColumns = Math.Round(o / (f + o), 3); _settings.Save(); ApplySideLayout(); }
         };
         PanesSplitter.DragCompleted += (_, _) =>
         {
@@ -100,6 +113,7 @@ public partial class MainWindow
         FilesOptions.ToolTip = Strings.Get("FolderOptions");
         FilesRefresh.ToolTip = Strings.Get("Refresh");
         FilesCollapse.ToolTip = Strings.Get("CollapseAll");
+        UpdateFileOpButtons();
         FilesTitle.Text = Strings.Get(_roots.Count > 0 ? "RecentFolders" : "FilesTitle");
         if (_roots.Count > 0) RefreshTree();   // context menus are built with the interface language
     }
@@ -199,23 +213,71 @@ public partial class MainWindow
 
     /// <summary>The sidebar, as in the macOS version: Files above and Contents below with a divider between
     /// them (OutlineShare of the height for Contents), or the one that is on filling it, or no sidebar.</summary>
+    /// Three layouts (Settings.SideLayout): "stacked" (above), "columns" (Files | Contents side by side in the
+    /// sidebar) and "right" (Files on the left, Contents on the right of the text, in RightHost).
     private void ApplySideLayout()
     {
-        bool files = _settings.FilesPanel, outline = _settings.Outline, any = files || outline;
-        SideColumn.MinWidth = any ? 180 : 0;
-        SideColumn.Width = new GridLength(any ? Math.Clamp(_settings.FilesWidth, 180, 700) : 0);
+        string layout = _settings.SideLayout is "columns" or "right" ? _settings.SideLayout : "stacked";
+        bool files = _settings.FilesPanel, outline = _settings.Outline;
+        bool right = layout == "right", cols = layout == "columns";
+        bool outLeft = outline && !right;                 // Contents lives in the sidebar
+        bool any = files || outLeft;
+        bool both = files && outLeft;
+
+        // Contents goes where the layout puts it
+        if (right && OutlinePane.Parent != RightHost) { SideGrid.Children.Remove(OutlinePane); RightHost.Child = OutlinePane; }
+        if (!right && OutlinePane.Parent != SideGrid) { RightHost.Child = null; SideGrid.Children.Add(OutlinePane); }
+
+        // the sidebar: in columns it is wider (two panes)
+        bool wide = cols && both;
+        double sideW = wide ? Math.Clamp(_settings.SideWidthColumns, 360, 1000) : Math.Clamp(_settings.FilesWidth, 180, 700);
+        SideColumn.MaxWidth = wide ? 1000 : 700;
+        SideColumn.MinWidth = any ? (wide ? 360 : 180) : 0;
+        SideColumn.Width = new GridLength(any ? sideW : 0);
         SideSplitterColumn.Width = new GridLength(any ? 5 : 0);
         SideSplitter.Visibility = any ? Visibility.Visible : Visibility.Collapsed;
         SideGrid.Visibility = SideSplitter.Visibility;
+
+        // inside the sidebar: rows (stacked) or columns
         double share = Math.Clamp(_settings.OutlineShare, 0.1, 0.9);
-        FilesRow.MinHeight = files && outline ? 90 : 0;
+        double cshare = Math.Clamp(_settings.OutlineShareColumns, 0.15, 0.85);
+        bool rows = both && !cols;
+        FilesRow.MinHeight = rows ? 90 : 0;
         OutlineRow.MinHeight = FilesRow.MinHeight;
-        FilesRow.Height = new GridLength(files ? (outline ? 1 - share : 1) : 0, GridUnitType.Star);
-        OutlineRow.Height = new GridLength(outline ? (files ? share : 1) : 0, GridUnitType.Star);
-        PanesSplitterRow.Height = new GridLength(files && outline ? 5 : 0);
-        PanesSplitter.Visibility = files && outline ? Visibility.Visible : Visibility.Collapsed;
+        FilesRow.Height = new GridLength(rows ? 1 - share : (files || !outLeft ? 1 : 0), GridUnitType.Star);
+        OutlineRow.Height = new GridLength(rows ? share : (!files && outLeft ? 1 : 0), GridUnitType.Star);
+        PanesSplitterRow.Height = new GridLength(rows ? 5 : 0);
+        PanesSplitter.Visibility = rows ? Visibility.Visible : Visibility.Collapsed;
+        FilesCol.MinWidth = wide ? 150 : 0;
+        OutlineCol.MinWidth = FilesCol.MinWidth;
+        FilesCol.Width = new GridLength(wide ? 1 - cshare : 1, GridUnitType.Star);
+        OutlineCol.Width = new GridLength(wide ? cshare : 0, GridUnitType.Star);
+        PanesSplitterCol.Width = new GridLength(wide ? 5 : 0);
+        ColsSplitter.Visibility = wide ? Visibility.Visible : Visibility.Collapsed;
+        if (!right)
+        {
+            // stacked: Contents in row 2 of column 0; columns: row 0 of column 2; alone: fills the sidebar
+            Grid.SetRow(OutlinePane, wide ? 0 : (files ? 2 : 0)); Grid.SetRowSpan(OutlinePane, wide || !files ? 3 : 1);
+            Grid.SetColumn(OutlinePane, wide ? 2 : 0);
+        }
+        Grid.SetRowSpan(FilesPane, rows ? 1 : 3);
+
+        // the right column
+        bool r = right && outline;
+        RightColumn.MinWidth = r ? 160 : 0;
+        RightColumn.Width = new GridLength(r ? Math.Clamp(_settings.OutlineWidthRight, 160, 700) : 0);
+        RightSplitterColumn.Width = new GridLength(r ? 5 : 0);
+        RightSplitter.Visibility = r ? Visibility.Visible : Visibility.Collapsed;
+        RightHost.Visibility = RightSplitter.Visibility;
+
         FilesPane.Visibility = files ? Visibility.Visible : Visibility.Collapsed;
         OutlinePane.Visibility = outline ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void SetSideLayout(string layout)
+    {
+        _settings.SideLayout = layout; _settings.Save();
+        ApplySideLayout(); BuildMenu();
     }
 
     private void ApplyFilesVisibility()
@@ -445,6 +507,7 @@ public partial class MainWindow
 
     private void OnTreeKey(object sender, KeyEventArgs e)
     {
+        if (TreeFileKey(e)) { e.Handled = true; return; }
         if (e.Key != Key.Enter || FilesTree.SelectedItem is not TreeViewItem { Tag: string path } item) return;
         e.Handled = true;
         Activate(item, path);
@@ -479,6 +542,7 @@ public partial class MainWindow
             new Separator(),
             MenuEntry(Strings.Plain("OpenFolder"), () => ShowInExplorer(path, true)),
             MenuEntry(Strings.Get("CopyPath"), () => Clipboard.SetText(path)),
+            RenameEntry(path),
             new Separator(),
             MenuEntry(Strings.Get("ConvertTxt"), () => ConvertToText(path)),
         },
@@ -512,6 +576,7 @@ public partial class MainWindow
         {
             MenuEntry(Strings.Plain("OpenFolder"), () => ShowInExplorer(path, false)),
             MenuEntry(Strings.Get("CopyPath"), () => Clipboard.SetText(path)),
+            RenameEntry(path),
             new Separator(),
             MenuEntry(Strings.Get("Refresh"), RefreshTree),
         },

@@ -355,7 +355,7 @@ public partial class MainWindow
                 {
                     var text = File.ReadAllText(draft, Encoding.UTF8);
                     if (orig != null && File.Exists(orig)) await LoadFileAsync(orig);
-                    await Js($"mdApp.load({Q(text)},{(orig != null ? "'https://doc.local/'" : "null")})");
+                    await Js($"mdApp.load({Q(text)},{DocBaseJs(orig)})");
                     _path = orig; _dirty = true;
                     UpdateTitle(); UpdateStatus(); Flash(Strings.Get("Recovered"));
                 }
