@@ -134,17 +134,17 @@ configuración se copia sola.
 
 ## Build tools / Herramientas de compilación
 
-Gryphmark 2.2.0 was built and tested with / se compiló y probó con:
+Gryphmark 2.2.1 was built and tested with / se compiló y probó con:
 
 | Tool | Version |
 |---|---|
 | Windows 11 Pro | x64 |
-| .NET SDK / runtime (self-contained, net10.0-windows) | 11.0.100 / 10.0.15 |
+| .NET SDK / runtime (self-contained, net10.0-windows) | 10.0.404 / 10.0.15 |
 | Microsoft.Web.WebView2 (NuGet) | 1.0.4314.35 |
 | Node.js / npm (web bundle, unchanged since 2.0.0) | 26.12.1 / 11.20.0 |
 | esbuild | 0.25.5 |
 | Inno Setup | 6.7.3 |
-| Microsoft Edge (manual PDFs) | 157.0.4341.60 |
+| Google Chrome (manual PDFs) | 158.0.8127.37 |
 | Python (`-Art` only) | 3.13.17, Pillow 12.3.0, numpy 2.5.4, scipy 1.18.1, opencv-python 5.0.0 |
 
 Web libraries / Bibliotecas web (exact versions in `_npm/package-lock.json`): TOAST UI Editor 3.2.2,
