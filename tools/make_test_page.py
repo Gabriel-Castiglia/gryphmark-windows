@@ -5,7 +5,7 @@ SPDX-License-Identifier: GPL-2.0-only
 """
 import sys, json, pathlib
 root = pathlib.Path(__file__).resolve().parents[1]
-www = root / "src" / "Gryphmark" / "wwwroot"
+www = root / "src" / "Vigia" / "wwwroot"
 mode, theme, lang, out = sys.argv[1], sys.argv[2], sys.argv[3], pathlib.Path(sys.argv[4])
 html = (www / "index.html").read_text(encoding="utf-8").replace("https://app.local/", www.as_uri() + "/")
 js = (www / "app.js").read_text(encoding="utf-8").replace("https://app.local/", www.as_uri() + "/")

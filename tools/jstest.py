@@ -5,7 +5,7 @@ SPDX-License-Identifier: GPL-2.0-only
 """
 import json, pathlib, subprocess, sys, tempfile
 root = pathlib.Path(__file__).resolve().parents[1]
-www = root / "src" / "Gryphmark" / "wwwroot"
+www = root / "src" / "Vigia" / "wwwroot"
 import os
 edge = next((p for p in (os.path.expandvars(x) for x in (
     r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe", r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe",

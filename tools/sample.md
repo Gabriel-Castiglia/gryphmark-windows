@@ -1,4 +1,4 @@
-# Gryphmark
+# Vigía
 
 Write your **Markdown** visually — *it writes the tags for you*. ~~No more syntax.~~
 

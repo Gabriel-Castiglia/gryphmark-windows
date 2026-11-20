@@ -1,20 +1,20 @@
-﻿# Gryphmark — full build: web bundle, icon, manuals (PDF), self-contained publish, installer.
+﻿# Vigía — full build: web bundle, icon, manuals (PDF), self-contained publish, installer.
 # Usage:  powershell -ExecutionPolicy Bypass -File build.ps1 [-SkipNpm] [-Art]
-#   -SkipNpm  keep the web bundle in src/Gryphmark/wwwroot/lib as it is
+#   -SkipNpm  keep the web bundle in src/Vigia/wwwroot/lib as it is
 #   -Art      redraw the icons and the installer pictures (they are committed; needs Python with
 #             Pillow, numpy, scipy and opencv-python)
-# The version comes from <Version> in src/Gryphmark/Gryphmark.csproj, the only place it is written.
+# The version comes from <Version> in src/Vigia/Vigia.csproj, the only place it is written.
 # Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
 # Date: November 10, 2026
 # SPDX-License-Identifier: GPL-2.0-only
 param([switch]$SkipNpm, [switch]$Art)
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
-$Version = ([xml](Get-Content (Join-Path $root "src/Gryphmark/Gryphmark.csproj") -Raw)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
-if (-not $Version) { throw "No <Version> in Gryphmark.csproj" }
+$Version = ([xml](Get-Content (Join-Path $root "src/Vigia/Vigia.csproj") -Raw)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+if (-not $Version) { throw "No <Version> in Vigia.csproj" }
 $out = Join-Path $root "out"
 $pub = Join-Path $out "publish"
-$www = Join-Path $root "src/Gryphmark/wwwroot"
+$www = Join-Path $root "src/Vigia/wwwroot"
 
 function Step($m) { Write-Host "==> $m" -ForegroundColor Cyan }
 
@@ -55,8 +55,8 @@ if (-not $SkipNpm) {
 # 2. Icon and installer artwork (only with -Art: the drawn files are in the repository)
 if ($Art) {
 Step "icon + wizard art"
-python "$root/tools/make_icon_griffin.py" "$root/assets/griffin_schongauer_met_cc0.jpg" "$root/src/Gryphmark/Gryphmark.ico" "$root/assets/gryphmark_base.png" "232,96,44" "1060,400,900" "12"
-# theme colours from that orange base; the default (gold) variant becomes Gryphmark.ico and assets/gryphmark.png
+python "$root/tools/make_icon.py" "$root/src/Vigia/Vigia.ico" "$root/assets/vigia_base.png" "232,96,44"
+# theme colours from that orange base; the default (gold) variant becomes Vigia.ico and assets/vigia.png
 python "$root/tools/make_theme_icons.py"
 python "$root/tools/make_wizard.py"
 }
@@ -71,8 +71,8 @@ $edge = @("${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe", "$en
     Where-Object { Test-Path $_ } | Select-Object -First 1
 if (-not $edge) { throw "No Chromium browser (Edge, Chrome or Brave) to print the manuals" }
 foreach ($l in "EN", "ES") {
-    $html = Join-Path $root "docs/Gryphmark_Manual_$l.html"
-    $pdf = Join-Path $root "docs/Gryphmark_Manual_$l.pdf"
+    $html = Join-Path $root "docs/Vigia_Manual_$l.html"
+    $pdf = Join-Path $root "docs/Vigia_Manual_$l.pdf"
     if (Test-Path $pdf) { Remove-Item $pdf -Force }
     Start-Process -FilePath $edge -Wait -WindowStyle Hidden -ArgumentList @("--headless=new", "--disable-gpu", "--no-first-run", "--user-data-dir=`"$env:TEMP\gm_pdf_profile`"", "--no-pdf-header-footer", "--print-to-pdf=`"$pdf`"", ([uri]$html).AbsoluteUri)
     $t = 0; while (-not (Test-Path $pdf) -and $t -lt 60) { Start-Sleep -Milliseconds 500; $t++ }
@@ -82,10 +82,10 @@ foreach ($l in "EN", "ES") {
 # 4. Publish (self-contained, win-x64)
 Step "dotnet publish"
 if (Test-Path $pub) { Remove-Item $pub -Recurse -Force }
-dotnet publish "$root/src/Gryphmark/Gryphmark.csproj" -c Release -o $pub -p:Version=$Version -nologo -v q
+dotnet publish "$root/src/Vigia/Vigia.csproj" -c Release -o $pub -p:Version=$Version -nologo -v q
 if ($LASTEXITCODE) { throw "dotnet publish failed" }
 New-Item -ItemType Directory -Force "$pub/docs" | Out-Null
-Copy-Item "$root/docs/Gryphmark_Manual_EN.pdf", "$root/docs/Gryphmark_Manual_ES.pdf" "$pub/docs/"
+Copy-Item "$root/docs/Vigia_Manual_EN.pdf", "$root/docs/Vigia_Manual_ES.pdf" "$pub/docs/"
 
 # Optional code signing: set GM_SIGN_PFX (path to a .pfx) and GM_SIGN_PASS before building.
 function Sign($file) {
@@ -96,13 +96,13 @@ function Sign($file) {
     & $signtool.FullName sign /f $env:GM_SIGN_PFX /p $env:GM_SIGN_PASS /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 $file
     if ($LASTEXITCODE) { throw "signing failed: $file" }
 }
-Sign "$pub/Gryphmark.exe"
+Sign "$pub/Vigia.exe"
 
 # 5. Installer
 Step "installer"
 $iscc = @("$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe", "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
 if (-not $iscc) { throw "Inno Setup 6 not found (winget install JRSoftware.InnoSetup)" }
-& $iscc /Q "/DAppVersion=$Version" "/DPublishDir=$pub" "$root/installer/Gryphmark.iss"
+& $iscc /Q "/DAppVersion=$Version" "/DPublishDir=$pub" "$root/installer/Vigia.iss"
 if ($LASTEXITCODE) { throw "ISCC failed" }
-Sign "$out/Gryphmark-Setup-$Version.exe"
-Get-Item "$out/Gryphmark-Setup-$Version.exe" | Select-Object Name, Length
+Sign "$out/Vigia-Setup-$Version.exe"
+Get-Item "$out/Vigia-Setup-$Version.exe" | Select-Object Name, Length

@@ -1,0 +1,45 @@
+<!-- Vigia: project file. The version is set here and nowhere else.
+     Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+     Date: November 10, 2026
+     SPDX-License-Identifier: GPL-2.0-only -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>Vigia.ico</ApplicationIcon>
+    <!-- per-monitor DPI (v2): sharp on a second screen with another scale; WPF alone is system aware -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>Vigia</AssemblyName>
+    <RootNamespace>Vigia</RootNamespace>
+    <!-- The version is set here only: build.ps1, the installer and the About window read it. -->
+    <Version>3.0.0</Version>
+    <Product>Vigia</Product>
+    <Company>Gabriel Castiglia</Company>
+    <Copyright>© 2026 Gabriel Castiglia</Copyright>
+    <Description>Vigia — Markdown editor with GitHub rendering</Description>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <SatelliteResourceLanguages>en;es</SatelliteResourceLanguages>
+    <!-- No build paths inside the binaries: no PDB, and source paths mapped to /_/ -->
+    <DebugType>none</DebugType>
+    <PathMap>$(MSBuildProjectDirectory)=/_/</PathMap>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Vigia.ico" />
+    <Resource Include="icons\*.ico" />
+    <Content Include="Vigia.ico" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="wwwroot\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

@@ -1,4 +1,4 @@
-"""Builds docs/Gryphmark_Manual_EN.html and _ES.html; build.ps1 prints them to PDF with Edge.
+"""Builds docs/Vigia_Manual_EN.html and _ES.html; build.ps1 prints them to PDF with Edge.
 Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
 Date: November 10, 2026
 SPDX-License-Identifier: GPL-2.0-only
@@ -12,7 +12,7 @@ version = sys.argv[1] if len(sys.argv) > 1 else "1.0.0"
 def img(name):
     return "data:image/png;base64," + base64.b64encode((docs / "img" / name).read_bytes()).decode()
 
-icon = "data:image/png;base64," + base64.b64encode((root / "assets" / "gryphmark.png").read_bytes()).decode()
+icon = "data:image/png;base64," + base64.b64encode((root / "assets" / "vigia.png").read_bytes()).decode()
 
 CSS = """
 @page { size: A4; margin: 18mm 17mm 20mm; }
@@ -46,27 +46,27 @@ T = {
   title="User Manual", tag="Write Markdown visually. See it like GitHub.", lang="en",
   toc="Contents",
   sections=[
-   ("What is Gryphmark", f"""
-<p><b>Gryphmark</b> is a Markdown viewer and editor for Windows. You format text with buttons — headings, bold, lists,
-tables, code — and Gryphmark writes the Markdown tags behind the scenes. Every document is shown exactly the way
+   ("What is Vigía", f"""
+<p><b>Vigía</b> is a Markdown viewer and editor for Windows. You format text with buttons — headings, bold, lists,
+tables, code — and Vigía writes the Markdown tags behind the scenes. Every document is shown exactly the way
 GitHub displays it, in light or dark theme.</p>
 <p>It is designed for <code>README.md</code> files, notes, documentation and any <code>.md</code> file you want to read or edit
 without memorising syntax.</p>
 <figure><img src="{img('visual_light_en.png')}"><figcaption>Visual editor: format with the toolbar, no tags in sight.</figcaption></figure>
 """),
    ("Installation", """
-<p>Run <code>Gryphmark-Setup-{v}.exe</code>. The installer is available in English and Spanish and does <b>not</b> need
-administrator rights: it installs for the current user in <code>%LOCALAPPDATA%\\Programs\\Gryphmark</code>.</p>
+<p>Run <code>Vigia-Setup-{v}.exe</code>. The installer is available in English and Spanish and does <b>not</b> need
+administrator rights: it installs for the current user in <code>%LOCALAPPDATA%\\Programs\\Vigia</code>.</p>
 <table><tr><th>Option</th><th>What it does</th></tr>
-<tr><td>Desktop shortcut</td><td>Adds a Gryphmark icon to the desktop.</td></tr>
-<tr><td>Open .md files with Gryphmark</td><td>Adds Gryphmark to <i>Open with</i> for .md / .markdown files, and makes it the handler for those files for the current user.</td></tr>
-<tr><td>Add "Open with Gryphmark" to folders</td><td>Right-click a folder (or the empty space inside one) in Explorer to open it in the Files panel. In Windows 11 it is under <i>Show more options</i>.</td></tr></table>
+<tr><td>Desktop shortcut</td><td>Adds a Vigía icon to the desktop.</td></tr>
+<tr><td>Open .md files with Vigía</td><td>Adds Vigía to <i>Open with</i> for .md / .markdown files, and makes it the handler for those files for the current user.</td></tr>
+<tr><td>Add "Open with Vigía" to folders</td><td>Right-click a folder (or the empty space inside one) in Explorer to open it in the Files panel. In Windows 11 it is under <i>Show more options</i>.</td></tr></table>
 <p>Requirements: Windows 10 or 11 (64-bit) and Microsoft Edge WebView2 Runtime, which is already part of Windows 11.
 The .NET runtime is included; nothing else has to be installed.</p>
 <p>Up to version 1.1.1 the program was called <b>Quillforge</b>. If that version is installed, the installer removes it,
-and Gryphmark copies its settings, recent files and recovery drafts on the first start.</p>
-<p>To uninstall: <i>Settings → Apps → Installed apps → Gryphmark → Uninstall</i>. Your settings in
-<code>%APPDATA%\\Gryphmark</code> are kept.</p>
+and Vigía copies its settings, recent files and recovery drafts on the first start.</p>
+<p>To uninstall: <i>Settings → Apps → Installed apps → Vigía → Uninstall</i>. Your settings in
+<code>%APPDATA%\\Vigia</code> are kept.</p>
 """),
    ("The window", """
 <table><tr><th>Part</th><th>Use</th></tr>
@@ -88,17 +88,17 @@ and Gryphmark copies its settings, recent files and recovery drafts on the first
 <p>When you only want to read a document, choose <b>Read only</b> in the <b>Edit | Read only</b> switch, to the left of the view buttons
 (also <i>View → Read only</i> or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd>). The text is locked in every view: keys, paste, drag and drop and
 the task boxes do nothing, and the formatting buttons are greyed out. You can still read, select, copy, find and switch views.
-If you type, the status bar reminds you how to unlock it. Choose <b>Edit</b> to write again; Gryphmark remembers your choice.</p>
+If you type, the status bar reminds you how to unlock it. Choose <b>Edit</b> to write again; Vigía remembers your choice.</p>
 """),
    ("Folders: the Files panel", f"""
-<p>Like VS Code or Obsidian, Gryphmark shows folders as trees on the left: subfolders and Markdown files
+<p>Like VS Code or Obsidian, Vigía shows folders as trees on the left: subfolders and Markdown files
 (<code>.md</code>, <code>.markdown</code>). You can have <b>several folders open at once</b>; each one is a block with its own
 pastel colour and a stripe on its left edge, so you see at a glance where one tree ends and the next begins. Click a file and it opens beside the trees.</p>
 <figure><img src="{img('files_panel_light.png')}" style="width:260px"><figcaption>Two folders open; the open file is marked.</figcaption></figure>
 <figure><img src="{img('files_favorites_en_light.png')}" style="width:260px"><figcaption>Favourites: one list for every folder, first in the panel; a file that is gone shows greyed.</figcaption></figure>
 <figure><img src="{img('layout_picker_en_light.png')}" style="width:500px"><figcaption>The layout button's panel: every layout drawn; a click applies it.</figcaption></figure>
 <table><tr><th>Action</th><th>How</th></tr>
-<tr><td>Open a folder</td><td>The <b>+</b> button of the panel, <i>File → Open folder…</i>, the <b>Open folder…</b> button of the empty panel, dropping a folder on the window, or right-clicking a folder in Explorer → <i>Open with Gryphmark</i> (installer option; in Windows 11 it is under <i>Show more options</i>). Each new folder is added below the others.</td></tr>
+<tr><td>Open a folder</td><td>The <b>+</b> button of the panel, <i>File → Open folder…</i>, the <b>Open folder…</b> button of the empty panel, dropping a folder on the window, or right-clicking a folder in Explorer → <i>Open with Vigía</i> (installer option; in Windows 11 it is under <i>Show more options</i>). Each new folder is added below the others.</td></tr>
 <tr><td>Show / hide the panel</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>, the folder button at the left of the toolbar, or <i>View → Files panel</i>. It shares the sidebar with the outline: the files above, the outline below. Drag the right edge of the sidebar to make it wider, and the line between the two to change their heights; both are kept. Each dedicated instance keeps its own layout.</td></tr>
 <tr><td>Layout</td><td>The <b>layout button</b> at the right end of the toolbar is a small drawing of the current layout. A click opens a panel with the six layouts drawn: Files and Outline on the left (one above the other, or side by side), one on each side of the text (either way round), or both on the right. A click on a drawing applies it at once; below them, <b>Files</b> and <b>Outline</b> turn each pane on or off and <b>Swap Files and Outline</b> trades their places. <i>View → Layout</i> has the same choices. Each layout keeps its own sidebar width: drag the edge of a sidebar and that layout remembers it.<br>You can also <b>drag a pane by its title</b> (FILES, CONTENTS or SEARCH) to an edge of the window: while you drag, both edges are outlined and the place the pane would take is filled in, with its name (<i>Outline on the right</i>, <i>Files below Outline</i>…). Near the other pane, its upper part puts the dragged one above it, the lower part below, the middle beside it. Let go to move it; let go in the middle of the window, or press <kbd>Esc</kbd>, to leave everything as it was.</td></tr>
 <tr><td>Browse</td><td>Click a folder to open or close it; click a file to open it. <kbd>Enter</kbd> does the same on the selected row.</td></tr>
@@ -122,15 +122,15 @@ from the tree, and a name already taken in the target folder is refused.</p>
 (the default: shades of the colour chosen in <i>View → Theme…</i>), <i>Multicolour</i> (a different hue for each folder) or <i>No colour</i>;
 a single folder can get its own colour from its right-click menu.</p>
 <h3>Dedicated instances</h3>
-<p>Some files or folders deserve a Gryphmark of their own — a to-do list, a wiki — so they never get mixed with your other work.
+<p>Some files or folders deserve a Vigía of their own — a to-do list, a wiki — so they never get mixed with your other work.
 Right-click a file, or the title of a folder, and choose <b>Open in a dedicated instance</b>, or <b>Desktop shortcut (dedicated instance)</b>
 to get a shortcut that always opens it that way. A dedicated instance is a separate window with its own settings, open folders,
 recent files and size; its name is shown in the title bar. Opening it again brings that window to the front instead of starting another one.
-It starts with the language, theme and colour of the main window. (Technically: <code>Gryphmark.exe --profile "Name" "path"</code>;
-its settings live in <code>%APPDATA%\\Gryphmark\\profiles\\Name</code>.)</p>
-<p><i>Open in a new window</i> is different: it is an extra window of the main Gryphmark. It can be used freely, and it never writes over the
+It starts with the language, theme and colour of the main window. (Technically: <code>Vigia.exe --profile "Name" "path"</code>;
+its settings live in <code>%APPDATA%\\Vigia\\profiles\\Name</code>.)</p>
+<p><i>Open in a new window</i> is different: it is an extra window of the main Vigía. It can be used freely, and it never writes over the
 main window's open folders or size.</p>
-<h3>What opens when Gryphmark starts</h3>
+<h3>What opens when Vigía starts</h3>
 <p>Choose it in <i>File → Folders at start</i> or in the <b>⋯</b> button of the panel:</p>
 <table><tr><th>Option</th><th>What happens</th></tr>
 <tr><td>Reopen the folders of the last session</td><td>The panel comes back exactly as you left it (the default).</td></tr>
@@ -165,12 +165,12 @@ Recent folders are listed in <i>File → Open recent</i>.</p>
 <tr><td>Open</td><td><i>File → Open</i> (<kbd>Ctrl</kbd>+<kbd>O</kbd>), double-click a .md file, or drag a file onto the window.</td></tr>
 <tr><td>Recent files</td><td><i>File → Open recent</i> keeps the last 12 files.</td></tr>
 <tr><td>Save / Save as</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. New files are saved as UTF-8 without BOM, the same as GitHub; existing files keep their encoding and line endings.</td></tr>
-<tr><td>New / New window</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> starts an empty document; <i>New window</i> opens a second Gryphmark.</td></tr>
+<tr><td>New / New window</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> starts an empty document; <i>New window</i> opens a second Vigía.</td></tr>
 <tr><td>Show in folder</td><td>Opens Explorer with the file selected.</td></tr></table>
-<p><b>Autosave</b> is on by default: a file with a name saves itself a moment after you stop typing, and closing it or opening another file saves without asking. The <i>Autosave</i> switch in the toolbar (also <i>File → Autosave</i>) turns it off; then only Save writes the file, and if you close a document with unsaved changes, Gryphmark asks whether to save them. Autosave never writes over a change made by another program: Gryphmark asks first. A new document is saved by itself once it has a name.</p>
+<p><b>Autosave</b> is on by default: a file with a name saves itself a moment after you stop typing, and closing it or opening another file saves without asking. The <i>Autosave</i> switch in the toolbar (also <i>File → Autosave</i>) turns it off; then only Save writes the file, and if you close a document with unsaved changes, Vigía asks whether to save them. Autosave never writes over a change made by another program: Vigía asks first. A new document is saved by itself once it has a name.</p>
 <h3>Images and links</h3>
 <p>Relative paths work as on GitHub: <code>![diagram](img/diagram.png)</code> shows the image stored next to the .md file.
-In GitHub preview, links to web pages open in your browser, links to other <code>.md</code> files open in Gryphmark, and
+In GitHub preview, links to web pages open in your browser, links to other <code>.md</code> files open in Vigía, and
 <code>#heading</code> links jump inside the document.</p>
 """),
    ("Export and print", """
@@ -182,18 +182,18 @@ In GitHub preview, links to web pages open in your browser, links to other <code
 <tr><td>Find / Replace</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> open a bar above the document. <kbd>F3</kbd> and <kbd>Shift</kbd>+<kbd>F3</kbd> jump between matches; <kbd>Esc</kbd> closes it. <i>Aa</i> matches case.</td></tr>
 <tr><td>Outline</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> or the outline button of the toolbar shows the headings in the sidebar, below the files; click one to jump to it. With the Files panel hidden, the outline fills the sidebar. The layout button, <i>View → Layout</i> or dragging its title (CONTENTS) puts it beside the files, above them, or on either side of the text.</td></tr>
 <tr><td>Your formatting is kept</td><td>Only what you change is rewritten when you save, down to the part of a line you touched: list markers, <code>__bold__</code>, <code>_italics_</code>, tags such as <code>&lt;kbd&gt;</code>, table alignment, line endings (CRLF/LF) and BOM stay as they were.</td></tr>
-<tr><td>Changed outside</td><td>If another program modifies the open file, Gryphmark reloads it (or asks first if you have unsaved changes) and marks what changed in green for a few seconds: new or rewritten paragraphs, and only the point or row added to a list or a table.</td></tr>
+<tr><td>Changed outside</td><td>If another program modifies the open file, Vigía reloads it (or asks first if you have unsaved changes) and marks what changed in green for a few seconds: new or rewritten paragraphs, and only the point or row added to a list or a table.</td></tr>
 <tr><td>Reading at the end</td><td>If you are at the end of a view when another program adds text at the bottom, the view goes down with it. Anywhere else you stay where you were.</td></tr>
 <tr><td>Text width</td><td><i>View → Text width</i>: <b>Normal</b> (980 px, as on GitHub), <b>Wide</b> (1280 px), <b>Very wide</b> (1600 px) or <b>The whole window</b>, for the Visual and GitHub views. The choice is remembered per profile; printing and exported pages keep GitHub's width.</td></tr>
 <tr><td>Pictures</td><td>Beside the document or in another folder (<code>../img/a.png</code>). In the GitHub view also by an absolute path (<code>C:\\Pics\\a.png</code>, <code>\\\\server\\share\\a.png</code>) or a <code>file:</code> address, with spaces in the path, and as <code>![[picture.png]]</code> or <code>![[picture.png|300]]</code>, looked for in the open folders; <code>![alt|300](a.png)</code> sets the width. A picture that is not found shows its name in a dashed box; a click on a picture opens it in its viewer.</td></tr>
 <tr><td>Tables</td><td>A long path, address or piece of code in a cell breaks where it has to, so the table fits the column instead of hiding behind a scrollbar; plain words stay whole. A table of eight columns or more takes less padding.</td></tr>
 <tr><td>Properties at the top</td><td>A block between two <code>---</code> lines at the start of a file (front matter, as GitHub, Jekyll or Obsidian use) is shown as properties, not as text: in the Visual view a grey box folded to its first lines, which opens while the cursor is in it; in the GitHub view a table under a <b>Properties</b> line, closed until clicked. The block is saved exactly as it was written.</td></tr>
 <tr><td>[[name]] links</td><td>In the GitHub view, <code>[[name]]</code> (also <code>[[name|text]]</code> and <code>[[name#heading]]</code>) links to the Markdown file of that name in the open folders, as in a wiki; the nearest one wins. A name that matches no file is shown in red. The text of the file does not change.</td></tr>
-<tr><td>Crash recovery</td><td>Unsaved work is backed up every 20 seconds. If Gryphmark or Windows stops unexpectedly, the next start offers to recover it.</td></tr>
+<tr><td>Crash recovery</td><td>Unsaved work is backed up every 20 seconds. If Vigía or Windows stops unexpectedly, the next start offers to recover it.</td></tr>
 <tr><td>Spell check</td><td><i>View → Spell check</i> underlines misspelled words, in the interface language (Windows dictionaries).</td></tr>
-<tr><td>One window per file</td><td>Opening a .md while Gryphmark is running brings the existing window forward instead of starting a second copy. <i>File → New window</i> still opens another one.</td></tr>
-<tr><td>Updates</td><td>Gryphmark checks once a day for a new version (once for all the dedicated instances); <i>Help → Check for updates</i> does it on demand. When there is one, a single question — <b>Update now</b>, <b>What's new</b> or <b>Later</b> — and the rest happens by itself: the installer is downloaded and checked against the release's checksums (one that does not match is deleted, never run), every Gryphmark window closes (saving first, or asking if it cannot), the new version installs in silence with the same options, and the windows open again, each with its profile and its file. If a window is not closed (its question answered with <i>Cancel</i>), nothing is installed and the others come back.</td></tr>
-<tr><td>About</td><td><i>Help → About Gryphmark</i> shows the version, author, license and credits. <i>Copy info</i> copies the version details, handy for reporting a problem.</td></tr>
+<tr><td>One window per file</td><td>Opening a .md while Vigía is running brings the existing window forward instead of starting a second copy. <i>File → New window</i> still opens another one.</td></tr>
+<tr><td>Updates</td><td>Vigía checks once a day for a new version (once for all the dedicated instances); <i>Help → Check for updates</i> does it on demand. When there is one, a single question — <b>Update now</b>, <b>What's new</b> or <b>Later</b> — and the rest happens by itself: the installer is downloaded and checked against the release's checksums (one that does not match is deleted, never run), every Vigía window closes (saving first, or asking if it cannot), the new version installs in silence with the same options, and the windows open again, each with its profile and its file. If a window is not closed (its question answered with <i>Cancel</i>), nothing is installed and the others come back.</td></tr>
+<tr><td>About</td><td><i>Help → About Vigía</i> shows the version, author, license and credits. <i>Copy info</i> copies the version details, handy for reporting a problem.</td></tr>
 <tr><td>Sample document</td><td>A sample that shows every feature in the three views. It opens on the first start and from <i>Help → Sample document</i>, and it is pinned at the top of <i>File → Open recent</i>; <i>Hide sample</i>, right below it, removes it from that list, and <i>Help → Show sample in Open recent</i> brings it back. It opens as an untitled copy, so the original is never overwritten, and it changes language together with the menus.</td></tr></table>
 <h3>GitHub extras</h3>
 <p>Also rendered exactly like GitHub: alerts (<code>&gt; [!NOTE]</code>, <code>[!TIP]</code>, <code>[!IMPORTANT]</code>, <code>[!WARNING]</code>, <code>[!CAUTION]</code>),
@@ -201,7 +201,7 @@ In GitHub preview, links to web pages open in your browser, links to other <code
 """),
    ("Language, theme and zoom", f"""
 <p><b>Language</b> menu: English or Español. It changes the menus, the toolbar tooltips and dialogs immediately.
-The first time, Gryphmark follows the Windows language.</p>
+The first time, Vigía follows the Windows language.</p>
 <p><b>View → Theme…</b> opens the theme window. <b>Appearance</b>: <i>Light</i>, <i>Dark</i> or <i>Automatic</i>, which follows Windows
 (Settings → Personalisation → Colours) and switches by itself when Windows does. <b>Colour</b>: a catalogue of twelve colours for
 the icon and the highlights. The chosen colour becomes the background of the icon everywhere — window, taskbar, desktop and
@@ -230,11 +230,11 @@ maximized state it had when it was closed (centred if that place is no longer on
 <tr><td>Version</td><td>{v}</td></tr>
 <tr><td>License</td><td>GNU GPL version 2 only (GPL-2.0-only) — free software, no warranty. Full text: <code>LICENSE.txt</code> in the program folder.</td></tr>
 <tr><td>Platform</td><td>Windows 10/11 on x64 (64-bit Intel or AMD); there is no ARM build. .NET 10 (WPF, self-contained) + Microsoft Edge WebView2</td></tr>
-<tr><td>Project page</td><td>github.com/Gabriel-Castiglia/gryphmark-windows</td></tr>
+<tr><td>Project page</td><td>github.com/Gabriel-Castiglia/vigia-windows</td></tr>
 <tr><td>Editor</td><td>TOAST UI Editor 3.2 (MIT)</td></tr>
 <tr><td>GitHub rendering</td><td>marked (GitHub Flavored Markdown), highlight.js, github-markdown-css (MIT); DOMPurify (MPL-2.0) cleans the HTML</td></tr>
-<tr><td>Icon</td><td>Griffin from Martin Schongauer's engraving (c. 1485), The Metropolitan Museum of Art, CC0; quill added.</td></tr>
-<tr><td>Settings</td><td><code>%APPDATA%\\Gryphmark\\settings.json</code></td></tr>
+<tr><td>Icon</td><td>Lighthouse from Debenne's design for a lighthouse (c. 1815), The Metropolitan Museum of Art, CC0.</td></tr>
+<tr><td>Settings</td><td><code>%APPDATA%\\Vigia\\settings.json</code></td></tr>
 <tr><td>Source code</td><td><code>src/</code> in the project folder; build with <code>build.ps1</code>.</td></tr></table>
 <div class="note">The visual editor normalises some details when it writes Markdown (for example, <code>*</code> lists become
 <code>-</code>). The text and the way GitHub displays it do not change.</div>
@@ -244,27 +244,27 @@ maximized state it had when it was closed (centred if that place is no longer on
   title="Manual de usuario", tag="Escribí Markdown en forma visual. Miralo como en GitHub.", lang="es",
   toc="Contenido",
   sections=[
-   ("Qué es Gryphmark", f"""
-<p><b>Gryphmark</b> es un visor y editor de Markdown para Windows. Das formato con botones —títulos, negrita, listas,
-tablas, código— y Gryphmark escribe por detrás las etiquetas de Markdown. Cada documento se ve exactamente como
+   ("Qué es Vigía", f"""
+<p><b>Vigía</b> es un visor y editor de Markdown para Windows. Das formato con botones —títulos, negrita, listas,
+tablas, código— y Vigía escribe por detrás las etiquetas de Markdown. Cada documento se ve exactamente como
 lo muestra GitHub, con tema claro u oscuro.</p>
 <p>Está pensado para archivos <code>README.md</code>, notas, documentación y cualquier <code>.md</code> que quieras leer o editar
 sin aprenderte la sintaxis.</p>
 <figure><img src="{img('visual_light_es.png')}"><figcaption>Editor visual: formato con la barra de herramientas, sin etiquetas a la vista.</figcaption></figure>
 """),
    ("Instalación", """
-<p>Ejecutá <code>Gryphmark-Setup-{v}.exe</code>. El instalador está en inglés y en español y <b>no</b> pide permisos de
-administrador: instala para el usuario actual en <code>%LOCALAPPDATA%\\Programs\\Gryphmark</code>.</p>
+<p>Ejecutá <code>Vigia-Setup-{v}.exe</code>. El instalador está en inglés y en español y <b>no</b> pide permisos de
+administrador: instala para el usuario actual en <code>%LOCALAPPDATA%\\Programs\\Vigia</code>.</p>
 <table><tr><th>Opción</th><th>Qué hace</th></tr>
-<tr><td>Acceso directo en el escritorio</td><td>Pone el ícono de Gryphmark en el escritorio.</td></tr>
-<tr><td>Abrir los .md con Gryphmark</td><td>Agrega Gryphmark a <i>Abrir con</i> para los .md / .markdown y lo deja como programa para esos archivos en el usuario actual.</td></tr>
-<tr><td>Agregar «Abrir con Gryphmark» a las carpetas</td><td>Clic derecho sobre una carpeta (o sobre el espacio vacío dentro de ella) en el Explorador para abrirla en el panel de archivos. En Windows 11 está en <i>Mostrar más opciones</i>.</td></tr></table>
+<tr><td>Acceso directo en el escritorio</td><td>Pone el ícono de Vigía en el escritorio.</td></tr>
+<tr><td>Abrir los .md con Vigía</td><td>Agrega Vigía a <i>Abrir con</i> para los .md / .markdown y lo deja como programa para esos archivos en el usuario actual.</td></tr>
+<tr><td>Agregar «Abrir con Vigía» a las carpetas</td><td>Clic derecho sobre una carpeta (o sobre el espacio vacío dentro de ella) en el Explorador para abrirla en el panel de archivos. En Windows 11 está en <i>Mostrar más opciones</i>.</td></tr></table>
 <p>Requisitos: Windows 10 u 11 de 64 bits y Microsoft Edge WebView2 Runtime, que ya viene con Windows 11.
 El runtime de .NET va incluido; no hay que instalar nada más.</p>
 <p>Hasta la versión 1.1.1 el programa se llamaba <b>Quillforge</b>. Si esa versión está instalada, el instalador la quita
-y Gryphmark copia su configuración, los recientes y los borradores de recuperación la primera vez que arranca.</p>
-<p>Para desinstalar: <i>Configuración → Aplicaciones → Aplicaciones instaladas → Gryphmark → Desinstalar</i>. La
-configuración en <code>%APPDATA%\\Gryphmark</code> se conserva.</p>
+y Vigía copia su configuración, los recientes y los borradores de recuperación la primera vez que arranca.</p>
+<p>Para desinstalar: <i>Configuración → Aplicaciones → Aplicaciones instaladas → Vigía → Desinstalar</i>. La
+configuración en <code>%APPDATA%\\Vigia</code> se conserva.</p>
 """),
    ("La ventana", """
 <table><tr><th>Parte</th><th>Para qué sirve</th></tr>
@@ -286,17 +286,17 @@ configuración en <code>%APPDATA%\\Gryphmark</code> se conserva.</p>
 <p>Cuando sólo querés leer un documento, elegí <b>Solo lectura</b> en el selector <b>Editar | Solo lectura</b>, a la izquierda de los botones de vista
 (también <i>Ver → Solo lectura</i> o <kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>L</kbd>). El texto queda bloqueado en todas las vistas: las teclas, pegar, arrastrar y soltar
 y las casillas de tareas no hacen nada, y los botones de formato quedan en gris. Igual podés leer, seleccionar, copiar, buscar y cambiar de vista.
-Si escribís, la barra de estado te recuerda cómo desbloquearlo. Elegí <b>Editar</b> para volver a escribir; Gryphmark recuerda tu elección.</p>
+Si escribís, la barra de estado te recuerda cómo desbloquearlo. Elegí <b>Editar</b> para volver a escribir; Vigía recuerda tu elección.</p>
 """),
    ("Carpetas: el panel de archivos", f"""
-<p>Como VS Code u Obsidian, Gryphmark muestra carpetas como árboles a la izquierda: subcarpetas y archivos Markdown
+<p>Como VS Code u Obsidian, Vigía muestra carpetas como árboles a la izquierda: subcarpetas y archivos Markdown
 (<code>.md</code>, <code>.markdown</code>). Podés tener <b>varias carpetas abiertas a la vez</b>; cada una es un bloque con su propio
 color pastel y una franja en el borde izquierdo, así ves de un vistazo dónde termina un árbol y empieza el siguiente. Hacés clic en un archivo y se abre al costado.</p>
 <figure><img src="{img('files_panel_light.png')}" style="width:260px"><figcaption>Dos carpetas abiertas; el archivo abierto queda marcado.</figcaption></figure>
 <figure><img src="{img('files_favorites_es_light.png')}" style="width:260px"><figcaption>Favoritos: una sola lista para todas las carpetas, primera en el panel; un archivo que ya no está se ve en gris.</figcaption></figure>
 <figure><img src="{img('layout_picker_es_light.png')}" style="width:500px"><figcaption>El panel del botón de disposición: todas las disposiciones dibujadas; un clic la aplica.</figcaption></figure>
 <table><tr><th>Acción</th><th>Cómo</th></tr>
-<tr><td>Abrir una carpeta</td><td>El botón <b>+</b> del panel, <i>Archivo → Abrir carpeta…</i>, el botón <b>Abrir carpeta…</b> del panel vacío, arrastrando una carpeta a la ventana, o con clic derecho sobre una carpeta en el Explorador → <i>Abrir con Gryphmark</i> (opción del instalador; en Windows 11 está en <i>Mostrar más opciones</i>). Cada carpeta nueva se agrega debajo de las otras.</td></tr>
+<tr><td>Abrir una carpeta</td><td>El botón <b>+</b> del panel, <i>Archivo → Abrir carpeta…</i>, el botón <b>Abrir carpeta…</b> del panel vacío, arrastrando una carpeta a la ventana, o con clic derecho sobre una carpeta en el Explorador → <i>Abrir con Vigía</i> (opción del instalador; en Windows 11 está en <i>Mostrar más opciones</i>). Cada carpeta nueva se agrega debajo de las otras.</td></tr>
 <tr><td>Mostrar / ocultar el panel</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>E</kbd>, el botón de carpeta a la izquierda de la barra, o <i>Ver → Panel de archivos</i>. Comparte la barra lateral con el esquema: los archivos arriba y el esquema abajo. Arrastrando el borde derecho de la barra se ensancha, y arrastrando la línea entre los dos cambia cuánto alto tiene cada uno; las dos medidas se recuerdan. Cada instancia dedicada recuerda su propia disposición.</td></tr>
 <tr><td>Disposición</td><td>El <b>botón de disposición</b>, en el extremo derecho de la barra, es un dibujito de la disposición actual. Un clic abre un panel con las seis disposiciones dibujadas: archivos e índice a la izquierda (uno arriba del otro o lado a lado), uno a cada lado del texto (en cualquiera de los dos sentidos) o los dos a la derecha. Un clic en un dibujo la aplica en el acto; debajo, <b>Archivos</b> e <b>Índice</b> prenden o apagan cada panel e <b>Intercambiar archivos e índice</b> les cambia el lugar. <i>Ver → Disposición</i> tiene las mismas opciones. Cada disposición recuerda su propio ancho de barra lateral: arrastrás el borde y esa disposición lo guarda.<br>También podés <b>arrastrar un panel de su título</b> (ARCHIVOS, CONTENIDO o BÚSQUEDA) hasta un costado de la ventana: mientras arrastrás se marcan los dos costados y se rellena el lugar que tomaría el panel, con su nombre (<i>Índice a la derecha</i>, <i>Archivos debajo del índice</i>…). Junto al otro panel, la parte de arriba pone el arrastrado encima, la de abajo debajo y el medio al costado. Soltalo para moverlo; si lo soltás en el medio de la ventana o apretás <kbd>Esc</kbd>, todo queda como estaba.</td></tr>
 <tr><td>Recorrer</td><td>Clic en una carpeta la abre o la cierra; clic en un archivo lo abre. <kbd>Enter</kbd> hace lo mismo sobre la fila seleccionada.</td></tr>
@@ -320,15 +320,15 @@ en sí no se renombran ni se mueven desde el árbol, y un nombre que ya existe e
 (por defecto: matices del color elegido en <i>Ver → Tema…</i>), <i>Multicolor</i> (un tono distinto por carpeta) o <i>Sin color</i>;
 una carpeta puede tener su propio color desde su menú de clic derecho.</p>
 <h3>Instancias dedicadas</h3>
-<p>Algunos archivos o carpetas merecen un Gryphmark propio —una lista de pendientes, una wiki— para que nunca se mezclen con el resto.
+<p>Algunos archivos o carpetas merecen un Vigía propio —una lista de pendientes, una wiki— para que nunca se mezclen con el resto.
 Hacé clic derecho sobre un archivo, o sobre el título de una carpeta, y elegí <b>Abrir en una instancia dedicada</b>, o
 <b>Acceso directo en el escritorio (instancia dedicada)</b> para tener un acceso que siempre lo abre así. Una instancia dedicada es una ventana
 aparte con su propia configuración, carpetas abiertas, recientes y tamaño; su nombre aparece en la barra de título. Si la abrís de nuevo, se trae
 al frente esa ventana en lugar de abrir otra. Arranca con el idioma, el tema y el color de la ventana principal. (Técnicamente:
-<code>Gryphmark.exe --profile "Nombre" "ruta"</code>; su configuración está en <code>%APPDATA%\\Gryphmark\\profiles\\Nombre</code>.)</p>
-<p><i>Abrir en otra ventana</i> es distinto: es una ventana extra del Gryphmark principal. Se puede usar sin problema y nunca pisa las
+<code>Vigia.exe --profile "Nombre" "ruta"</code>; su configuración está en <code>%APPDATA%\\Vigia\\profiles\\Nombre</code>.)</p>
+<p><i>Abrir en otra ventana</i> es distinto: es una ventana extra del Vigía principal. Se puede usar sin problema y nunca pisa las
 carpetas abiertas ni el tamaño de la ventana principal.</p>
-<h3>Qué se abre al iniciar Gryphmark</h3>
+<h3>Qué se abre al iniciar Vigía</h3>
 <p>Se elige en <i>Archivo → Carpetas al iniciar</i> o en el botón <b>⋯</b> del panel:</p>
 <table><tr><th>Opción</th><th>Qué pasa</th></tr>
 <tr><td>Reabrir las carpetas de la última sesión</td><td>El panel vuelve tal como lo dejaste (por defecto).</td></tr>
@@ -363,12 +363,12 @@ Las carpetas recientes aparecen en <i>Archivo → Abrir reciente</i>.</p>
 <tr><td>Abrir</td><td><i>Archivo → Abrir</i> (<kbd>Ctrl</kbd>+<kbd>O</kbd>), doble clic en un .md, o arrastrar el archivo a la ventana.</td></tr>
 <tr><td>Recientes</td><td><i>Archivo → Abrir reciente</i> guarda los últimos 12.</td></tr>
 <tr><td>Guardar / Guardar como</td><td><kbd>Ctrl</kbd>+<kbd>S</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>. Los archivos nuevos se guardan en UTF-8 sin BOM, igual que GitHub; los existentes conservan su codificación y finales de línea.</td></tr>
-<tr><td>Nuevo / Nueva ventana</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> empieza un documento vacío; <i>Nueva ventana</i> abre otro Gryphmark.</td></tr>
+<tr><td>Nuevo / Nueva ventana</td><td><kbd>Ctrl</kbd>+<kbd>N</kbd> empieza un documento vacío; <i>Nueva ventana</i> abre otro Vigía.</td></tr>
 <tr><td>Mostrar en la carpeta</td><td>Abre el Explorador con el archivo seleccionado.</td></tr></table>
-<p>El <b>autoguardado</b> viene encendido: un archivo con nombre se guarda solo un momento después de que dejás de escribir, y al cerrarlo o abrir otro se guarda sin preguntar. El interruptor <i>Autoguardado</i> de la barra (también <i>Archivo → Autoguardado</i>) lo apaga; entonces solo Guardar escribe el archivo, y si cerrás un documento con cambios sin guardar, Gryphmark pregunta si querés guardarlos. El autoguardado nunca escribe encima de un cambio hecho por otro programa: Gryphmark pregunta antes. Un documento nuevo se guarda solo cuando ya tiene nombre.</p>
+<p>El <b>autoguardado</b> viene encendido: un archivo con nombre se guarda solo un momento después de que dejás de escribir, y al cerrarlo o abrir otro se guarda sin preguntar. El interruptor <i>Autoguardado</i> de la barra (también <i>Archivo → Autoguardado</i>) lo apaga; entonces solo Guardar escribe el archivo, y si cerrás un documento con cambios sin guardar, Vigía pregunta si querés guardarlos. El autoguardado nunca escribe encima de un cambio hecho por otro programa: Vigía pregunta antes. Un documento nuevo se guarda solo cuando ya tiene nombre.</p>
 <h3>Imágenes y enlaces</h3>
 <p>Las rutas relativas funcionan como en GitHub: <code>![diagrama](img/diagrama.png)</code> muestra la imagen que está junto al .md.
-En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otros <code>.md</code> se abren en Gryphmark y los
+En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otros <code>.md</code> se abren en Vigía y los
 <code>#título</code> saltan dentro del documento.</p>
 """),
    ("Exportar e imprimir", """
@@ -380,18 +380,18 @@ En la vista GitHub, los enlaces web se abren en el navegador, los enlaces a otro
 <tr><td>Buscar / Reemplazar</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd> abren una barra sobre el documento. <kbd>F3</kbd> y <kbd>Mayús</kbd>+<kbd>F3</kbd> saltan entre coincidencias; <kbd>Esc</kbd> la cierra. <i>Aa</i> distingue mayúsculas.</td></tr>
 <tr><td>Esquema</td><td><kbd>Ctrl</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd> o el botón de esquema de la barra muestra los títulos en la barra lateral, debajo de los archivos; un clic salta a ese título. Con el panel de archivos oculto, el esquema ocupa toda la barra. El botón de disposición, <i>Ver → Disposición</i> o arrastrar su título (CONTENIDO) lo ponen al lado de los archivos, encima de ellos o a cualquiera de los dos lados del texto.</td></tr>
 <tr><td>Se respeta tu formato</td><td>Al guardar sólo se reescribe lo que cambiaste, hasta la parte de la línea que tocaste: viñetas, <code>__negrita__</code>, <code>_cursiva_</code>, etiquetas como <code>&lt;kbd&gt;</code>, alineación de tablas, finales de línea (CRLF/LF) y BOM quedan como estaban.</td></tr>
-<tr><td>Cambios externos</td><td>Si otro programa modifica el archivo abierto, Gryphmark lo recarga (o pregunta antes si tenés cambios sin guardar) y marca en verde unos segundos lo que cambió: los párrafos nuevos o reescritos, y en una lista o una tabla solo el punto o la fila que se agregó.</td></tr>
+<tr><td>Cambios externos</td><td>Si otro programa modifica el archivo abierto, Vigía lo recarga (o pregunta antes si tenés cambios sin guardar) y marca en verde unos segundos lo que cambió: los párrafos nuevos o reescritos, y en una lista o una tabla solo el punto o la fila que se agregó.</td></tr>
 <tr><td>Leer el final</td><td>Si estás al final de una vista cuando otro programa agrega texto abajo, la vista baja con lo nuevo. En cualquier otro lugar te quedás donde estabas.</td></tr>
 <tr><td>Ancho del texto</td><td><i>Ver → Ancho del texto</i>: <b>Normal</b> (980 px, como GitHub), <b>Ancho</b> (1280 px), <b>Muy ancho</b> (1600 px) o <b>Toda la ventana</b>, para las vistas Visual y GitHub. La elección se recuerda por perfil; la impresión y las páginas exportadas mantienen el ancho de GitHub.</td></tr>
 <tr><td>Imágenes</td><td>Al lado del documento o en otra carpeta (<code>../img/a.png</code>). En la vista GitHub también con una ruta absoluta (<code>C:\\Imagenes\\a.png</code>, <code>\\\\servidor\\carpeta\\a.png</code>) o una dirección <code>file:</code>, con espacios en la ruta, y como <code>![[imagen.png]]</code> o <code>![[imagen.png|300]]</code>, que se buscan en las carpetas abiertas; <code>![alt|300](a.png)</code> fija el ancho. Una imagen que no se encuentra muestra su nombre en un recuadro punteado; un clic en una imagen la abre en su visor.</td></tr>
 <tr><td>Tablas</td><td>Una ruta, una dirección o un código largo dentro de una celda se corta donde hace falta, así la tabla entra en la columna en vez de quedar detrás de una barra de desplazamiento; las palabras comunes quedan enteras. Una tabla de ocho columnas o más lleva menos relleno.</td></tr>
 <tr><td>Propiedades al principio</td><td>Un bloque entre dos líneas <code>---</code> al comienzo del archivo (front matter, como lo usan GitHub, Jekyll u Obsidian) se muestra como propiedades y no como texto: en la vista Visual, un recuadro gris plegado a sus primeras líneas, que se abre mientras el cursor está adentro; en la vista GitHub, una tabla bajo una línea <b>Propiedades</b>, cerrada hasta que se hace clic. El bloque se guarda exactamente como estaba escrito.</td></tr>
 <tr><td>Enlaces [[nombre]]</td><td>En la vista GitHub, <code>[[nombre]]</code> (también <code>[[nombre|texto]]</code> y <code>[[nombre#título]]</code>) lleva al archivo Markdown de ese nombre en las carpetas abiertas, como en una wiki; gana el más cercano. Un nombre sin archivo sale en rojo. El texto del archivo no cambia.</td></tr>
-<tr><td>Recuperación</td><td>Lo no guardado se respalda cada 20 segundos. Si Gryphmark o Windows se cierran de golpe, al volver a abrir ofrece recuperarlo.</td></tr>
+<tr><td>Recuperación</td><td>Lo no guardado se respalda cada 20 segundos. Si Vigía o Windows se cierran de golpe, al volver a abrir ofrece recuperarlo.</td></tr>
 <tr><td>Ortografía</td><td><i>Ver → Corrector ortográfico</i> subraya las palabras mal escritas, en el idioma de la interfaz (diccionarios de Windows).</td></tr>
-<tr><td>Una sola ventana</td><td>Abrir un .md con Gryphmark ya abierto trae al frente la ventana existente en vez de abrir otra copia. <i>Archivo → Nueva ventana</i> sigue abriendo otra.</td></tr>
-<tr><td>Actualizaciones</td><td>Gryphmark busca una versión nueva una vez por día (una sola vez para todas las instancias dedicadas); <i>Ayuda → Buscar actualizaciones</i> lo hace en el momento. Si hay una, una sola pregunta — <b>Actualizar ahora</b>, <b>Ver novedades</b> o <b>Más tarde</b> — y el resto se hace solo: se descarga el instalador y se lo compara con las sumas de verificación de la versión publicada (si no coincide se borra y nunca se ejecuta), se cierran todas las ventanas de Gryphmark (cada una guarda antes, o pregunta si no puede), la versión nueva se instala en silencio con las mismas opciones y las ventanas se vuelven a abrir, cada una con su perfil y su archivo. Si una ventana no se cierra (porque en su pregunta se eligió <i>Cancelar</i>), no se instala nada y las demás vuelven.</td></tr>
-<tr><td>Acerca de</td><td><i>Ayuda → Acerca de Gryphmark</i> muestra la versión, el autor, la licencia y los créditos. <i>Copiar info</i> copia los datos de versión, útil para reportar un problema.</td></tr>
+<tr><td>Una sola ventana</td><td>Abrir un .md con Vigía ya abierto trae al frente la ventana existente en vez de abrir otra copia. <i>Archivo → Nueva ventana</i> sigue abriendo otra.</td></tr>
+<tr><td>Actualizaciones</td><td>Vigía busca una versión nueva una vez por día (una sola vez para todas las instancias dedicadas); <i>Ayuda → Buscar actualizaciones</i> lo hace en el momento. Si hay una, una sola pregunta — <b>Actualizar ahora</b>, <b>Ver novedades</b> o <b>Más tarde</b> — y el resto se hace solo: se descarga el instalador y se lo compara con las sumas de verificación de la versión publicada (si no coincide se borra y nunca se ejecuta), se cierran todas las ventanas de Vigía (cada una guarda antes, o pregunta si no puede), la versión nueva se instala en silencio con las mismas opciones y las ventanas se vuelven a abrir, cada una con su perfil y su archivo. Si una ventana no se cierra (porque en su pregunta se eligió <i>Cancelar</i>), no se instala nada y las demás vuelven.</td></tr>
+<tr><td>Acerca de</td><td><i>Ayuda → Acerca de Vigía</i> muestra la versión, el autor, la licencia y los créditos. <i>Copiar info</i> copia los datos de versión, útil para reportar un problema.</td></tr>
 <tr><td>Documento de ejemplo</td><td>Un ejemplo que muestra todas las funciones en las tres vistas. Se abre la primera vez que arrancás el programa y desde <i>Ayuda → Documento de ejemplo</i>, y está fijo arriba de todo en <i>Archivo → Abrir reciente</i>; <i>Ocultar ejemplo</i>, justo debajo, lo saca de esa lista, y <i>Ayuda → Mostrar el ejemplo en Abrir reciente</i> lo vuelve a poner. Se abre como copia sin título, así que el original nunca se pisa, y cambia de idioma junto con los menús.</td></tr></table>
 <h3>Extras de GitHub</h3>
 <p>También se muestran igual que en GitHub: avisos (<code>&gt; [!NOTE]</code>, <code>[!TIP]</code>, <code>[!IMPORTANT]</code>, <code>[!WARNING]</code>, <code>[!CAUTION]</code>),
@@ -399,7 +399,7 @@ diagramas <code>```mermaid</code>, fórmulas (<code>$E=mc^2$</code> y <code>$$ �
 """),
    ("Idioma, tema y zoom", f"""
 <p>Menú <b>Idioma</b>: English o Español. Cambia al instante los menús, las ayudas de la barra y los diálogos.
-La primera vez, Gryphmark toma el idioma de Windows.</p>
+La primera vez, Vigía toma el idioma de Windows.</p>
 <p><b>Ver → Tema…</b> abre la ventana de tema. <b>Apariencia</b>: <i>Claro</i>, <i>Oscuro</i> o <i>Automático</i>, que sigue a Windows
 (Configuración → Personalización → Colores) y cambia solo cuando Windows cambia. <b>Color</b>: un catálogo de doce colores para
 el ícono y el resaltado. El color elegido pasa a ser el fondo del ícono en todos lados — ventana, barra de tareas, accesos del
@@ -428,11 +428,11 @@ el estado maximizado que tenía al cerrarla (centrada si ese lugar ya no está e
 <tr><td>Versión</td><td>{v}</td></tr>
 <tr><td>Licencia</td><td>GNU GPL versión 2 únicamente (GPL-2.0-only) — software libre, sin garantía. Texto completo: <code>LICENSE.txt</code> en la carpeta del programa.</td></tr>
 <tr><td>Plataforma</td><td>Windows 10/11 en x64 (Intel o AMD de 64 bits); no hay versión para ARM. .NET 10 (WPF, autónomo) + Microsoft Edge WebView2</td></tr>
-<tr><td>Página del proyecto</td><td>github.com/Gabriel-Castiglia/gryphmark-windows</td></tr>
+<tr><td>Página del proyecto</td><td>github.com/Gabriel-Castiglia/vigia-windows</td></tr>
 <tr><td>Editor</td><td>TOAST UI Editor 3.2 (MIT)</td></tr>
 <tr><td>Render GitHub</td><td>marked (GitHub Flavored Markdown), highlight.js, github-markdown-css (MIT); DOMPurify (MPL-2.0) limpia el HTML</td></tr>
-<tr><td>Ícono</td><td>Grifo del grabado de Martin Schongauer (c. 1485), Museo Metropolitano de Arte, CC0; pluma agregada.</td></tr>
-<tr><td>Configuración</td><td><code>%APPDATA%\\Gryphmark\\settings.json</code></td></tr>
+<tr><td>Ícono</td><td>Faro del proyecto de faro de Debenne (c. 1815), Museo Metropolitano de Arte, CC0.</td></tr>
+<tr><td>Configuración</td><td><code>%APPDATA%\\Vigia\\settings.json</code></td></tr>
 <tr><td>Código fuente</td><td><code>src/</code> en la carpeta del proyecto; se compila con <code>build.ps1</code>.</td></tr></table>
 <div class="note">El editor visual normaliza algunos detalles al escribir el Markdown (por ejemplo, las listas con <code>*</code>
 pasan a <code>-</code>). El texto y cómo lo muestra GitHub no cambian.</div>
@@ -443,12 +443,12 @@ pasan a <code>-</code>). El texto y cómo lo muestra GitHub no cambian.</div>
 for code, d in T.items():
     toc = "".join(f"<div>{i}. {name}</div>" for i, (name, _) in enumerate(d["sections"], 1))
     body = "".join(f"<h2>{i}. {name}</h2>{html.replace('{v}', version)}" for i, (name, html) in enumerate(d["sections"], 1))
-    page = f"""<!doctype html><html lang="{d['lang']}"><head><meta charset="utf-8"><title>Gryphmark — {d['title']}</title><style>{CSS}</style></head>
+    page = f"""<!doctype html><html lang="{d['lang']}"><head><meta charset="utf-8"><title>Vigía — {d['title']}</title><style>{CSS}</style></head>
 <body>
-<div class="cover"><img src="{icon}"><h1>Gryphmark</h1><div class="tag">{d['tag']}</div>
+<div class="cover"><img src="{icon}"><h1>Vigía</h1><div class="tag">{d['tag']}</div>
 <div class="meta">{d['title']} · v{version}<br>© 2026 Gabriel Castiglia</div></div>
 <h2>{d['toc']}</h2><div class="toc">{toc}</div>
 {body}
 </body></html>"""
-    (docs / f"Gryphmark_Manual_{code.upper()}.html").write_text(page, encoding="utf-8")
+    (docs / f"Vigia_Manual_{code.upper()}.html").write_text(page, encoding="utf-8")
 print("ok")

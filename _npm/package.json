@@ -1,7 +1,7 @@
 {
   "name": "_npm",
   "version": "1.0.0",
-  "description": "Web dependencies of Gryphmark, bundled by esbuild (see build.ps1)",
+  "description": "Web dependencies of Vigía, bundled by esbuild (see build.ps1)",
   "author": "Gabriel Castiglia",
   "license": "GPL-2.0-only",
   "type": "commonjs",

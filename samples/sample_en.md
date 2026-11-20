@@ -1,4 +1,4 @@
-# Welcome to Gryphmark
+# Welcome to Vigía
 
 This is a **sample document**. Change it as much as you like: it opens as an untitled copy, so the original is never overwritten. Save it with **Save as** if you want to keep your version.
 
@@ -9,7 +9,7 @@ This is a **sample document**. Change it as much as you like: it opens as an unt
 
 | View | Shortcut | What you see |
 |:--|:--:|:--|
-| **Visual** | `Ctrl+1` | The formatted document. Type and use the buttons; Gryphmark writes the tags. |
+| **Visual** | `Ctrl+1` | The formatted document. Type and use the buttons; Vigía writes the tags. |
 | **Markdown** | `Ctrl+2` | The Markdown text on the left and a live preview on the right. |
 | **GitHub** | `Ctrl+3` | Read-only: the page exactly as GitHub will show it. |
 

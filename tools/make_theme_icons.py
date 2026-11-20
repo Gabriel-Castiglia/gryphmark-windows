@@ -1,11 +1,11 @@
-"""Builds the colour variants of the Gryphmark icon used by the theme catalogue (View -> Theme...).
+"""Builds the colour variants of the Vigía icon used by the theme catalogue (View -> Theme...).
 
 Only the coloured background is recoloured; the cream engraving and its black lines stay as they are.
 Each pixel's weight is its saturation (the background is the only saturated area), and the new colour keeps
 the original pixel's brightness, so anti-aliased edges and texture survive.
 
-Output: src/Gryphmark/icons/gryphmark_<key>.ico (16-256 px), docs/img/theme_icons.png (contact sheet), and
-src/Gryphmark/Gryphmark.ico = the default (gold) variant: exe, installer and shortcuts; assets/gryphmark.png = the
+Output: src/Vigia/icons/vigia_<key>.ico (16-256 px), docs/img/theme_icons.png (contact sheet), and
+src/Vigia/Vigia.ico = the default (gold) variant: exe, installer and shortcuts; assets/vigia.png = the
 same variant at full size, for the README, the manuals and the GitHub profile.
 Keep the keys and colours in sync with Accents.cs.
 Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
@@ -17,8 +17,8 @@ import numpy as np
 from PIL import Image
 
 root = pathlib.Path(__file__).resolve().parents[1]
-src = root / "assets" / "gryphmark_base.png"   # the drawn icon, in the original orange
-out = root / "src" / "Gryphmark" / "icons"
+src = root / "assets" / "vigia_base.png"   # the drawn icon, in the original orange
+out = root / "src" / "Vigia" / "icons"
 out.mkdir(exist_ok=True)
 
 ACCENTS = {               # key: icon background
@@ -52,14 +52,14 @@ for key, hexc in ACCENTS.items():
     new = np.clip(target * shade, 0, 1)
     res = rgb * (1 - w) + new * w
     img = Image.fromarray((np.concatenate([res, a[..., 3:]], -1) * 255).round().astype(np.uint8), "RGBA")
-    img.save(out / f"gryphmark_{key}.ico", sizes=sizes)
+    img.save(out / f"vigia_{key}.ico", sizes=sizes)
     if key == "gold":
-        img.save(root / "assets" / "gryphmark.png", optimize=True)
+        img.save(root / "assets" / "vigia.png", optimize=True)
     tiles.append(img.resize((160, 160), Image.LANCZOS))
     print("ok", key)
 
 import shutil
-shutil.copyfile(out / "gryphmark_gold.ico", root / "src" / "Gryphmark" / "Gryphmark.ico")
+shutil.copyfile(out / "vigia_gold.ico", root / "src" / "Vigia" / "Vigia.ico")
 
 sheet = Image.new("RGBA", (len(tiles) * 176 + 16, 192), (128, 128, 128, 255))
 for i, t in enumerate(tiles):

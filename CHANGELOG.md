@@ -1,19 +1,28 @@
 # Changelog
 
-## 2.2.1 — 2026-11-20
+## 3.0.0 — 2026-11-20
 
-- Search in the folders: a click on a result in the Visual or GitHub view now lands on that very match. The
-  matches are counted in the file's text, and those views hide part of it (link addresses, tags): in a file with
-  the words inside a link address, the click went to a later match. When the view holds another number of matches,
-  the one taken is the one whose paragraph shares most words with that line of the file.
-- Search in the folders: in a line with the words twice, the second result shows the second one in bold (both
-  showed the first).
-- Updates: a window whose close was cancelled during an update (its question answered *Cancel*), or one where the
-  update did not go on, now hears the next update; before, it stopped listening after the first signal and the
-  next update waited two minutes for it and gave up.
-- Updates: the installer's name is checked (letters, digits, dot, hyphen, underscore) before it is saved, and its
-  address must be HTTPS.
-- The find bar no longer moves to the next match when its text is set to the same words from outside.
+**Gryphmark is now Vigía**, a name easier to remember: the one who keeps watch from above, as the app watches a
+Markdown file while an AI writes it. The icon is a lighthouse, from Debenne's design for a lighthouse (c. 1815,
+The Met, CC0). The repository is now `vigia-windows` (GitHub forwards the old address).
+
+- Installing Vigía removes Gryphmark (and Quillforge, if it is still there) in silence. The first time Vigía starts,
+  everything under `%APPDATA%\Gryphmark` comes over to `%APPDATA%\Vigia`: settings, the dedicated instances' profiles,
+  recovery drafts. The old folder is left untouched.
+- The program is `Vigia.exe` in `%LOCALAPPDATA%\Programs\Vigia`; the installer is `Vigia-Setup-<version>.exe`.
+- What 2.2.1 was going to bring is here too:
+  - Search in the folders: a click on a result in the Visual or GitHub view now lands on that very match. The
+    matches are counted in the file's text, and those views hide part of it (link addresses, tags): in a file with
+    the words inside a link address, the click went to a later match. When the view holds another number of matches,
+    the one taken is the one whose paragraph shares most words with that line of the file.
+  - Search in the folders: in a line with the words twice, the second result shows the second one in bold (both
+    showed the first).
+  - Updates: a window whose close was cancelled during an update (its question answered *Cancel*), or one where the
+    update did not go on, now hears the next update; before, it stopped listening after the first signal and the
+    next update waited two minutes for it and gave up.
+  - Updates: the installer's name is checked (letters, digits, dot, hyphen, underscore) before it is saved, and its
+    address must be HTTPS.
+  - The find bar no longer moves to the next match when its text is set to the same words from outside.
 
 ## 2.2.0 — 2026-11-20
 

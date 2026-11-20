@@ -1,0 +1,174 @@
+/* Vigía -- editor page styles.
+   Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
+   Date: November 10, 2026
+   SPDX-License-Identifier: GPL-2.0-only */
+html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+body.light { background: #ffffff; }
+body.dark  { background: #0d1117; }
+
+#editorHost { height: 100%; }
+#previewHost { display: none; height: 100%; overflow: auto; box-sizing: border-box; }
+body.mode-preview #editorHost { display: none; }
+body.mode-preview #previewHost { display: block; }
+
+/* GitHub page layout for the read-only view */
+/* --gm-col: width of the text column (View -> Text width, app.js setWidth); 980 px is GitHub's */
+body { --gm-col: 980px; }
+#preview { box-sizing: border-box; max-width: var(--gm-col); margin: 0 auto; padding: 32px 45px 64px; }
+
+/* Toast UI frame tuned to look like a document, not a widget */
+.toastui-editor-defaultUI { border: none !important; border-radius: 0 !important; }
+/* The toolbar is native (WPF): hide Toast's own */
+.toastui-editor-toolbar, .toastui-editor-mode-switch { display: none !important; }
+.toastui-editor-main { height: 100% !important; }
+
+/* Table right-click menu, kept soft */
+.toastui-editor-context-menu {
+  border: 1px solid #E0E0E5 !important; border-radius: 10px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,.12) !important; overflow: hidden; padding: 4px 0 !important;
+}
+body.dark .toastui-editor-context-menu { border-color: #3A3A3C !important; background: #2A2A2D !important; }
+
+/* Find highlights (CSS Custom Highlight API) */
+::highlight(gm-find) { background-color: rgba(255, 214, 10, .38); }
+::highlight(gm-cur)  { background-color: rgba(255, 159, 10, .85); color: #1d1d1f; }
+body.dark ::highlight(gm-find) { background-color: rgba(255, 214, 10, .28); }
+/* What another program changed, for a few seconds after a reload (app.js markChanges) */
+::highlight(gm-changed) { background-color: rgba(46, 160, 67, .26); }
+::highlight(gm-changed-fade) { background-color: rgba(46, 160, 67, .10); }
+body.dark ::highlight(gm-changed) { background-color: rgba(46, 160, 67, .38); }
+body.dark ::highlight(gm-changed-fade) { background-color: rgba(46, 160, 67, .14); }
+
+/* Task lists in the GitHub view: crisp boxes instead of the greyed-out disabled checkbox */
+#preview .contains-task-list { padding-left: 1.6em; }
+#preview .task-list-item { list-style: none; }
+#preview .task-list-item-checkbox {
+  -webkit-appearance: none; appearance: none; box-sizing: border-box;
+  width: 16px; height: 16px; margin: 0 .5em .2em -1.6em; vertical-align: middle;
+  border: 1.5px solid #8c959f; border-radius: 4px; background: #fff;
+  display: inline-grid; place-content: center; opacity: 1; cursor: default;
+}
+#preview .task-list-item-checkbox:checked { background: #1f883d; border-color: #1f883d; }
+#preview .task-list-item-checkbox:checked::before {
+  content: ""; width: 9px; height: 5px; margin-top: -2px;
+  border: solid #fff; border-width: 0 0 2px 2px; transform: rotate(-45deg);
+}
+#preview .task-list-item.checked { color: var(--fgColor-muted, #59636e); }
+body.dark #preview .task-list-item-checkbox { background: #0d1117; border-color: #6e7681; }
+body.dark #preview .task-list-item-checkbox:checked { background: #238636; border-color: #238636; }
+body.dark #preview .task-list-item.checked { color: var(--fgColor-muted, #9198a1); }
+
+/* Mermaid diagrams centred like on GitHub */
+.markdown-body pre.mermaid { background: transparent; text-align: center; }
+
+/* Quiet scrollbars */
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,.18); border-radius: 6px; border: 3px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background-color: rgba(0,0,0,.32); }
+body.dark ::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,.18); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Visual editor page: same column and spacing as github.com. This element is the one that scrolls,
+   so it fills the view and its scrollbar sits at the window's edge; the 980 px column comes from the
+   side padding. With max-width the scrollbar stood at the column's edge, far inside a wide window. */
+.toastui-editor-ww-container .toastui-editor-contents.markdown-body {
+  margin: 0; padding: 24px max(45px, calc(50% - var(--gm-col) / 2 + 45px)) 64px; box-sizing: border-box;
+  font-size: 16px; line-height: 1.5;
+}
+/* Toast's own colours lose to GitHub's inside documents */
+.toastui-editor-contents.markdown-body p,
+.toastui-editor-contents.markdown-body li,
+.toastui-editor-contents.markdown-body ul,
+.toastui-editor-contents.markdown-body ol,
+.toastui-editor-contents.markdown-body table,
+.toastui-editor-contents.markdown-body td { color: inherit; }
+.toastui-editor-contents.markdown-body h1,
+.toastui-editor-contents.markdown-body h2 { border-bottom: 1px solid var(--borderColor-muted, #d1d9e0b3); }
+.toastui-editor-contents.markdown-body h1 { font-size: 2em; margin: .67em 0; padding-bottom: .3em; }
+.toastui-editor-contents.markdown-body h2 { font-size: 1.5em; padding-bottom: .3em; }
+.toastui-editor-contents.markdown-body h3 { font-size: 1.25em; border: none; }
+.toastui-editor-contents.markdown-body h4 { font-size: 1em; border: none; }
+.toastui-editor-contents.markdown-body h5 { font-size: .875em; border: none; }
+.toastui-editor-contents.markdown-body h6 { font-size: .85em; border: none; }
+.toastui-editor-contents.markdown-body blockquote { border-left: .25em solid var(--borderColor-default, #d1d9e0); color: var(--fgColor-muted, #59636e); padding: 0 1em; margin: 0 0 16px; }
+.toastui-editor-contents.markdown-body blockquote p { color: inherit; }
+.toastui-editor-contents.markdown-body table td,
+.toastui-editor-contents.markdown-body table th { border: 1px solid var(--borderColor-default, #d1d9e0); padding: 6px 13px; }
+.toastui-editor-contents.markdown-body table th,
+.toastui-editor-contents.markdown-body table th p { background: transparent; color: inherit; font-weight: 600; }
+.toastui-editor-contents.markdown-body code { background: var(--bgColor-neutral-muted, #818b981f); color: inherit; border-radius: 6px; padding: .2em .4em; font-size: 85%; }
+.toastui-editor-contents.markdown-body pre { background: var(--bgColor-muted, #f6f8fa); border-radius: 6px; padding: 16px; font-size: 13.6px; line-height: 1.45; }
+.toastui-editor-contents.markdown-body pre code { background: transparent; padding: 0; font-size: 100%; }
+/* The document's text colour, which lists and tables inherit. Toast colours lists and tables a
+   dark grey that its dark theme does not change, so in the dark visual view list items and table
+   headers stayed almost black on the dark page. */
+.toastui-editor-contents.markdown-body { color: #1f2328; }
+body.dark .toastui-editor-contents.markdown-body { background: #0d1117; color: #f0f6fc; }
+body.dark .toastui-editor-dark .toastui-editor-ww-container,
+body.dark .toastui-editor-dark .toastui-editor-md-container { background: #0d1117; }
+
+@media print {
+  #editorHost { display: none !important; }
+  #previewHost { display: block !important; overflow: visible; height: auto; }
+  #preview { padding: 0; max-width: none; }
+  html, body { overflow: visible; height: auto; }
+}
+
+/* [[name]] links of the GitHub view; a missing one is red and dashed */
+#preview a.wikilink { text-decoration: none; border-bottom: 1px dotted currentColor; }
+#preview a.wikilink:hover { border-bottom-style: solid; }
+#preview a.wikilink.missing { color: #cf222e; border-bottom: 1px dashed currentColor; cursor: help; }
+body.dark #preview a.wikilink.missing { color: #ff7b72; }
+
+/* The editor library failed on this text: a notice instead of a blank view (app.js editorFailed) */
+#editorError { display: none; margin: 24px; padding: 12px 16px; border-radius: 6px; font: 14px/1.5 -apple-system, "Segoe UI", sans-serif;
+  border: 1px solid #d4a72c; background: #fff8c5; color: #3b2300; }
+body.dark #editorError { border-color: #9e6a03; background: #2d2208; color: #f0d68a; }
+body.editor-broken:not(.mode-preview) #editorError { display: block; }
+
+/* Tables fit the column instead of hiding behind a scrollbar: a long path, address or piece of code inside a cell
+   breaks where it has to (plain words stay whole), so the columns can share the width. Measured on 58 notes with
+   such tables: 6 scrolled in a 1200 px window and 8 in an 800 px one (up to 427 px too wide). The scrollbar stays
+   as a last resort, for a table of many columns. Same rule in the Visual and GitHub views. */
+.markdown-body td code, .markdown-body th code, .markdown-body td a, .markdown-body th a { overflow-wrap: anywhere; }
+/* A table of eight columns or more takes less padding in its cells (6 px instead of 13 at each side): a 20-column
+   table spent 520 px on padding alone. */
+.markdown-body table:has(tr > :nth-child(8)) th, .markdown-body table:has(tr > :nth-child(8)) td,
+.toastui-editor-contents.markdown-body table:has(tr > :nth-child(8)) th,
+.toastui-editor-contents.markdown-body table:has(tr > :nth-child(8)) td { padding: 4px 6px; }
+
+/* Pictures of the GitHub view: a click opens one in its viewer, and one that cannot be found is a dashed box with its
+   name instead of a broken icon (app.js watchImages). */
+#preview img:not(a img) { cursor: zoom-in; }
+#preview .gm-img-missing { display: inline-block; padding: 2px 8px; border: 1px dashed #cf222e; border-radius: 6px; color: #cf222e; font-size: 13px; }
+body.dark #preview .gm-img-missing { border-color: #ff7b72; color: #ff7b72; }
+
+/* Properties at the top of a file (front matter). Visual view: folded to its first lines, in grey, and open
+   while the cursor is in it (body.gm-fm-open, app.js foldFrontMatter). */
+.toastui-editor-ww-container [data-front-matter] {
+  position: relative; margin: 0 0 16px; padding: 8px 12px; border-radius: 6px;
+  font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+  color: #59636e; background: #f6f8fa; border: 1px solid #d1d9e0;
+  white-space: pre; overflow: hidden; max-height: calc(4 * 1.5em); cursor: text;
+}
+.toastui-editor-ww-container [data-front-matter]::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2.2em; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(246, 248, 250, 0), #f6f8fa);
+}
+body.gm-fm-open .toastui-editor-ww-container [data-front-matter] { white-space: pre-wrap; word-break: break-word; max-height: none; }
+body.gm-fm-open .toastui-editor-ww-container [data-front-matter]::after { display: none; }
+body.dark .toastui-editor-ww-container [data-front-matter] { color: #9198a1; background: #151b23; border-color: #3d444d; }
+body.dark .toastui-editor-ww-container [data-front-matter]::after { background: linear-gradient(to bottom, rgba(21, 27, 35, 0), #151b23); }
+
+/* GitHub view: the properties as a table under a folded "Properties" line */
+.markdown-body details.gm-frontmatter { margin: 0 0 16px; padding: 6px 12px; border: 1px solid #d1d9e0; border-radius: 6px; background: #f6f8fa; font-size: 13px; }
+.markdown-body details.gm-frontmatter > summary { cursor: pointer; color: #59636e; font-weight: 600; }
+.markdown-body details.gm-frontmatter > summary span { font-weight: 400; margin-left: .4em; }
+.markdown-body details.gm-frontmatter[open] > summary { margin-bottom: 8px; }
+.markdown-body details.gm-frontmatter table { display: table; width: 100%; margin: 0; font-size: 12px; }
+.markdown-body details.gm-frontmatter th { text-align: left; vertical-align: top; white-space: nowrap; width: 1%; }
+.markdown-body details.gm-frontmatter td { word-break: break-word; }
+.markdown-body details.gm-frontmatter td table { margin-top: 4px; }
+.markdown-body details.gm-frontmatter ul { margin: 0; }
+body.dark .markdown-body details.gm-frontmatter { border-color: #3d444d; background: #151b23; }
+body.dark .markdown-body details.gm-frontmatter > summary { color: #9198a1; }
