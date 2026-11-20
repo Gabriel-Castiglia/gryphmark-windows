@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.1.0 — 2026-11-20
+
+- Panes go anywhere. Files and Outline can each sit on the left or on the right of the text; on the same side,
+  one above the other or side by side, in either order. Six layouts in all, up from three.
+- A layout button at the right end of the toolbar, drawn as the current layout. A click opens a panel with every
+  layout drawn: a click on one applies it at once; below, Files and Outline on or off and *Swap Files and Outline*.
+  *View → Layout* has the same choices.
+- Drag a pane by its title (FILES or CONTENTS) to an edge of the window. While dragging, both edges are outlined
+  and the place the pane would take is filled in with its name; near the other pane, the upper part puts it above,
+  the lower part below and the middle beside it. Letting go in the middle of the window, or Esc, changes nothing.
+  The text is a browser window that WPF cannot draw over, so the guide is a see-through window of its own.
+  A 2.0 layout is carried over as it was.
+- Favourites. A star at the right of each file row (faint on hover, golden when on), right-click → *Add to
+  favourites*, or *File → Favourite* for the open file. The favourites make one list for every open folder, the
+  first block of the Files panel, with each file's folder in grey; they can be moved up or down, sorted A → Z,
+  cleaned of files that are gone, or emptied. A favourite renamed or moved from the panel follows its file.
+- Updates install themselves. *Help → Check for updates* (and the daily check, now once a day for all the
+  dedicated instances) asks once — *Update now*, *What's new* or *Later* — and then: the installer is downloaded
+  and checked against the release's `SHA256SUMS.txt` (one that does not match is deleted, never run); every
+  Gryphmark window closes, saving first or asking as when closed by hand; the installer runs in silence keeping the
+  install options, waits for the last window to be gone, and opens every window again with its profile and its
+  file. A window that does not close stops the update, and the windows that had closed come back.
+- `--render-chrome` uses a throw-away profile: its pictures no longer change the user's own settings.
+
 ## 2.0.0 — 2026-11-16
 
 Windows and macOS now share one version number: this is 2.0.0 on both.

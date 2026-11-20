@@ -35,7 +35,8 @@ follows tools that save by writing a new file and renaming it over the old one.
 - **Dedicated instances**: open a file or folder in its own Gryphmark, separate from the main window (`--profile "Name"`, or right-click in the Files panel → desktop shortcut)
 - **Zoom bar** in the status bar (also `Ctrl` + mouse wheel); on a narrow window the buttons that do not fit go into a ⋯ menu
 - Find & replace, spell check; a sidebar with the files above and the outline below, as on the Mac (drag its edge and the line between them)
-- Layouts and text width: *View → Layout* puts the files and the outline side by side, or the outline on the right of the text; *View → Text width* widens the column up to the whole window
+- **Layouts**: the files and the outline go on either side of the text, one above the other or side by side; pick one from the drawings behind the layout button of the toolbar (or *View → Layout*), or drag a pane by its title to an edge of the window. *View → Text width* widens the column up to the whole window
+- **Favourites**: a star on each file row puts it in one list for all the open folders, at the top of the Files panel
 - Rename and move files and folders from the Files panel (`F2`, or drag them with the padlock open), with undo and redo; the open document follows its file
 - Properties at the top of a file (front matter) shown as a folded box and as a table, saved as written
 - **Convert to TXT**: right-click a file in the Files panel; a .txt is written next to it, as the document reads in the GitHub view, and the Markdown file is not changed
@@ -43,12 +44,12 @@ follows tools that save by writing a new file and renaming it over the old one.
 - Keeps your formatting: only what you edit changes on save, down to the part of a line you touched (CRLF/BOM preserved)
 - **[[name]] links** in the GitHub view open the Markdown file of that name in the open folders, as in a wiki (a missing one is red), as on the Mac
 - Links in a document open only web pages, e-mail, other Markdown files, pictures and PDFs; a link to any other file shows it in Explorer instead of running it
-- Crash recovery, single instance, update check
+- Crash recovery, single instance, and **updates that install themselves** (checked against the release's SHA-256, every open window reopened afterwards)
 - Export to self-contained HTML, print / save as PDF
 - Per-user installer (no admin rights), optional `.md` association
 - Manuals: [`docs/Gryphmark_Manual_EN.pdf`](docs/Gryphmark_Manual_EN.pdf)
 
-**Build** (on Windows x64): .NET 10 SDK, Node.js with npm, Inno Setup 6 and a Chromium browser (Edge, Chrome or
+**Build** (on Windows x64): .NET 10 SDK or later, Node.js with npm, Inno Setup 6 and a Chromium browser (Edge, Chrome or
 Brave) to print the manuals. The version is written only in `<Version>` of `src/Gryphmark/Gryphmark.csproj`.
 
 ```powershell
@@ -89,7 +90,8 @@ que guardan escribiendo un archivo nuevo y renombrándolo encima del viejo.
 - **Instancias dedicadas**: abrir un archivo o una carpeta en su propio Gryphmark, separado de la ventana principal (`--profile "Nombre"`, o clic derecho en el panel de archivos → acceso directo en el escritorio)
 - **Barra de zoom** en la barra de estado (también `Ctrl` + rueda del mouse); con la ventana angosta, los botones que no entran van a un menú ⋯
 - Buscar y reemplazar, revisión ortográfica; una barra lateral con los archivos arriba y el esquema abajo, como en la Mac (se arrastran su borde y la línea entre los dos)
-- Disposición y ancho del texto: *Ver → Disposición* pone los archivos y el esquema lado a lado, o el esquema a la derecha del texto; *Ver → Ancho del texto* ensancha la columna hasta toda la ventana
+- **Disposición**: los archivos y el esquema van a cualquiera de los dos lados del texto, uno arriba del otro o lado a lado; se elige con los dibujos del botón de disposición de la barra (o *Ver → Disposición*), o arrastrando un panel de su título hasta un costado de la ventana. *Ver → Ancho del texto* ensancha la columna hasta toda la ventana
+- **Favoritos**: una estrella en cada archivo lo suma a una sola lista para todas las carpetas abiertas, arriba del panel de archivos
 - Cambiar nombre y mover archivos y carpetas desde el panel de archivos (`F2`, o arrastrándolos con el candado abierto), con deshacer y rehacer; el documento abierto sigue a su archivo
 - Propiedades al principio de un archivo (front matter) como un recuadro plegado y como una tabla, guardadas tal como estaban
 - **Convertir a TXT**: clic derecho en un archivo del panel de archivos; se escribe un .txt al lado, como se lee el documento en la vista GitHub, y el archivo Markdown no cambia
@@ -97,12 +99,12 @@ que guardan escribiendo un archivo nuevo y renombrándolo encima del viejo.
 - Respeta tu formato: al guardar solo cambia lo que editaste, hasta la parte de la línea que tocaste (conserva CRLF/BOM)
 - Enlaces `[[nombre]]` en la vista GitHub: abren el archivo Markdown de ese nombre en las carpetas abiertas, como en una wiki (uno que falta se ve en rojo), como en la Mac
 - Los enlaces de un documento solo abren páginas web, correo, otros archivos Markdown, imágenes y PDF; un enlace a cualquier otro archivo lo muestra en el Explorador en vez de ejecutarlo
-- Recuperación ante cierres, instancia única, aviso de actualizaciones
+- Recuperación ante cierres, instancia única y **actualizaciones que se instalan solas** (verificadas contra el SHA-256 de la versión publicada; las ventanas abiertas se vuelven a abrir al terminar)
 - Exportar a HTML autónomo, imprimir o guardar como PDF
 - Instalador por usuario (sin permisos de administrador), asociación opcional de `.md`
 - Manuales: [`docs/Gryphmark_Manual_ES.pdf`](docs/Gryphmark_Manual_ES.pdf)
 
-**Compilar** (en Windows x64): SDK de .NET 10, Node.js con npm, Inno Setup 6 y un navegador Chromium (Edge, Chrome
+**Compilar** (en Windows x64): SDK de .NET 10 o posterior, Node.js con npm, Inno Setup 6 y un navegador Chromium (Edge, Chrome
 o Brave) para imprimir los manuales. La versión se escribe solo en `<Version>` de `src/Gryphmark/Gryphmark.csproj`.
 
 ```powershell
@@ -130,17 +132,17 @@ configuración se copia sola.
 
 ## Build tools / Herramientas de compilación
 
-Gryphmark 1.9.0 was built and tested with / se compiló y probó con:
+Gryphmark 2.1.0 was built and tested with / se compiló y probó con:
 
 | Tool | Version |
 |---|---|
 | Windows 11 Pro | x64 |
-| .NET SDK / runtime (self-contained) | 10.0.404 / 10.0.15 |
-| Microsoft.Web.WebView2 (NuGet) | 1.0.2903.40 |
-| Node.js / npm | 26.12.1 / 11.20.0 |
+| .NET SDK / runtime (self-contained, net10.0-windows) | 11.0.100 / 10.0.15 |
+| Microsoft.Web.WebView2 (NuGet) | 1.0.4314.35 |
+| Node.js / npm (web bundle, unchanged since 2.0.0) | 26.12.1 / 11.20.0 |
 | esbuild | 0.25.5 |
 | Inno Setup | 6.7.3 |
-| Google Chrome (manual PDFs) | 157.0.8103.51 |
+| Microsoft Edge (manual PDFs) | 157.0.4341.60 |
 | Python (`-Art` only) | 3.13.17, Pillow 12.3.0, numpy 2.5.4, scipy 1.18.1, opencv-python 5.0.0 |
 
 Web libraries / Bibliotecas web (exact versions in `_npm/package-lock.json`): TOAST UI Editor 3.2.2,

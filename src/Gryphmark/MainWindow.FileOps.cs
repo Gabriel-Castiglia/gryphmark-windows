@@ -121,14 +121,14 @@ public partial class MainWindow
             string.Equals(p, from, StringComparison.OrdinalIgnoreCase) ? to
             : isDir && IsUnder(p, from) ? to + p[from.Length..] : p;
         bool changed = false;
-        foreach (var list in new[] { _settings.Recent, _settings.RecentFolders })
+        foreach (var list in new[] { _settings.Recent, _settings.RecentFolders, _settings.FavoriteFiles })
             for (int i = 0; i < list.Count; i++)
             {
                 var m = Map(list[i]);
                 if (!ReferenceEquals(m, list[i])) { list[i] = m; changed = true; }
             }
         if (!changed) return;
-        foreach (var list in new[] { _settings.Recent, _settings.RecentFolders })
+        foreach (var list in new[] { _settings.Recent, _settings.RecentFolders, _settings.FavoriteFiles })
         {
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             list.RemoveAll(p => !seen.Add(p));
@@ -161,7 +161,7 @@ public partial class MainWindow
     }
 
     // ------------------------------------------------------------------ rename (F2 / right-click)
-    private bool CanEditNode(string path) => !_roots.Contains(path, PathCmp);
+    private bool CanEditNode(string path) => path != FavTag && !_roots.Contains(path, PathCmp);
 
     private async void RenameNode(string path)
     {

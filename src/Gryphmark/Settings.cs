@@ -41,10 +41,18 @@ public sealed class Settings
     public double OutlineShare { get; set; } = 0.45;    // part of the sidebar's height for Contents when both show
     public bool TreeLocked { get; set; } = true;        // unlocked: files and folders can be dragged in the tree (moved on disk)
     public int TextWidth { get; set; } = 980;           // text column in px (980 = GitHub's); 0 = the whole window
-    public string SideLayout { get; set; } = "stacked"; // stacked | columns (Files | Contents) | right (Contents right of the text)
+    /// <summary>2.0: stacked | columns | right. From 2.1 the layout is the four values below; an old value is
+    /// turned into them once at start (MainWindow.Layout.cs) and this is left empty.</summary>
+    public string SideLayout { get; set; } = "stacked";
+    public string FilesSide { get; set; } = "left";     // left | right of the text
+    public string OutlineSide { get; set; } = "left";   // left | right of the text
+    public string SideArrange { get; set; } = "rows";   // both on one side: rows (one above the other) | cols (side by side)
+    public bool OutlineFirst { get; set; }              // both on one side: Contents above / to the left of Files
     public double SideWidthColumns { get; set; } = 520; // sidebar width when Files and Contents sit side by side
     public double OutlineShareColumns { get; set; } = 0.45; // part of that width for Contents
-    public double OutlineWidthRight { get; set; } = 260; // width of Contents on the right
+    public double OutlineWidthRight { get; set; } = 260; // width of the right sidebar with one pane
+    /// <summary>Favourite files: one list for all the open folders, shown above the trees (MainWindow.Favorites.cs).</summary>
+    public List<string> FavoriteFiles { get; set; } = new();
     public double Width { get; set; } = 1200;
     public double Height { get; set; } = 820;
     public bool Maximized { get; set; }

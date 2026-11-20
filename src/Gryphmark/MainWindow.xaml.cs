@@ -56,6 +56,7 @@ public partial class MainWindow : Window
         Loaded += async (_, _) => await InitWebAsync();
         Closing += OnClosing;
         InitFeatures();
+        InitUpdate();
         InitFit();
         InitFolder(startFolder);
         PreviewKeyDown += OnKey;
@@ -634,7 +635,7 @@ public partial class MainWindow : Window
         ["Task"] = "", ["CodeBlock"] = "", ["Hr"] = "",
         ["ModeVisual"] = "", ["ModeSource"] = "", ["ModePreview"] = "",
         ["Dark"] = "", ["ZoomIn"] = "", ["ZoomOut"] = "", ["ZoomReset"] = "",
-        ["AutoSave"] = "\uE895",
+        ["AutoSave"] = "\uE895", ["FavCurrent"] = "\uE734",
         ["OpenDir"] = "\uE838", ["Files"] = "\uE8B7", ["CloseDir"] = "\uE711", ["Sample"] = "\uE736", ["Manual"] = "", ["Guide"] = "", ["About"] = "",
         ["Find"] = "", ["Replace"] = "", ["FindNext"] = "", ["Outline"] = "", ["CheckUpdates"] = "", ["RecentClear"] = "",
     };
@@ -713,6 +714,8 @@ public partial class MainWindow : Window
         }
         file.Items.Add(recent);
         file.Items.Add(Item("CloseDir", null, () => { CloseAllFolders(); return Task.CompletedTask; }, enabled: _roots.Count > 0));
+        file.Items.Add(Item("FavCurrent", null, () => { if (_path != null) ToggleFavorite(_path); return Task.CompletedTask; },
+            _path != null && IsFavorite(_path), enabled: _path != null));
         var startup = new MenuItem { Header = Strings.Get("StartupMenu") };
         foreach (var mi in StartupItems()) startup.Items.Add(mi);
         file.Items.Add(startup);
@@ -777,11 +780,7 @@ public partial class MainWindow : Window
         view.Items.Add(new Separator());
         view.Items.Add(Item("Files", ctrl + "Shift+E", () => { ToggleFiles(); return Task.CompletedTask; }, _settings.FilesPanel));
         view.Items.Add(Item("Outline", ctrl + "Shift+O", () => { ToggleOutline(); return Task.CompletedTask; }, _settings.Outline));
-        var layoutMenu = new MenuItem { Header = Strings.Get("Layout") };
-        foreach (var (key, code) in new[] { ("LayoutStacked", "stacked"), ("LayoutColumns", "columns"), ("LayoutRight", "right") })
-            layoutMenu.Items.Add(Item(key, null, () => { SetSideLayout(code); return Task.CompletedTask; },
-                (_settings.SideLayout is "columns" or "right" ? _settings.SideLayout : "stacked") == code));
-        view.Items.Add(layoutMenu);
+        view.Items.Add(LayoutMenu());
         var widthMenu = new MenuItem { Header = Strings.Get("TextWidth") };
         foreach (var (key, px) in new[] { ("WidthNormal", 980), ("WidthWide", 1280), ("WidthWider", 1600), ("WidthFull", 0) })
             widthMenu.Items.Add(Item(key, null, async () =>
@@ -830,6 +829,7 @@ public partial class MainWindow : Window
         MainMenu.Items.Add(help);
 
         BuildToolbar();
+        if (_folderInit) ApplySideLayout();   // the layout button's drawing follows the theme colour
         InputBindings.Clear();
         var f1 = new KeyBinding(new RelayCommand(OpenManual), Key.F1, ModifierKeys.None);
         InputBindings.Add(f1);

@@ -54,25 +54,72 @@ public partial class MainWindow
             await SetReadOnly(false); await SetMode("visual");
 
             // the sidebar: Files above Contents in one column, as on the Mac
-            _settings.FilesPanel = true; _settings.Outline = true; ApplySideLayout(); UpdateLayout();
+            _settings.FilesPanel = true; _settings.Outline = true;
+            SetLayout("left", "left", "rows", false); UpdateLayout();
             var f = FilesPane.TranslatePoint(new Point(0, 0), this); var o = OutlinePane.TranslatePoint(new Point(0, 0), this);
+            var w = Web.TranslatePoint(new Point(0, 0), this);
             Check("sidebar: Files above Contents, same column and width",
-                  f.Y < o.Y && Math.Abs(f.X - o.X) < 1 && Math.Abs(FilesPane.ActualWidth - OutlinePane.ActualWidth) < 1 && FilesPane.ActualHeight > 50,
+                  f.Y < o.Y && Math.Abs(f.X - o.X) < 1 && Math.Abs(FilesPane.ActualWidth - OutlinePane.ActualWidth) < 1 && FilesPane.ActualHeight > 50 && o.X < w.X,
                   $"files {f} {FilesPane.ActualWidth}x{FilesPane.ActualHeight}, outline {o} {OutlinePane.ActualWidth}");
 
-            // the other two layouts: side by side, and Contents on the right of the text
-            var savedLayout = _settings.SideLayout;
-            _settings.SideLayout = "columns"; ApplySideLayout(); UpdateLayout();
-            f = FilesPane.TranslatePoint(new Point(0, 0), this); o = OutlinePane.TranslatePoint(new Point(0, 0), this);
-            var w = Web.TranslatePoint(new Point(0, 0), this);
-            Check("layout columns: Files | Contents | text", Math.Abs(f.Y - o.Y) < 1 && f.X < o.X && o.X < w.X && OutlinePane.ActualWidth > 100,
-                  $"files {f}, outline {o} {OutlinePane.ActualWidth}, web {w}");
-            _settings.SideLayout = "right"; ApplySideLayout(); UpdateLayout();
-            f = FilesPane.TranslatePoint(new Point(0, 0), this); o = OutlinePane.TranslatePoint(new Point(0, 0), this);
-            w = Web.TranslatePoint(new Point(0, 0), this);
-            Check("layout right: Files | text | Contents", f.X < w.X && w.X < o.X && OutlinePane.ActualWidth > 100,
-                  $"files {f}, web {w}, outline {o} {OutlinePane.ActualWidth}");
-            _settings.SideLayout = savedLayout; ApplySideLayout(); UpdateLayout();
+            // every other layout, measured: where each pane ends up against the text
+            (Point F, Point O, Point W) Measure(string fs, string os, string arr, bool of)
+            {
+                SetLayout(fs, os, arr, of); UpdateLayout();
+                return (FilesPane.TranslatePoint(new Point(0, 0), this), OutlinePane.TranslatePoint(new Point(0, 0), this), Web.TranslatePoint(new Point(0, 0), this));
+            }
+            var m = Measure("left", "left", "cols", false);
+            Check("layout: Files | Contents | text", Math.Abs(m.F.Y - m.O.Y) < 1 && m.F.X < m.O.X && m.O.X < m.W.X && OutlinePane.ActualWidth > 100, $"{m}");
+            m = Measure("left", "left", "rows", true);
+            Check("layout: Contents above Files (swapped)", m.O.Y < m.F.Y && Math.Abs(m.F.X - m.O.X) < 1 && m.F.X < m.W.X, $"{m}");
+            m = Measure("left", "right", "rows", false);
+            Check("layout: Files | text | Contents", m.F.X < m.W.X && m.W.X < m.O.X && OutlinePane.ActualWidth > 100, $"{m}");
+            m = Measure("right", "left", "rows", false);
+            Check("layout: Contents | text | Files", m.O.X < m.W.X && m.W.X < m.F.X && FilesPane.ActualWidth > 100, $"{m}");
+            m = Measure("right", "right", "rows", false);
+            Check("layout: text | Files above Contents", m.W.X < m.F.X && m.F.Y < m.O.Y && Math.Abs(m.F.X - m.O.X) < 1 && SideColumn.ActualWidth == 0, $"{m}");
+            m = Measure("right", "right", "cols", true);
+            Check("layout: text | Contents | Files", m.W.X < m.O.X && m.O.X < m.F.X && Math.Abs(m.F.Y - m.O.Y) < 1, $"{m}");
+            _settings.Outline = false;
+            m = Measure("left", "right", "rows", false);
+            Check("layout: a pane that is off takes no room", RightColumn.ActualWidth == 0 && OutlinePane.Visibility != Visibility.Visible && m.F.X < m.W.X, $"right {RightColumn.ActualWidth}");
+            _settings.Outline = true;
+            // dragging a pane by its title: the place under the pointer
+            SetLayout("left", "left", "rows", false); UpdateLayout();
+            double bw = BodyGrid.ActualWidth, bh = BodyGrid.ActualHeight;
+            _dockPane = OutlinePane;
+            var t1 = DockTargetAt(new Point(bw - 20, bh / 2)); var t2 = DockTargetAt(new Point(bw / 2, bh / 2));
+            _dockPane = FilesPane;
+            var t3 = DockTargetAt(new Point(20, bh * 0.9)); var t4 = DockTargetAt(new Point(20, bh / 2));
+            _dockPane = null;
+            Check("drag a pane: right edge, middle (nothing), below and beside the other pane",
+                  t1 is { Side: "right", Arrange: null } && t2 == null && t3 is { Side: "left", Arrange: "rows", PaneFirst: false } && t4 is { Side: "left", Arrange: "cols", PaneFirst: true },
+                  $"{t1} | {t2} | {t3} | {t4}");
+            SetLayout("left", "left", "rows", false); UpdateLayout();
+
+            // favourites: one list for every tree, first block of the panel, following a rename
+            var favDir = Path.Combine(tmp, "fav"); Directory.CreateDirectory(favDir);
+            var fa = Path.Combine(favDir, "a.md"); File.WriteAllText(fa, "# A\n");
+            OpenFolder(favDir, showPanel: true);
+            _settings.FavoriteFiles.Clear();
+            ToggleFavorite(fa);
+            var firstBlock = FilesTree.Items.OfType<System.Windows.Controls.TreeViewItem>().FirstOrDefault();
+            Check("favourites: the starred file shows in the first block", firstBlock?.Tag as string == FavTag
+                  && firstBlock.Items.OfType<System.Windows.Controls.TreeViewItem>().Any(i => i.Tag as string == fa), $"first {firstBlock?.Tag}");
+            var fb = Path.Combine(favDir, "b.md");
+            await MovePath(fa, fb, false);
+            Check("favourites: follow a rename", _settings.FavoriteFiles.Contains(fb, StringComparer.OrdinalIgnoreCase) && !_settings.FavoriteFiles.Contains(fa, StringComparer.OrdinalIgnoreCase),
+                  string.Join(" | ", _settings.FavoriteFiles));
+            ToggleFavorite(fb);
+            Check("favourites: the block goes when the list is empty", _settings.FavoriteFiles.Count == 0
+                  && FilesTree.Items.OfType<System.Windows.Controls.TreeViewItem>().All(i => i.Tag as string != FavTag), "");
+
+            // updates: versions and the checksum file
+            var sums = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789ABCDEF  Gryphmark-Setup-9.9.9.exe\n"
+                     + "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff *Gryphmark_Manual_EN.pdf\n";
+            Check("updates: newer versions and checksums", IsNewer("v2.1.0", "2.0.9") && !IsNewer("2.0.0", "2.0.0") && !IsNewer("x", "1.0.0")
+                  && HashFor(sums, "Gryphmark-Setup-9.9.9.exe") == "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+                  && HashFor(sums, "Gryphmark_Manual_EN.pdf")?.StartsWith("ffff") == true && HashFor(sums, "other.exe") == null, "");
 
             // file operations of the tree: rename, drop into a folder, undo and redo; the open document follows
             var ops = Path.Combine(tmp, "ops"); var sub = Path.Combine(ops, "sub");

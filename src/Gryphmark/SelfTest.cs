@@ -95,6 +95,24 @@ public static class SelfTest
                 w.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
                 w.UpdateLayout();
                 Save(pane, Path.Combine(dir, $"files_tree_{sfx}.png"));
+                // favourites: two starred files from two folders, and one that is gone
+                w.SetFavoritesForTest(Path.Combine(demo, "Notes", "Ideas.md"), Path.Combine(second, "docs", "setup.md"), Path.Combine(demo, "Gone.md"));
+                w.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+                w.UpdateLayout();
+                Save(pane, Path.Combine(dir, $"files_favorites_{sfx}.png"));
+                w.SetFavoritesForTest();
+                // the layout picker, and a pane being dragged (the place it would take)
+                var picker = w.LayoutPickerForTest();
+                picker.Effect = null;   // the shadow widens the bounds to the left and the picture loses its right edge
+                Layout(picker);
+                Save(picker, Path.Combine(dir, $"layout_picker_{sfx}.png"), dark);
+                foreach (var (files, fx, fy, name) in new[] { (false, 0.95, 0.5, "right"), (true, 0.03, 0.85, "below"), (false, 0.06, 0.5, "beside") })
+                {
+                    var shot = w.DockOverlayForTest(files, fx, fy);
+                    Layout(shot);
+                    Save(shot, Path.Combine(dir, $"layout_drag_{name}_{sfx}.png"), dark);
+                }
+                Save((FrameworkElement)w.FindName("LayoutBtn"), Path.Combine(dir, $"layout_button_{sfx}.png"), dark);
                 w.TestFolder(null);
             }
             Strings.Lang = keepLang;

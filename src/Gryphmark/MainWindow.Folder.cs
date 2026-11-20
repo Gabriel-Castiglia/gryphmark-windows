@@ -52,27 +52,8 @@ public partial class MainWindow
         FilesCollapse.Click += (_, _) => CollapseAllTrees();
         InitFileOps();
         FilesOptions.Click += (_, _) => { var m = OptionsMenu(); m.PlacementTarget = FilesOptions; m.Placement = PlacementMode.Bottom; m.IsOpen = true; };
-        SideSplitter.DragCompleted += (_, _) =>
-        {
-            if (SideColumn.ActualWidth <= 0) return;
-            if (ColsSplitter.Visibility == Visibility.Visible) _settings.SideWidthColumns = Math.Round(SideColumn.ActualWidth);
-            else _settings.FilesWidth = Math.Round(SideColumn.ActualWidth);
-            _settings.Save();
-        };
-        RightSplitter.DragCompleted += (_, _) =>
-        {
-            if (RightColumn.ActualWidth > 0) { _settings.OutlineWidthRight = Math.Round(RightColumn.ActualWidth); _settings.Save(); }
-        };
-        ColsSplitter.DragCompleted += (_, _) =>
-        {
-            double f = FilesCol.ActualWidth, o = OutlineCol.ActualWidth;
-            if (f > 0 && o > 0) { _settings.OutlineShareColumns = Math.Round(o / (f + o), 3); _settings.Save(); ApplySideLayout(); }
-        };
-        PanesSplitter.DragCompleted += (_, _) =>
-        {
-            double f = FilesRow.ActualHeight, o = OutlineRow.ActualHeight;
-            if (f > 0 && o > 0) { _settings.OutlineShare = Math.Round(o / (f + o), 3); _settings.Save(); ApplySideLayout(); }
-        };
+        InitLayout();
+        InitFavorites();
         // 1.4 and earlier kept a single folder
         if (_settings.Folders.Count == 0 && _settings.Folder != null) _settings.Folders.Add(_settings.Folder);
         _settings.Folder = null;
@@ -189,7 +170,7 @@ public partial class MainWindow
         foreach (var d in _roots.ToList()) StopWatching(d);
         _roots.Clear(); _missing.Clear();
         SaveRoots();
-        FilesTree.Items.Clear();
+        RefreshTree();   // the favourites stay
         FilesTitle.Text = Strings.Get("FilesTitle");
         ApplyFilesVisibility();
         BuildMenu();
@@ -211,79 +192,10 @@ public partial class MainWindow
         ApplyFilesVisibility(); BuildMenu();
     }
 
-    /// <summary>The sidebar, as in the macOS version: Files above and Contents below with a divider between
-    /// them (OutlineShare of the height for Contents), or the one that is on filling it, or no sidebar.</summary>
-    /// Three layouts (Settings.SideLayout): "stacked" (above), "columns" (Files | Contents side by side in the
-    /// sidebar) and "right" (Files on the left, Contents on the right of the text, in RightHost).
-    private void ApplySideLayout()
-    {
-        string layout = _settings.SideLayout is "columns" or "right" ? _settings.SideLayout : "stacked";
-        bool files = _settings.FilesPanel, outline = _settings.Outline;
-        bool right = layout == "right", cols = layout == "columns";
-        bool outLeft = outline && !right;                 // Contents lives in the sidebar
-        bool any = files || outLeft;
-        bool both = files && outLeft;
-
-        // Contents goes where the layout puts it
-        if (right && OutlinePane.Parent != RightHost) { SideGrid.Children.Remove(OutlinePane); RightHost.Child = OutlinePane; }
-        if (!right && OutlinePane.Parent != SideGrid) { RightHost.Child = null; SideGrid.Children.Add(OutlinePane); }
-
-        // the sidebar: in columns it is wider (two panes)
-        bool wide = cols && both;
-        double sideW = wide ? Math.Clamp(_settings.SideWidthColumns, 360, 1000) : Math.Clamp(_settings.FilesWidth, 180, 700);
-        SideColumn.MaxWidth = wide ? 1000 : 700;
-        SideColumn.MinWidth = any ? (wide ? 360 : 180) : 0;
-        SideColumn.Width = new GridLength(any ? sideW : 0);
-        SideSplitterColumn.Width = new GridLength(any ? 5 : 0);
-        SideSplitter.Visibility = any ? Visibility.Visible : Visibility.Collapsed;
-        SideGrid.Visibility = SideSplitter.Visibility;
-
-        // inside the sidebar: rows (stacked) or columns
-        double share = Math.Clamp(_settings.OutlineShare, 0.1, 0.9);
-        double cshare = Math.Clamp(_settings.OutlineShareColumns, 0.15, 0.85);
-        bool rows = both && !cols;
-        FilesRow.MinHeight = rows ? 90 : 0;
-        OutlineRow.MinHeight = FilesRow.MinHeight;
-        FilesRow.Height = new GridLength(rows ? 1 - share : (files || !outLeft ? 1 : 0), GridUnitType.Star);
-        OutlineRow.Height = new GridLength(rows ? share : (!files && outLeft ? 1 : 0), GridUnitType.Star);
-        PanesSplitterRow.Height = new GridLength(rows ? 5 : 0);
-        PanesSplitter.Visibility = rows ? Visibility.Visible : Visibility.Collapsed;
-        FilesCol.MinWidth = wide ? 150 : 0;
-        OutlineCol.MinWidth = FilesCol.MinWidth;
-        FilesCol.Width = new GridLength(wide ? 1 - cshare : 1, GridUnitType.Star);
-        OutlineCol.Width = new GridLength(wide ? cshare : 0, GridUnitType.Star);
-        PanesSplitterCol.Width = new GridLength(wide ? 5 : 0);
-        ColsSplitter.Visibility = wide ? Visibility.Visible : Visibility.Collapsed;
-        if (!right)
-        {
-            // stacked: Contents in row 2 of column 0; columns: row 0 of column 2; alone: fills the sidebar
-            Grid.SetRow(OutlinePane, wide ? 0 : (files ? 2 : 0)); Grid.SetRowSpan(OutlinePane, wide || !files ? 3 : 1);
-            Grid.SetColumn(OutlinePane, wide ? 2 : 0);
-        }
-        Grid.SetRowSpan(FilesPane, rows ? 1 : 3);
-
-        // the right column
-        bool r = right && outline;
-        RightColumn.MinWidth = r ? 160 : 0;
-        RightColumn.Width = new GridLength(r ? Math.Clamp(_settings.OutlineWidthRight, 160, 700) : 0);
-        RightSplitterColumn.Width = new GridLength(r ? 5 : 0);
-        RightSplitter.Visibility = r ? Visibility.Visible : Visibility.Collapsed;
-        RightHost.Visibility = RightSplitter.Visibility;
-
-        FilesPane.Visibility = files ? Visibility.Visible : Visibility.Collapsed;
-        OutlinePane.Visibility = outline ? Visibility.Visible : Visibility.Collapsed;
-    }
-
-    private void SetSideLayout(string layout)
-    {
-        _settings.SideLayout = layout; _settings.Save();
-        ApplySideLayout(); BuildMenu();
-    }
-
     private void ApplyFilesVisibility()
     {
         ApplySideLayout();
-        bool open = _roots.Count > 0;
+        bool open = _roots.Count > 0 || _settings.FavoriteFiles.Count > 0;   // favourites show without any folder
         FilesEmptyPanel.Visibility = open ? Visibility.Collapsed : Visibility.Visible;
         FilesTree.Visibility = open ? Visibility.Visible : Visibility.Collapsed;
         FilesHeaderButtons.Visibility = open ? Visibility.Visible : Visibility.Collapsed;
@@ -372,6 +284,11 @@ public partial class MainWindow
             }
             Collect(FilesTree.Items);
             FilesTree.Items.Clear();
+            if (MakeFavoritesRoot() is { } fav)
+            {
+                FilesTree.Items.Add(fav);
+                if (expanded.Contains(FavTag) || !known.Contains(FavTag)) fav.IsExpanded = true;
+            }
             foreach (var root in OrderedRoots().ToList())
             {
                 bool ok = SafeDirExists(root);
@@ -455,9 +372,11 @@ public partial class MainWindow
         };
         icon.SetResourceReference(TextBlock.ForegroundProperty, isDir ? "Gm.FolderIcon" : "Gm.TextMuted");
         var name = new TextBlock { Text = Path.GetFileName(path), TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center };
-        var header = new DockPanel();
+        var header = new DockPanel { Background = Brushes.Transparent };
         DockPanel.SetDock(icon, Dock.Left);
-        header.Children.Add(icon); header.Children.Add(name);
+        header.Children.Add(icon);
+        if (!isDir) AddStar(header, path);   // a star on the right: filled for a favourite, on hover for the rest
+        header.Children.Add(name);
 
         // the style is set here: ItemContainerStyle only reaches items generated by the TreeView itself
         var item = new TreeViewItem { Header = header, Tag = path, ToolTip = path, Style = (Style)FindResource("Gm.FilesItem") };
@@ -502,6 +421,8 @@ public partial class MainWindow
         var src = e.OriginalSource as DependencyObject;
         if (Ancestor<ToggleButton>(src) != null) return;   // the chevron toggles by itself
         if (Ancestor<TreeViewItem>(src) is not { Tag: string path } item) return;
+        if (StarClicked(src, path)) { e.Handled = true; return; }   // the star of a row: favourite or not
+        if (path == FavTag) { item.IsExpanded = !item.IsExpanded; return; }
         Activate(item, path);
     }
 
@@ -510,6 +431,7 @@ public partial class MainWindow
         if (TreeFileKey(e)) { e.Handled = true; return; }
         if (e.Key != Key.Enter || FilesTree.SelectedItem is not TreeViewItem { Tag: string path } item) return;
         e.Handled = true;
+        if (path == FavTag) { item.IsExpanded = !item.IsExpanded; return; }
         Activate(item, path);
     }
 
@@ -539,6 +461,8 @@ public partial class MainWindow
             MenuEntry(Strings.Get("OpenNewWindow"), () => StartSelf("--new-window", path)),
             MenuEntry(Strings.Get("OpenDedicated"), () => OpenDedicated(path)),
             MenuEntry(Strings.Get("DedicatedShortcut"), () => DedicatedShortcut(path)),
+            new Separator(),
+            FavoriteEntry(path),
             new Separator(),
             MenuEntry(Strings.Plain("OpenFolder"), () => ShowInExplorer(path, true)),
             MenuEntry(Strings.Get("CopyPath"), () => Clipboard.SetText(path)),

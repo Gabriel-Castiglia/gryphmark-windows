@@ -62,7 +62,7 @@ public partial class MainWindow
         Loaded += (_, _) => Dispatcher.BeginInvoke(async () =>
         {
             await Task.Delay(1500);
-            if ((DateTime.UtcNow - _settings.LastUpdateCheck).TotalHours > 24) await CheckUpdatesAsync(false);
+            if (SelfTestLog == null && !Settings.IsSecondary) await CheckUpdatesAsync(false);   // once a day for all the profiles
         });
     }
 
@@ -363,33 +363,6 @@ public partial class MainWindow
                 if (ans == MessageBoxResult.Yes) break;
             }
             catch { try { File.Delete(meta); } catch { } }
-        }
-    }
-
-    // ------------------------------------------------------------------ updates (GitHub releases)
-    private async Task CheckUpdatesAsync(bool interactive)
-    {
-        try
-        {
-            // remember the attempt even if it fails (no network, no release yet): at most one try a day
-            _settings.LastUpdateCheck = DateTime.UtcNow; _settings.Save();
-            using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(8) };
-            http.DefaultRequestHeaders.UserAgent.ParseAdd($"Gryphmark/{Version}");
-            var json = await http.GetStringAsync($"https://api.github.com/repos/{Repo}/releases/latest");
-            using var doc = JsonDocument.Parse(json);
-            var tag = (doc.RootElement.GetProperty("tag_name").GetString() ?? "").TrimStart('v', 'V');
-            var url = doc.RootElement.GetProperty("html_url").GetString();
-            if (System.Version.TryParse(tag, out var latest) && System.Version.TryParse(Version, out var mine) && latest > mine)
-            {
-                var r = MessageBox.Show(this, string.Format(Strings.Get("UpdateAvailable"), tag, Version), "Gryphmark", MessageBoxButton.YesNo, MessageBoxImage.Information);
-                if (r == MessageBoxResult.Yes && url != null) OpenLink(url);
-            }
-            else if (interactive)
-                MessageBox.Show(this, string.Format(Strings.Get("UpToDate"), Version), "Gryphmark", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-        catch (Exception ex)
-        {
-            if (interactive) MessageBox.Show(this, string.Format(Strings.Get("UpdateError"), ex.Message), "Gryphmark", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 

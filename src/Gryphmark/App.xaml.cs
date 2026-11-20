@@ -29,12 +29,26 @@ public partial class App : Application
 
     private void OnStartup(object sender, StartupEventArgs e)
     {
+        if (e.Args.Contains("--after-update"))   // run by the installer after an update (MainWindow.Update.cs)
+        {
+            Gryphmark.MainWindow.RelaunchAfterUpdate();
+            Shutdown();
+            return;
+        }
         int rc = Array.IndexOf(e.Args, "--render-chrome");
         if (rc >= 0 && rc + 1 < e.Args.Length)
         {
-            var w = new MainWindow(null) { Left = -20000, Top = -20000, ShowActivated = false, WindowStartupLocation = WindowStartupLocation.Manual };
+            // a throw-away profile: the pictures open folders and change panes, never the user's own settings
+            Settings.Profile = "RenderChrome-" + Guid.NewGuid().ToString("N")[..8];
+            var w = new MainWindow(null)
+            {
+                Left = -20000, Top = -20000, ShowActivated = false, ShowInTaskbar = false, WindowStartupLocation = WindowStartupLocation.Manual,
+                WindowState = WindowState.Normal, Width = 1200, Height = 820,
+            };
             w.Show();
             SelfTest.RenderChrome(w, e.Args[rc + 1]);
+            w.Close();
+            try { Directory.Delete(Settings.Dir, true); } catch { }
             Shutdown();
             return;
         }
