@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.2.1 — 2026-11-20
+
+- Search in the folders: a click on a result in the Visual or GitHub view now lands on that very match. The
+  matches are counted in the file's text, and those views hide part of it (link addresses, tags): in a file with
+  the words inside a link address, the click went to a later match. When the view holds another number of matches,
+  the one taken is the one whose paragraph shares most words with that line of the file.
+- Search in the folders: in a line with the words twice, the second result shows the second one in bold (both
+  showed the first).
+- Updates: a window whose close was cancelled during an update (its question answered *Cancel*), or one where the
+  update did not go on, now hears the next update; before, it stopped listening after the first signal and the
+  next update waited two minutes for it and gave up.
+- Updates: the installer's name is checked (letters, digits, dot, hyphen, underscore) before it is saved, and its
+  address must be HTTPS.
+- The find bar no longer moves to the next match when its text is set to the same words from outside.
+
 ## 2.2.0 — 2026-11-20
 
 - Search in the folders: a Search pane (View → Search in the folders, the toolbar's magnifier or Ctrl+Shift+F) looks

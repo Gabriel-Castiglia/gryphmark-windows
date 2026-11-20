@@ -565,6 +565,29 @@
     return res;
   }
 
+  function wordsOf(s) { return (String(s).toLowerCase().match(/[\p{L}\p{N}]{3,}/gu) || []); }
+  // the text of the paragraph (or item, cell, heading) a match is in
+  function blockTextOf(m) {
+    if (m.node) {
+      let el = m.node.parentElement;
+      while (el && !/^(P|LI|H[1-6]|TD|TH|PRE|BLOCKQUOTE|DT|DD|SUMMARY)$/.test(el.tagName)) el = el.parentElement;
+      return (el || m.node.parentElement || { textContent: '' }).textContent || '';
+    }
+    const v = pmView();
+    try { return v ? v.state.doc.resolve(m.from).parent.textContent : ''; } catch (e) { return ''; }
+  }
+  function closestByLine(line, k) {
+    const want = new Set(wordsOf(line));
+    if (!want.size) return k;
+    let best = -1, bestScore = -1;
+    find.matches.forEach((m, j) => {
+      const have = new Set(wordsOf(blockTextOf(m)));
+      let s = 0; want.forEach(w => { if (have.has(w)) s++; });
+      if (s > bestScore || (s === bestScore && Math.abs(j - k) < Math.abs(best - k))) { best = j; bestScore = s; }
+    });
+    return best < 0 ? k : best;
+  }
+
   function toRange(m) {
     const r = document.createRange();
     if (m.node) { r.setStart(m.node, m.start); r.setEnd(m.node, m.end); return r; }
@@ -863,10 +886,19 @@
     words() { return countWords(); },
     selectedText() { try { return editor.getSelectedText() || ''; } catch (e) { return ''; } },
     focus() { if (editor && state.mode !== 'preview') editor.focus(); },
-    find(q, cs, step) { const changed = q !== find.query || !!cs !== find.cs; find.query = q; find.cs = !!cs; if (changed) find.cur = -1; runFind(changed ? 0 : (step || 1)); },
+    // step 0 with the same words keeps the place (the find bar asks again when its text is set from outside)
+    find(q, cs, step) { const changed = q !== find.query || !!cs !== find.cs; find.query = q; find.cs = !!cs; if (changed) find.cur = -1; runFind(changed ? 0 : step, !changed && !step); },
     findClose() { find.query = ''; find.matches = []; find.cur = -1; paint(); },
-    // the Search pane: straight to the i-th match of q (counted from the top)
-    findAt(q, cs, i) { find.query = q; find.cs = !!cs; find.cur = Math.max(0, i | 0); runFind(0, true); },
+    // the search in the folders: straight to the i-th match of q, counted in the file's text. A view that hides
+    // the Markdown (link addresses, tags) can hold another number of matches: then the one taken is the one whose
+    // paragraph shares most words with that line of the file, the nearest to i among equals.
+    findAt(q, cs, i, line, total) {
+      find.query = q; find.cs = !!cs; find.cur = -1; runFind(0);
+      const n = find.matches.length; if (!n) return;
+      let k = Math.max(0, i | 0);
+      if (typeof line === 'string' && total !== n) k = closestByLine(line, k);
+      find.cur = Math.min(k, n - 1); paint(); report();
+    },
     replace(q, cs, r) { find.query = q; find.cs = !!cs; replaceCurrent(r); },
     replaceAll(q, cs, r) { find.query = q; find.cs = !!cs; return replaceAll(r); },
     scrollToHeading(i) { scrollToHeading(i); },

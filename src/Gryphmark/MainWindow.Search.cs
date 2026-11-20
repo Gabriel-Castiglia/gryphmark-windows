@@ -20,7 +20,7 @@ namespace Gryphmark;
 /// runs off the window's thread, a moment after the typing stops, and a new search cancels the one before.</summary>
 public partial class MainWindow
 {
-    internal sealed record SearchHit(int Line, string Text, int Occurrence);
+    internal sealed record SearchHit(int Line, string Text, int Occurrence, int Column);
     internal sealed record SearchFile(string Path, List<SearchHit> Hits);
 
     private const int SearchMaxFiles = 300, SearchMaxHits = 5000;
@@ -107,7 +107,7 @@ public partial class MainWindow
             var line = raw.TrimEnd('\r');
             for (int at = line.IndexOf(q, cmp); at >= 0; at = line.IndexOf(q, at + Math.Max(1, q.Length), cmp))
             {
-                hits.Add(new SearchHit(lineNo, line, occurrence));
+                hits.Add(new SearchHit(lineNo, line, occurrence, at));
                 occurrence++;
             }
         }
@@ -166,7 +166,7 @@ public partial class MainWindow
             var node = new TreeViewItem { Header = SearchFileHeader(f), Tag = f, ToolTip = f.Path, Style = (Style)FindResource("Gm.FilesItem"), IsExpanded = expand };
             ToolTipService.SetInitialShowDelay(node, 900);
             foreach (var h in f.Hits)
-                node.Items.Add(new TreeViewItem { Header = SearchLineHeader(h, q, matchCase), Tag = (f.Path, h, q, matchCase), Style = (Style)FindResource("Gm.FilesItem") });
+                node.Items.Add(new TreeViewItem { Header = SearchLineHeader(h, q, matchCase), Tag = (f.Path, h, q, matchCase, f.Hits.Count), Style = (Style)FindResource("Gm.FilesItem") });
             SearchTree.Items.Add(node);
         }
     }
@@ -188,12 +188,11 @@ public partial class MainWindow
         return header;
     }
 
-    /// <summary>"12  …text around the match…" with the match in bold.</summary>
+    /// <summary>"12  …text around the match…" with this match in bold (the second of a line is the second one).</summary>
     private static FrameworkElement SearchLineHeader(SearchHit h, string q, bool matchCase)
     {
         var line = h.Text.Replace('\t', ' ');
-        var cmp = matchCase ? StringComparison.Ordinal : StringComparison.CurrentCultureIgnoreCase;
-        int at = Math.Max(0, line.IndexOf(q, cmp));
+        int at = Math.Clamp(h.Column, 0, line.Length);
         int start = Math.Max(0, at - 30);
         string before = (start > 0 ? "…" : "") + line[start..at].TrimStart();
         string match = line.Substring(at, Math.Min(q.Length, line.Length - at));
@@ -220,14 +219,15 @@ public partial class MainWindow
     {
         switch (item.Tag)
         {
-            case SearchFile f: await OpenAtMatch(f.Path, SearchBox.Text, SearchCase.IsChecked == true, 0); break;
-            case ValueTuple<string, SearchHit, string, bool> t: await OpenAtMatch(t.Item1, t.Item3, t.Item4, t.Item2.Occurrence); break;
+            case SearchFile f: await OpenAtMatch(f.Path, SearchBox.Text, SearchCase.IsChecked == true, 0, f.Hits.FirstOrDefault()?.Text, f.Hits.Count); break;
+            case ValueTuple<string, SearchHit, string, bool, int> t: await OpenAtMatch(t.Item1, t.Item3, t.Item4, t.Item2.Occurrence, t.Item2.Text, t.Item5); break;
         }
     }
 
     /// <summary>Opens the file (asking about unsaved changes first, as always) and goes to its n-th match, with the
-    /// find bar showing the words.</summary>
-    private async Task OpenAtMatch(string path, string q, bool matchCase, int occurrence)
+    /// find bar showing the words. The line and the file's number of matches let the page pick the right one in a
+    /// view that hides some of the Markdown (app.js, findAt).</summary>
+    private async Task OpenAtMatch(string path, string q, bool matchCase, int occurrence, string? line, int total)
     {
         if (!File.Exists(path)) { Flash(Strings.Get("ItemGone")); return; }
         if (!string.Equals(path, _path, StringComparison.OrdinalIgnoreCase))
@@ -240,6 +240,6 @@ public partial class MainWindow
         FindBar.Visibility = Visibility.Visible;
         ReplaceRow.Visibility = Visibility.Collapsed;
         FindBox.Text = q;   // the find bar runs its own search on this
-        if (_ready) await Js($"mdApp.findAt({Q(q)},{(matchCase ? "true" : "false")},{occurrence})");
+        if (_ready) await Js($"mdApp.findAt({Q(q)},{(matchCase ? "true" : "false")},{occurrence},{Q(line ?? "")},{total})");
     }
 }

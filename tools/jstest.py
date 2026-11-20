@@ -401,6 +401,24 @@ js = """
     out.pictures = JSON.stringify(im) === want && asked && found && boxed;
     if (!out.pictures) out.pictures_seen = JSON.stringify({ im, asked, found, boxed });
 
+    // the search in the folders counts matches in the file's text; a link address is not in the views: the line
+    // of the file picks the match (here the 2nd of the file is the 1st that Visual and GitHub show)
+    const HIDDEN = 'A [link](notes/item.md) here.\\n\\nFirst the item word.\\n\\nLast line about item and more.\\n';
+    const hid = {};
+    for (const m of ['visual', 'preview']) {
+      mdApp.setMode(m); await new Promise(r => setTimeout(r, 50));
+      mdApp.load(HIDDEN, null); await new Promise(r => setTimeout(r, 150));
+      mdApp.findAt('item', false, 1, 'First the item word.', 3);
+      hid[m] = window.__lastFind && [window.__lastFind.index, window.__lastFind.total];
+      mdApp.findClose();
+    }
+    mdApp.setMode('source'); await new Promise(r => setTimeout(r, 50));
+    mdApp.findAt('item', false, 1, 'First the item word.', 3);
+    hid.markdown = window.__lastFind && [window.__lastFind.index, window.__lastFind.total];
+    mdApp.findClose();
+    out.find_at_hidden_markdown = JSON.stringify(hid) === JSON.stringify({ visual: [0, 2], preview: [0, 2], markdown: [1, 3] });
+    if (!out.find_at_hidden_markdown) out.find_at_seen = JSON.stringify(hid);
+
     mdApp.setMode('visual');
   } catch (e) { out.err = String(e && e.stack || e); }
   document.getElementById('out').textContent = JSON.stringify(out);

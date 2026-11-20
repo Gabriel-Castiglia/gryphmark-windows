@@ -128,7 +128,7 @@ public partial class MainWindow
             var hitsA = FindInText("x gryphon\ny\nGRYPHON gryphon\n", "gryphon", false);
             Check("search: matches in Markdown files only, not in tool folders; case on demand; counted from the top",
                   res.Count == 2 && res.Sum(r => r.Hits.Count) == 3 && !cutS && resCase.Sum(r => r.Hits.Count) == 1
-                  && hitsA.Count == 3 && hitsA[2].Line == 3 && hitsA[2].Occurrence == 2,
+                  && hitsA.Count == 3 && hitsA[2].Line == 3 && hitsA[2].Occurrence == 2 && hitsA[1].Column == 0 && hitsA[2].Column == 8,
                   string.Join(" | ", res.Select(r => Path.GetFileName(r.Path) + ":" + r.Hits.Count)));
             Check("profiles: only test leftovers are cleaned up", Settings.TestProfileName.IsMatch("SelfTest-0123abcd") && Settings.TestProfileName.IsMatch("RenderChrome-ffffffff")
                   && !Settings.TestProfileName.IsMatch("My notes") && !Settings.TestProfileName.IsMatch("SelfTest-xyz") && !Settings.TestProfileName.IsMatch("SelfTest-0123abcd2"), "");

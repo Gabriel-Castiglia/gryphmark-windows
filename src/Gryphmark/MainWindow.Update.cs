@@ -36,10 +36,16 @@ public partial class MainWindow
         {
             _updateSignal = new EventWaitHandle(false, EventResetMode.ManualReset, UpdateEventName);
             var signal = _updateSignal;
+            // Listens for good: a window whose close was cancelled, or an update that did not go on, must still hear
+            // the next one. After each signal it waits for the updating window to reset it before listening again.
             new Thread(() =>
             {
-                try { signal.WaitOne(); } catch { return; }
-                Dispatcher.BeginInvoke(CloseForUpdate);
+                while (true)
+                {
+                    try { signal.WaitOne(); } catch { return; }
+                    Dispatcher.BeginInvoke(CloseForUpdate);
+                    try { while (signal.WaitOne(0)) Thread.Sleep(500); } catch { return; }
+                }
             }) { IsBackground = true, Name = "update-signal" }.Start();
         }
         catch { }
@@ -98,7 +104,10 @@ public partial class MainWindow
             {
                 var name = a.GetProperty("name").GetString() ?? "";
                 var url = a.GetProperty("browser_download_url").GetString();
-                if (name.StartsWith("Gryphmark-Setup-", StringComparison.OrdinalIgnoreCase) && name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) { setupUrl = url; setupName = name; }
+                // the name becomes a file name in %TEMP%: letters, digits, dot, hyphen and underscore only
+                if (name.StartsWith("Gryphmark-Setup-", StringComparison.OrdinalIgnoreCase) && name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
+                    && name.All(c => char.IsAsciiLetterOrDigit(c) || c is '.' or '-' or '_') && url?.StartsWith("https://", StringComparison.Ordinal) == true)
+                { setupUrl = url; setupName = name; }
                 else if (name.Equals("SHA256SUMS.txt", StringComparison.OrdinalIgnoreCase)) sumsUrl = url;
             }
             if (setupUrl == null || setupName == null || sumsUrl == null)
