@@ -97,6 +97,10 @@ js = """
     // find
     mdApp.find('item', false, 1);
     out.find_total = window.__lastFind && window.__lastFind.total;
+    // the Search pane goes straight to the n-th match
+    mdApp.findAt('item', false, 1);
+    out.find_at = !!window.__lastFind && window.__lastFind.index === 1 && window.__lastFind.total === 2;
+    mdApp.findClose();
     // GitHub extras
     mdApp.setMode('preview');
     await new Promise(r => setTimeout(r, 300));

@@ -1,4 +1,4 @@
-// Gryphmark -- main window: where the Files and Contents panes go.
+// Gryphmark -- main window: where the Files, Contents and Search panes go.
 // Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
 // Date: November 20, 2026
 // SPDX-License-Identifier: GPL-2.0-only
@@ -12,12 +12,13 @@ using System.Windows.Shapes;
 
 namespace Gryphmark;
 
-/// <summary>The layout of the two panes, Files and Contents. Each one goes to the left or to the right of the text
-/// (Settings.FilesSide / OutlineSide); when both are on the same side they sit one above the other or side by side
-/// (SideArrange), in either order (OutlineFirst). It is chosen three ways: the layout button at the right of the
-/// toolbar (a drawing of every layout, a click applies it), View → Layout, or dragging a pane by its title to an
-/// edge of the window, where the place it would take is shown before it is dropped. The dividers between the panes
-/// and the text are dragged to change their size, as before.</summary>
+/// <summary>The layout of the panes: Files, Contents and (from 2.2) Search. Each one goes to the left or to the right
+/// of the text (Settings.FilesSide / OutlineSide / SearchSide); the panes on one side sit one above the other or side by
+/// side (SideArrange for the left, RightArrange for the right), in the order of Settings.PaneOrder, with a divider
+/// between each two. Each layout keeps its own sidebar width (Settings.LayoutWidths) and each pane its share of the
+/// room (PaneWeights). It is chosen three ways: the layout button at the right of the toolbar (a drawing of every
+/// layout, a click applies it), View → Layout, or dragging a pane by its title to an edge of the window, where the
+/// place it would take is shown before it is dropped.</summary>
 public partial class MainWindow
 {
     private sealed record LayoutPreset(string Key, string Files, string Outline, string Arrange);
@@ -32,6 +33,7 @@ public partial class MainWindow
         new("LayoutRightCols", "right", "right", "cols"),
     };
 
+    private static readonly string[] PaneKeys = { "files", "outline", "search" };
     private Popup? _layoutPopup;
 
     private void InitLayout()
@@ -43,143 +45,214 @@ public partial class MainWindow
             case "right": _settings.FilesSide = "left"; _settings.OutlineSide = "right"; break;
             case "stacked": _settings.FilesSide = "left"; _settings.OutlineSide = "left"; _settings.SideArrange = "rows"; break;
         }
-        if (_settings.SideLayout != "") { _settings.SideLayout = ""; _settings.Save(); }
+        _settings.SideLayout = "";
+        // 2.1 → 2.2: one arrangement per side, an order of panes, a share per pane
+        if (_settings.RightArrange == "") _settings.RightArrange = _settings.SideArrange;
+        if (_settings.PaneOrder.Count == 0) _settings.PaneOrder = _settings.OutlineFirst ? new() { "outline", "files", "search" } : new() { "files", "outline", "search" };
+        if (_settings.PaneWeights.Count == 0)
+        {
+            double s = Math.Clamp(_settings.OutlineShare, 0.1, 0.9);
+            _settings.PaneWeights = new() { ["files"] = Math.Round(1 - s, 3), ["outline"] = Math.Round(s, 3), ["search"] = 0.5 };
+        }
+        _settings.Save();
 
         SideSplitter.DragCompleted += (_, _) => SaveSideWidth(false);
         RightSplitter.DragCompleted += (_, _) => SaveSideWidth(true);
-        PanesSplitter.DragCompleted += (_, _) => SavePaneShare(false);
-        RightPanesSplitter.DragCompleted += (_, _) => SavePaneShare(false);
-        ColsSplitter.DragCompleted += (_, _) => SavePaneShare(true);
-        RightColsSplitter.DragCompleted += (_, _) => SavePaneShare(true);
-
         LayoutBtn.Click += (_, _) => ShowLayoutPicker();
         InitDocking();
     }
 
-    private bool BothOn(bool right) =>
-        _settings.FilesPanel && _settings.Outline && _settings.FilesSide == _settings.OutlineSide && (_settings.FilesSide == "right") == right;
+    // ------------------------------------------------------------------ the model
+    private Border PaneOf(string key) => key switch { "files" => FilesPane, "outline" => OutlinePane, _ => SearchPane };
+    private string KeyOf(Border pane) => pane == FilesPane ? "files" : pane == OutlinePane ? "outline" : "search";
+    private bool PaneOn(string key) => key switch { "files" => _settings.FilesPanel, "outline" => _settings.Outline, _ => _settings.SearchPanel };
+    private string SideOf(string key) => key switch { "files" => _settings.FilesSide, "outline" => _settings.OutlineSide, _ => _settings.SearchSide } == "right" ? "right" : "left";
+
+    private void SetSideOf(string key, string side)
+    {
+        if (key == "files") _settings.FilesSide = side; else if (key == "outline") _settings.OutlineSide = side; else _settings.SearchSide = side;
+    }
+
+    private string ArrangeOf(string side) => (side == "right" ? _settings.RightArrange : _settings.SideArrange) == "cols" ? "cols" : "rows";
+
+    private void SetArrange(string side, string arrange)
+    {
+        if (side == "right") _settings.RightArrange = arrange; else _settings.SideArrange = arrange;
+    }
+
+    /// <summary>Every pane once, in the saved order (anything unknown or missing is mended).</summary>
+    private List<string> Order()
+    {
+        var o = _settings.PaneOrder.Where(PaneKeys.Contains).Distinct().ToList();
+        foreach (var k in PaneKeys) if (!o.Contains(k)) o.Add(k);
+        _settings.PaneOrder = o;
+        return o;
+    }
+
+    private List<string> PanesOn(string side) => Order().Where(k => PaneOn(k) && SideOf(k) == side).ToList();
+
+    private double Weight(string key) => _settings.PaneWeights.TryGetValue(key, out var w) && w > 0.01 ? w : key == "files" ? 0.55 : key == "outline" ? 0.45 : 0.5;
+
+    /// <summary>What a sidebar holds, as the key of its saved width: side, panes in order, and how they sit.</summary>
+    private string WidthKey(string side, List<string> panes) =>
+        side + ":" + string.Join("+", panes) + (panes.Count > 1 ? ":" + ArrangeOf(side) : "");
+
+    private double SideWidth(string side, List<string> panes)
+    {
+        bool cols = panes.Count > 1 && ArrangeOf(side) == "cols";
+        double min = cols ? panes.Count * 150 + (panes.Count - 1) * 5 : 180, max = cols ? 1400 : 700;
+        if (!_settings.LayoutWidths.TryGetValue(WidthKey(side, panes), out var w))
+            w = cols ? _settings.SideWidthColumns * (panes.Count > 2 ? 1.4 : 1) : side == "right" ? _settings.OutlineWidthRight : _settings.FilesWidth;   // 2.1's widths
+        return Math.Clamp(w, min, max);
+    }
 
     private void SaveSideWidth(bool right)
     {
+        string side = right ? "right" : "left";
         var w = (right ? RightColumn : SideColumn).ActualWidth;
-        if (w <= 0) return;
-        if (BothOn(right) && _settings.SideArrange == "cols") _settings.SideWidthColumns = Math.Round(w);
-        else if (right) _settings.OutlineWidthRight = Math.Round(w);
-        else _settings.FilesWidth = Math.Round(w);
+        var panes = PanesOn(side);
+        if (w <= 0 || panes.Count == 0) return;
+        _settings.LayoutWidths[WidthKey(side, panes)] = Math.Round(w);
         _settings.Save();
     }
 
-    /// <summary>After the divider between the two panes moved: the part that Contents takes.</summary>
-    private void SavePaneShare(bool cols)
+    /// <summary>After a divider between two panes moved: the share of each pane on that side.</summary>
+    private void SavePaneWeights(string side)
     {
-        double f = cols ? FilesPane.ActualWidth : FilesPane.ActualHeight, o = cols ? OutlinePane.ActualWidth : OutlinePane.ActualHeight;
-        if (f <= 0 || o <= 0) return;
-        if (cols) _settings.OutlineShareColumns = Math.Round(o / (f + o), 3); else _settings.OutlineShare = Math.Round(o / (f + o), 3);
+        var panes = PanesOn(side);
+        bool cols = ArrangeOf(side) == "cols";
+        var sizes = panes.Select(k => cols ? PaneOf(k).ActualWidth : PaneOf(k).ActualHeight).ToList();
+        double total = sizes.Sum();
+        if (total <= 0 || sizes.Any(s => s <= 0)) return;
+        for (int i = 0; i < panes.Count; i++) _settings.PaneWeights[panes[i]] = Math.Round(sizes[i] / total, 3);
         _settings.Save();
         ApplySideLayout();
     }
 
     // ------------------------------------------------------------------ applying it
-    /// <summary>Puts each pane in its sidebar and arranges both sidebars. A pane that is off takes no room; a
+    /// <summary>Puts each pane in its sidebar and lays both sidebars out. A pane that is off takes no room; a
     /// sidebar with nothing in it disappears with its divider.</summary>
     private void ApplySideLayout()
     {
-        bool files = _settings.FilesPanel, outline = _settings.Outline;
-        bool fRight = _settings.FilesSide == "right", oRight = _settings.OutlineSide == "right";
-        PlacePane(FilesPane, fRight ? RightGrid : SideGrid);
-        PlacePane(OutlinePane, oRight ? RightGrid : SideGrid);
-        ArrangeSide(false, files && !fRight, outline && !oRight);
-        ArrangeSide(true, files && fRight, outline && oRight);
-        FilesPane.Visibility = files ? Visibility.Visible : Visibility.Collapsed;
-        OutlinePane.Visibility = outline ? Visibility.Visible : Visibility.Collapsed;
-        LayoutBtn.Content = LayoutDrawing(_settings.FilesSide, _settings.OutlineSide, _settings.SideArrange, _settings.OutlineFirst, files, outline, 26, 17, mini: true);
+        foreach (var k in PaneKeys)
+        {
+            var pane = PaneOf(k);
+            var target = SideOf(k) == "right" ? RightGrid : SideGrid;
+            if (pane.Parent != target) { (pane.Parent as Panel)?.Children.Remove(pane); target.Children.Add(pane); }
+            pane.Visibility = PaneOn(k) ? Visibility.Visible : Visibility.Collapsed;
+        }
+        ArrangeSide("left");
+        ArrangeSide("right");
+        LayoutBtn.Content = LayoutDrawing(CurrentState(), 26, 17, mini: true);
         LayoutBtn.ToolTip = Strings.Get("LayoutPickerTip");
     }
 
-    private static void PlacePane(Border pane, Grid target)
+    private void ArrangeSide(string side)
     {
-        if (pane.Parent == target) return;
-        (pane.Parent as Panel)?.Children.Remove(pane);
-        target.Children.Add(pane);
-    }
-
-    private void ArrangeSide(bool right, bool hasFiles, bool hasOutline)
-    {
+        bool right = side == "right";
         var g = right ? RightGrid : SideGrid;
         var col = right ? RightColumn : SideColumn;
         var splitCol = right ? RightSplitterColumn : SideSplitterColumn;
         var split = right ? RightSplitter : SideSplitter;
-        var rowSplit = right ? RightPanesSplitter : PanesSplitter;
-        var colSplit = right ? RightColsSplitter : ColsSplitter;
+        var panes = PanesOn(side);
+        int n = panes.Count;
+        bool cols = n > 1 && ArrangeOf(side) == "cols";
 
-        bool any = hasFiles || hasOutline, both = hasFiles && hasOutline;
-        bool wide = both && _settings.SideArrange == "cols", rows = both && !wide;
-        double w = wide ? Math.Clamp(_settings.SideWidthColumns, 360, 1000)
-                        : Math.Clamp(right ? _settings.OutlineWidthRight : _settings.FilesWidth, 180, 700);
-        col.MaxWidth = wide ? 1000 : 700;
-        col.MinWidth = any ? (wide ? 360 : 180) : 0;
-        col.Width = new GridLength(any ? w : 0);
-        splitCol.Width = new GridLength(any ? 5 : 0);
-        split.Visibility = any ? Visibility.Visible : Visibility.Collapsed;
+        double w = n > 0 ? SideWidth(side, panes) : 0;
+        col.MaxWidth = cols ? 1400 : 700;
+        col.MinWidth = n == 0 ? 0 : cols ? n * 150 + (n - 1) * 5 : 180;
+        col.Width = new GridLength(w);
+        splitCol.Width = new GridLength(n > 0 ? 5 : 0);
+        split.Visibility = n > 0 ? Visibility.Visible : Visibility.Collapsed;
         g.Visibility = split.Visibility;
 
-        // which pane comes first (above, or on the left) and the part of the room the second one takes
-        Border? first = both ? (_settings.OutlineFirst ? OutlinePane : FilesPane) : hasFiles ? FilesPane : hasOutline ? OutlinePane : null;
-        Border? second = both ? (first == FilesPane ? OutlinePane : FilesPane) : null;
-        double oShare = Math.Clamp(_settings.OutlineShare, 0.1, 0.9), oShareCols = Math.Clamp(_settings.OutlineShareColumns, 0.15, 0.85);
-        double s2 = second == OutlinePane ? (wide ? oShareCols : oShare) : 1 - (wide ? oShareCols : oShare);
-
-        var r = g.RowDefinitions; var c = g.ColumnDefinitions;
-        r[0].Height = new GridLength(rows ? 1 - s2 : 1, GridUnitType.Star);
-        r[1].Height = new GridLength(rows ? 5 : 0);
-        r[2].Height = new GridLength(rows ? s2 : 0, GridUnitType.Star);
-        r[0].MinHeight = r[2].MinHeight = rows ? 90 : 0;
-        c[0].Width = new GridLength(wide ? 1 - s2 : 1, GridUnitType.Star);
-        c[1].Width = new GridLength(wide ? 5 : 0);
-        c[2].Width = new GridLength(wide ? s2 : 0, GridUnitType.Star);
-        c[0].MinWidth = c[2].MinWidth = wide ? 150 : 0;
-        rowSplit.Visibility = rows ? Visibility.Visible : Visibility.Collapsed;
-        colSplit.Visibility = wide ? Visibility.Visible : Visibility.Collapsed;
-
-        foreach (var pane in new[] { FilesPane, OutlinePane })
+        // the rows or columns of this side are made again: one per pane, a divider between each two
+        foreach (var s in g.Children.OfType<GridSplitter>().ToList()) g.Children.Remove(s);
+        g.RowDefinitions.Clear(); g.ColumnDefinitions.Clear();
+        double total = panes.Sum(Weight);
+        for (int i = 0; i < n; i++)
         {
+            if (i > 0)
+            {
+                if (cols) g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(5) }); else g.RowDefinitions.Add(new RowDefinition { Height = new GridLength(5) });
+                var d = NewSplitter(cols);
+                d.DragCompleted += (_, _) => SavePaneWeights(side);
+                if (cols) Grid.SetColumn(d, 2 * i - 1); else Grid.SetRow(d, 2 * i - 1);
+                g.Children.Add(d);
+            }
+            var star = new GridLength(Weight(panes[i]) / total, GridUnitType.Star);
+            if (cols) g.ColumnDefinitions.Add(new ColumnDefinition { Width = star, MinWidth = 150 }); else g.RowDefinitions.Add(new RowDefinition { Height = star, MinHeight = 90 });
+        }
+        foreach (var k in PaneKeys)
+        {
+            var pane = PaneOf(k);
             if (pane.Parent != g) continue;
-            bool isSecond = pane == second;
-            Grid.SetRow(pane, rows && isSecond ? 2 : 0);
-            Grid.SetRowSpan(pane, rows ? 1 : 3);
-            Grid.SetColumn(pane, wide && isSecond ? 2 : 0);
-            Grid.SetColumnSpan(pane, 1);
+            int i = panes.IndexOf(k);
+            Grid.SetRow(pane, !cols && i > 0 ? 2 * i : 0);
+            Grid.SetColumn(pane, cols && i > 0 ? 2 * i : 0);
+            Grid.SetRowSpan(pane, 1); Grid.SetColumnSpan(pane, 1);
         }
     }
 
+    /// <summary>A divider between two panes: 5 px to grab, a 1 px line drawn.</summary>
+    private static GridSplitter NewSplitter(bool cols)
+    {
+        var line = new FrameworkElementFactory(typeof(Rectangle));
+        if (cols) { line.SetValue(FrameworkElement.WidthProperty, 1.0); line.SetValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Center); }
+        else { line.SetValue(FrameworkElement.HeightProperty, 1.0); line.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center); }
+        line.SetResourceReference(Shape.FillProperty, "Gm.ChromeBorder");
+        var bg = new FrameworkElementFactory(typeof(Border));
+        bg.SetValue(Border.BackgroundProperty, Brushes.Transparent);
+        bg.AppendChild(line);
+        return new GridSplitter
+        {
+            ResizeBehavior = GridResizeBehavior.PreviousAndNext, ResizeDirection = cols ? GridResizeDirection.Columns : GridResizeDirection.Rows,
+            HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch, Focusable = false,
+            Cursor = cols ? Cursors.SizeWE : Cursors.SizeNS, Template = new ControlTemplate(typeof(GridSplitter)) { VisualTree = bg },
+        };
+    }
+
+    /// <summary>Files and Contents to these sides; when they share one, how they sit there and which comes first.</summary>
     private void SetLayout(string filesSide, string outlineSide, string? arrange = null, bool? outlineFirst = null)
     {
         _settings.FilesSide = filesSide; _settings.OutlineSide = outlineSide;
-        if (arrange != null) _settings.SideArrange = arrange;
-        if (outlineFirst != null) _settings.OutlineFirst = outlineFirst.Value;
+        if (arrange != null && filesSide == outlineSide) SetArrange(filesSide, arrange);
+        if (outlineFirst != null)
+        {
+            var o = Order();
+            o.Remove("outline");
+            o.Insert(outlineFirst.Value ? o.IndexOf("files") : o.IndexOf("files") + 1, "outline");
+            _settings.PaneOrder = o;
+        }
         _settings.Save();
         ApplySideLayout(); BuildMenu();
     }
 
-    /// <summary>Files and Contents trade places: the order on one side, or the sides themselves.</summary>
+    /// <summary>Files and Contents trade places: their order on one side, or the sides themselves.</summary>
     private void SwapPanes()
     {
-        if (_settings.FilesSide == _settings.OutlineSide) SetLayout(_settings.FilesSide, _settings.OutlineSide, outlineFirst: !_settings.OutlineFirst);
+        if (_settings.FilesSide == _settings.OutlineSide)
+        {
+            var o = Order();
+            int f = o.IndexOf("files"), c = o.IndexOf("outline");
+            (o[f], o[c]) = (o[c], o[f]);
+            _settings.PaneOrder = o; _settings.Save();
+            ApplySideLayout(); BuildMenu();
+        }
         else SetLayout(_settings.OutlineSide, _settings.FilesSide);
     }
 
     private bool IsPreset(LayoutPreset p) =>
-        _settings.FilesSide == p.Files && _settings.OutlineSide == p.Outline && (p.Files != p.Outline || _settings.SideArrange == p.Arrange);
+        _settings.FilesSide == p.Files && _settings.OutlineSide == p.Outline && (p.Files != p.Outline || ArrangeOf(p.Files) == p.Arrange);
 
-    /// <summary>View → Layout: the six layouts and the swap.</summary>
+    /// <summary>View → Layout: the six layouts, the swap and the picker.</summary>
     internal MenuItem LayoutMenu()
     {
         var m = new MenuItem { Header = Strings.Get("Layout") };
         foreach (var p in Presets)
         {
             var preset = p;
-            var mi = MenuEntry(Strings.Get(p.Key), () => SetLayout(preset.Files, preset.Outline, preset.Arrange), IsPreset(p));
-            m.Items.Add(mi);
+            m.Items.Add(MenuEntry(Strings.Get(p.Key), () => SetLayout(preset.Files, preset.Outline, preset.Arrange), IsPreset(p)));
         }
         m.Items.Add(new Separator());
         m.Items.Add(MenuEntry(Strings.Get("LayoutSwap"), SwapPanes));
@@ -188,53 +261,80 @@ public partial class MainWindow
     }
 
     // ------------------------------------------------------------------ drawings
-    /// <summary>A small drawing of a layout: the window, the text with a few lines, Files in the theme colour and
-    /// Contents in a lighter shade of it. The toolbar button shows the current one (mini); the picker, all of them.</summary>
-    private FrameworkElement LayoutDrawing(string filesSide, string outlineSide, string arrange, bool outlineFirst,
-                                           bool showFiles, bool showOutline, double width, double height, bool mini)
+    /// <summary>A layout as the drawings see it: the side of each pane, the order, how each side sits, what is on.</summary>
+    private sealed record LayoutState(Dictionary<string, string> Side, List<string> Order, string LeftArrange, string RightArrange, HashSet<string> On);
+
+    private LayoutState CurrentState() => new(
+        PaneKeys.ToDictionary(k => k, SideOf), Order().ToList(), ArrangeOf("left"), ArrangeOf("right"), PaneKeys.Where(PaneOn).ToHashSet());
+
+    /// <summary>The current layout with a preset applied (Files and Contents both shown), for the picker's drawings.</summary>
+    private LayoutState PresetState(LayoutPreset p)
+    {
+        var s = CurrentState();
+        s.Side["files"] = p.Files; s.Side["outline"] = p.Outline;
+        s.On.Add("files"); s.On.Add("outline");
+        return p.Files == p.Outline
+            ? s with { LeftArrange = p.Files == "left" ? p.Arrange : s.LeftArrange, RightArrange = p.Files == "right" ? p.Arrange : s.RightArrange }
+            : s;
+    }
+
+    /// <summary>A small drawing of a layout: the window, the text with a few lines, Files in the theme colour,
+    /// Contents in a lighter shade and Search lighter still. The toolbar button shows the current one (mini).</summary>
+    private FrameworkElement LayoutDrawing(LayoutState st, double width, double height, bool mini)
     {
         var accent = (FindResource("Gm.Accent") as SolidColorBrush)?.Color ?? Colors.SteelBlue;
         bool dark = ChromeIsDark();
-        Brush filesBrush = new SolidColorBrush(accent);
-        Brush outlineBrush = new SolidColorBrush(Color.FromArgb(dark ? (byte)120 : (byte)105, accent.R, accent.G, accent.B));
+        Brush Shade(byte a) => new SolidColorBrush(Color.FromArgb(a, accent.R, accent.G, accent.B));
+        var fills = new Dictionary<string, Brush> { ["files"] = Shade(255), ["outline"] = Shade(dark ? (byte)120 : (byte)105), ["search"] = Shade(dark ? (byte)70 : (byte)55) };
+        var glyphs = new Dictionary<string, string> { ["files"] = "", ["outline"] = Glyphs["Outline"], ["search"] = "" };
         Brush paper = new SolidColorBrush(dark ? Color.FromRgb(13, 17, 23) : Colors.White);
         Brush line = new SolidColorBrush(dark ? Color.FromRgb(80, 86, 96) : Color.FromRgb(200, 204, 210));
         double gap = mini ? 1 : 3;
 
-        FrameworkElement Pane(bool files)
+        FrameworkElement Pane(string key)
         {
-            var b = new Border { Background = files ? filesBrush : outlineBrush, CornerRadius = new CornerRadius(mini ? 1 : 3), Margin = new Thickness(gap / 2) };
+            var b = new Border { Background = fills[key], CornerRadius = new CornerRadius(mini ? 1 : 3), Margin = new Thickness(gap / 2) };
             if (!mini)
                 b.Child = new TextBlock
                 {
-                    Text = files ? "" : Glyphs["Outline"], FontFamily = (FontFamily)FindResource("Gm.Icons"), FontSize = 11,
-                    Foreground = Brushes.White, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center,
+                    Text = glyphs[key], FontFamily = (FontFamily)FindResource("Gm.Icons"), FontSize = 11,
+                    Foreground = key == "search" && !dark ? new SolidColorBrush(accent) : Brushes.White,
+                    HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center,
                 };
             return b;
         }
 
+        List<string> On(string side) => st.Order.Where(k => st.On.Contains(k) && st.Side[k] == side).ToList();
+        bool Cols(string side) => (side == "left" ? st.LeftArrange : st.RightArrange) == "cols";
+
         FrameworkElement? Side(string side)
         {
-            bool f = showFiles && filesSide == side, o = showOutline && outlineSide == side;
-            if (!f && !o) return null;
-            if (!(f && o)) return Pane(f);
+            var panes = On(side);
+            if (panes.Count == 0) return null;
+            if (panes.Count == 1) return Pane(panes[0]);
             var g = new Grid();
-            bool cols = arrange == "cols";
-            var a = Pane(!outlineFirst); var b = Pane(outlineFirst);
-            if (cols) { g.ColumnDefinitions.Add(new ColumnDefinition()); g.ColumnDefinitions.Add(new ColumnDefinition()); Grid.SetColumn(b, 1); }
-            else { g.RowDefinitions.Add(new RowDefinition()); g.RowDefinitions.Add(new RowDefinition()); Grid.SetRow(b, 1); }
-            g.Children.Add(a); g.Children.Add(b);
+            for (int i = 0; i < panes.Count; i++)
+            {
+                var p = Pane(panes[i]);
+                if (Cols(side)) { g.ColumnDefinitions.Add(new ColumnDefinition()); Grid.SetColumn(p, i); }
+                else { g.RowDefinitions.Add(new RowDefinition()); Grid.SetRow(p, i); }
+                g.Children.Add(p);
+            }
             return g;
         }
 
-        double SideShare(string side) =>
-            showFiles && showOutline && filesSide == side && outlineSide == side && arrange == "cols" ? 0.42 : 0.26;
+        double Share(string side)
+        {
+            var n = On(side).Count;
+            return n == 0 ? 0 : Cols(side) && n > 1 ? Math.Min(0.5, 0.21 * n) : 0.26;
+        }
 
         var grid = new Grid { Margin = new Thickness(gap / 2) };
         var left = Side("left"); var right = Side("right");
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(left != null ? SideShare("left") : 0, GridUnitType.Star) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1 - (left != null ? SideShare("left") : 0) - (right != null ? SideShare("right") : 0), GridUnitType.Star) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(right != null ? SideShare("right") : 0, GridUnitType.Star) });
+        double sl = Share("left"), sr = Share("right");
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(sl, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(Math.Max(0.2, 1 - sl - sr), GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(sr, GridUnitType.Star) });
         if (left != null) grid.Children.Add(left);
         if (right != null) { Grid.SetColumn(right, 2); grid.Children.Add(right); }
         var text = new StackPanel { Margin = new Thickness(mini ? 2 : 6, mini ? 2 : 6, mini ? 2 : 6, 0) };
@@ -255,7 +355,7 @@ public partial class MainWindow
     }
 
     // ------------------------------------------------------------------ the picker
-    /// <summary>The layout button's panel: every layout drawn (a click applies it and the panel stays open), the two
+    /// <summary>The layout button's panel: every layout drawn (a click applies it and the panel stays open), the
     /// panes on or off, the swap, and how to drag a pane.</summary>
     private void ShowLayoutPicker()
     {
@@ -293,7 +393,7 @@ public partial class MainWindow
             var preset = p;
             bool current = IsPreset(p);
             var content = new StackPanel();
-            content.Children.Add(LayoutDrawing(p.Files, p.Outline, p.Arrange, p.Files == p.Outline && _settings.OutlineFirst, true, true, 124, 78, mini: false));
+            content.Children.Add(LayoutDrawing(PresetState(p), 124, 78, mini: false));
             var cap = Label(Strings.Plain(p.Key), 11, muted: !current);
             cap.Margin = new Thickness(2, 6, 2, 0); cap.TextAlignment = TextAlignment.Center; cap.Width = 124;
             content.Children.Add(cap);
@@ -324,17 +424,19 @@ public partial class MainWindow
             g.SetResourceReference(TextBlock.FontFamilyProperty, "Gm.Icons");
             var l = Label(text, 12); l.VerticalAlignment = VerticalAlignment.Center;
             sp.Children.Add(g); sp.Children.Add(l);
-            var b = new Button { Content = sp, Style = (Style)FindResource("Gm.DialogButton"), Margin = new Thickness(0, 0, 8, 0), Padding = new Thickness(10, 4, 12, 4) };
+            var b = new Button { Content = sp, Style = (Style)FindResource("Gm.DialogButton"), Margin = new Thickness(0, 0, 8, 6), Padding = new Thickness(10, 4, 12, 4) };
             if (on) b.SetResourceReference(Button.BorderBrushProperty, "Gm.Accent");
             b.Click += (_, _) => { run(); RefreshLayoutPicker(); };
             return b;
         }
-        row.Children.Add(Chip(Strings.Plain("FilesShort"), _settings.FilesPanel ? "" : "", _settings.FilesPanel, ToggleFiles));
-        row.Children.Add(Chip(Strings.Plain("OutlineShort"), _settings.Outline ? "" : "", _settings.Outline, ToggleOutline));
+        string Check(bool on) => on ? "" : "";
+        row.Children.Add(Chip(Strings.Plain("FilesShort"), Check(_settings.FilesPanel), _settings.FilesPanel, ToggleFiles));
+        row.Children.Add(Chip(Strings.Plain("OutlineShort"), Check(_settings.Outline), _settings.Outline, ToggleOutline));
+        row.Children.Add(Chip(Strings.Plain("SearchShort"), Check(_settings.SearchPanel), _settings.SearchPanel, ToggleSearch));
         row.Children.Add(Chip(Strings.Plain("LayoutSwap"), "", false, SwapPanes));
         panel.Children.Add(row);
         var hint = Label(Strings.Get("LayoutDragHint"), 11, muted: true);
-        hint.Margin = new Thickness(0, 10, 0, 0);
+        hint.Margin = new Thickness(0, 8, 0, 0);
         panel.Children.Add(hint);
         return new Border { Style = (Style)FindResource("Gm.PopupFrame"), Child = panel };
     }
@@ -346,6 +448,7 @@ public partial class MainWindow
     internal FrameworkElement DockOverlayForTest(bool files, double fx, double fy)
     {
         _settings.FilesPanel = _settings.Outline = true;
+        _settings.SearchPanel = false;
         SetLayout("left", "left", "rows", false);
         UpdateLayout();
         _dockPane = files ? FilesPane : OutlinePane;
@@ -358,10 +461,10 @@ public partial class MainWindow
     }
 
     // ------------------------------------------------------------------ dragging a pane
-    // A pane is dragged by its title (FILES / CONTENTS). While it moves, a see-through window over the body of
-    // the main one shows both edges and, under the pointer, the place the pane would take; letting go there moves
-    // it, anywhere else (or Esc) leaves everything as it was. A see-through window, and not a WPF layer, because
-    // the text is a browser window that a layer could not cover.
+    // A pane is dragged by its title (FILES / CONTENTS / SEARCH). While it moves, a see-through window over the body
+    // of the main one shows both edges and, under the pointer, the place the pane would take; letting go there moves
+    // it, anywhere else (or Esc) leaves everything as it was. A see-through window, and not a WPF layer, because the
+    // text is a browser window that a layer could not cover.
     private sealed record DockTarget(string Side, string? Arrange, bool PaneFirst, Rect Zone, string Label);
 
     private Border? _dockPane;
@@ -374,7 +477,7 @@ public partial class MainWindow
 
     private void InitDocking()
     {
-        foreach (var (handle, pane) in new (FrameworkElement, Border)[] { (FilesHeader, FilesPane), (OutlineHeader, OutlinePane) })
+        foreach (var (handle, pane) in new (FrameworkElement, Border)[] { (FilesHeader, FilesPane), (OutlineHeader, OutlinePane), (SearchHeader, SearchPane) })
         {
             handle.Cursor = Cursors.SizeAll;
             handle.PreviewMouseLeftButtonDown += (_, e) =>
@@ -388,7 +491,7 @@ public partial class MainWindow
             handle.MouseLeftButtonUp += (_, _) => EndDock(apply: true);
             handle.LostMouseCapture += (_, _) => EndDock(apply: false);
         }
-        FilesTitle.ToolTip = OutlineTitle.ToolTip = Strings.Get("PaneDragTip");
+        FilesTitle.ToolTip = OutlineTitle.ToolTip = SearchTitle.ToolTip = Strings.Get("PaneDragTip");
         PreviewKeyDown += (_, e) => { if (_docking && e.Key == Key.Escape) { e.Handled = true; EndDock(apply: false); } };
     }
 
@@ -407,22 +510,23 @@ public partial class MainWindow
         DrawDockOverlay();
     }
 
-    /// <summary>The place under the pointer (BodyGrid coordinates): the strip along each edge; where the other
-    /// pane already is, its upper third puts the pane above it, the lower third below, the middle beside it.</summary>
+    private static string PaneName(string key) => Strings.Plain(key == "files" ? "FilesShort" : key == "outline" ? "OutlineShort" : "SearchShort");
+
+    /// <summary>The place under the pointer (BodyGrid coordinates): the strip along each edge; where other panes
+    /// already are, the upper third puts the pane above them, the lower third below, the middle beside them.</summary>
     private DockTarget? DockTargetAt(Point p)
     {
         double W = BodyGrid.ActualWidth, H = BodyGrid.ActualHeight;
-        if (W <= 0 || H <= 0 || p.Y < 0 || p.Y > H) return null;
+        if (_dockPane == null || W <= 0 || H <= 0 || p.Y < 0 || p.Y > H) return null;
         double edge = Math.Clamp(W * 0.22, 140, 320);
         string? side = p.X < edge ? "left" : p.X > W - edge ? "right" : null;
         if (side == null) return null;
-        bool files = _dockPane == FilesPane;
-        string name = Strings.Plain(files ? "FilesShort" : "OutlineShort"), other = Strings.Get(files ? "OfOutline" : "OfFiles");
-        bool otherOn = files ? _settings.Outline : _settings.FilesPanel;
-        string otherSide = files ? _settings.OutlineSide : _settings.FilesSide;
+        string key = KeyOf(_dockPane), name = PaneName(key);
+        var others = PanesOn(side).Where(k => k != key).ToList();
+        string other = others.Count == 1 ? Strings.Get(others[0] == "files" ? "OfFiles" : others[0] == "outline" ? "OfOutline" : "OfSearch") : Strings.Get("OfOthers");
         double x0 = side == "left" ? 0 : W - edge;
         var strip = new Rect(x0, 0, edge, H);
-        if (!otherOn || otherSide != side)
+        if (others.Count == 0)
             return new DockTarget(side, null, true, strip, string.Format(Strings.Get(side == "left" ? "DockLeft" : "DockRight"), name));
         double fy = p.Y / H;
         if (fy < 1 / 3.0) return new DockTarget(side, "rows", true, new Rect(x0, 0, edge, H / 2), string.Format(Strings.Get("DockAbove"), name, other));
@@ -430,6 +534,22 @@ public partial class MainWindow
         bool firstHalf = p.X - x0 < edge / 2;
         return new DockTarget(side, "cols", firstHalf, new Rect(firstHalf ? x0 : x0 + edge / 2, 0, edge / 2, H),
                               string.Format(Strings.Get(firstHalf ? "DockBesideLeft" : "DockBesideRight"), name, other));
+    }
+
+    /// <summary>The dragged pane goes to the target: its side, how the panes there sit, and first or last among them.</summary>
+    private void DockTo(string key, DockTarget target)
+    {
+        var others = PanesOn(target.Side).Where(k => k != key).ToList();
+        SetSideOf(key, target.Side);
+        if (target.Arrange != null) SetArrange(target.Side, target.Arrange);
+        var o = Order();
+        o.Remove(key);
+        if (others.Count > 0)
+            o.Insert(target.PaneFirst ? o.IndexOf(others[0]) : o.IndexOf(others[^1]) + 1, key);
+        else o.Add(key);
+        _settings.PaneOrder = o;
+        _settings.Save();
+        ApplySideLayout(); BuildMenu();
     }
 
     private void ShowDockOverlay()
@@ -490,10 +610,6 @@ public partial class MainWindow
         _dockOverlay?.Close(); _dockOverlay = null; _dockCanvas = null;
         if (_dockHandle is { IsMouseCaptured: true } h) h.ReleaseMouseCapture();   // raises LostMouseCapture: already cleared
         _dockHandle = null;
-        if (!apply || !docking || target == null) return;
-        bool files = pane == FilesPane;
-        string fSide = files ? target.Side : _settings.FilesSide, oSide = files ? _settings.OutlineSide : target.Side;
-        bool? outlineFirst = target.Arrange == null ? null : files ? !target.PaneFirst : target.PaneFirst;
-        SetLayout(fSide, oSide, target.Arrange, outlineFirst);
+        if (apply && docking && target != null) DockTo(KeyOf(pane), target);
     }
 }

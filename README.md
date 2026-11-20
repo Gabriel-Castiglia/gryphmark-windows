@@ -36,7 +36,8 @@ follows tools that save by writing a new file and renaming it over the old one.
 - **Zoom bar** in the status bar (also `Ctrl` + mouse wheel); on a narrow window the buttons that do not fit go into a ⋯ menu
 - Find & replace, spell check; a sidebar with the files above and the outline below, as on the Mac (drag its edge and the line between them)
 - **Layouts**: the files and the outline go on either side of the text, one above the other or side by side; pick one from the drawings behind the layout button of the toolbar (or *View → Layout*), or drag a pane by its title to an edge of the window. *View → Text width* widens the column up to the whole window
-- **Favourites**: a star on each file row puts it in one list for all the open folders, at the top of the Files panel
+- **Favourites**: a star on each file or folder row puts it in one list for all the open folders, at the top of the Files panel (drag to reorder); an optional RECENT block below it
+- **Search in the folders** (`Ctrl+Shift+F`): every Markdown file of the open folders, results by file and line, a click opens the file at the match; a pane you place like the others
 - Rename and move files and folders from the Files panel (`F2`, or drag them with the padlock open), with undo and redo; the open document follows its file
 - Properties at the top of a file (front matter) shown as a folded box and as a table, saved as written
 - **Convert to TXT**: right-click a file in the Files panel; a .txt is written next to it, as the document reads in the GitHub view, and the Markdown file is not changed
@@ -91,7 +92,8 @@ que guardan escribiendo un archivo nuevo y renombrándolo encima del viejo.
 - **Barra de zoom** en la barra de estado (también `Ctrl` + rueda del mouse); con la ventana angosta, los botones que no entran van a un menú ⋯
 - Buscar y reemplazar, revisión ortográfica; una barra lateral con los archivos arriba y el esquema abajo, como en la Mac (se arrastran su borde y la línea entre los dos)
 - **Disposición**: los archivos y el esquema van a cualquiera de los dos lados del texto, uno arriba del otro o lado a lado; se elige con los dibujos del botón de disposición de la barra (o *Ver → Disposición*), o arrastrando un panel de su título hasta un costado de la ventana. *Ver → Ancho del texto* ensancha la columna hasta toda la ventana
-- **Favoritos**: una estrella en cada archivo lo suma a una sola lista para todas las carpetas abiertas, arriba del panel de archivos
+- **Favoritos**: una estrella en cada archivo o carpeta lo suma a una sola lista para todas las carpetas abiertas, arriba del panel de archivos (se reordena arrastrando); debajo, un bloque RECIENTES opcional
+- **Buscar en las carpetas** (`Ctrl+Shift+F`): todos los archivos Markdown de las carpetas abiertas, resultados por archivo y línea, un clic abre el archivo en la coincidencia; un panel que se ubica como los otros
 - Cambiar nombre y mover archivos y carpetas desde el panel de archivos (`F2`, o arrastrándolos con el candado abierto), con deshacer y rehacer; el documento abierto sigue a su archivo
 - Propiedades al principio de un archivo (front matter) como un recuadro plegado y como una tabla, guardadas tal como estaban
 - **Convertir a TXT**: clic derecho en un archivo del panel de archivos; se escribe un .txt al lado, como se lee el documento en la vista GitHub, y el archivo Markdown no cambia
@@ -132,7 +134,7 @@ configuración se copia sola.
 
 ## Build tools / Herramientas de compilación
 
-Gryphmark 2.1.0 was built and tested with / se compiló y probó con:
+Gryphmark 2.2.0 was built and tested with / se compiló y probó con:
 
 | Tool | Version |
 |---|---|

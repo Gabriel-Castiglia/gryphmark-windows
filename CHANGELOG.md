@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.2.0 — 2026-11-20
+
+- Search in the folders: a Search pane (View → Search in the folders, the toolbar's magnifier or Ctrl+Shift+F) looks
+  for a word or a phrase in every Markdown file of the open folders, the same files the trees show. Results come
+  grouped by file, each line with its number and the match in bold; a click opens the file at that very match, with
+  the find bar showing it. Match case on demand; it searches a moment after the typing stops and stops at 300 files
+  or 5,000 matches. It is a pane like Files and Outline: anywhere, by the layout button or by dragging its title.
+- Three panes, any of them on either side, one above the other or side by side; each side keeps its own arrangement
+  and the order of its panes, with a divider between each two.
+- Each layout keeps its own sidebar width: going back to a layout brings it back as it was left. Widths set in 2.1
+  are kept.
+- Favourite folders, in the same list as the files and shown before them; a favourite folder opens like a tree.
+- Favourites are reordered by dragging one onto another (locked tree or not); Move up / Move down stay.
+- A RECENT block with the last files opened, under the favourites. Off by default: View → Recent files in the
+  panel, or the panel's ⋯ menu.
+- The profiles left behind by the self-test and the pictures for the manual are deleted at a later start.
+- The pictures of the manual and the README were made again from a neutral sample.
+
 ## 2.1.0 — 2026-11-20
 
 - Panes go anywhere. Files and Outline can each sit on the left or on the right of the text; on the same side,

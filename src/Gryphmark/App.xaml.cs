@@ -66,6 +66,7 @@ public partial class App : Application
             t.Show();
             return;
         }
+        _ = Task.Run(Settings.CleanupTestProfiles);   // leftovers of the self-test and the pictures (Settings.cs)
         var profile = ProfileArg(e.Args, out int skip);
         if (!string.IsNullOrWhiteSpace(profile)) Settings.Profile = profile.Trim();
         var path = e.Args.Where((a, i) => i != skip && !a.StartsWith('-')).FirstOrDefault();

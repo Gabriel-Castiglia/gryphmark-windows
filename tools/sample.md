@@ -10,10 +10,10 @@ Write your **Markdown** visually — *it writes the tags for you*. ~~No more syn
 
 > **Note:** looks exactly like GitHub.
 
-| Protocol | Stack | Status |
+| Planet | Moons | Visited |
 |---|---|:---:|
-| EtherCAT | Lima | ✅ |
-| PROFINET | Lima | ⏳ |
+| Mars | 2 | ✅ |
+| Jupiter | 95 | ⏳ |
 
 ```python
 def render(md: str) -> str:

@@ -51,14 +51,94 @@ public partial class MainWindow
         Flash(string.Format(Strings.Get(was ? "FavRemoved" : "FavAdded"), Path.GetFileName(path)));
     }
 
+    /// <summary>A favourite is a folder (shown first, and opens like a tree) when it is one on disk, or when it is gone
+    /// and its name has no Markdown extension.</summary>
+    private static bool FavIsDir(string path) => SafeDirExists(path) || (!File.Exists(path) && !MdExtensions.Contains(Path.GetExtension(path)));
+
+    /// <summary>The favourites as shown: folders first, then files, each in the list's order.</summary>
+    private List<string> FavoritesShown() =>
+        _settings.FavoriteFiles.Where(FavIsDir).Concat(_settings.FavoriteFiles.Where(p => !FavIsDir(p))).ToList();
+
+    /// <summary>Up or down among the favourites of the same kind (folders among folders, files among files).</summary>
     private void MoveFavorite(string path, int delta)
     {
-        var list = _settings.FavoriteFiles;
-        int i = list.FindIndex(p => PathCmp.Equals(p, path)), j = i + delta;
-        if (i < 0 || j < 0 || j >= list.Count) return;
-        (list[i], list[j]) = (list[j], list[i]);
+        var shown = FavoritesShown();
+        int i = shown.FindIndex(p => PathCmp.Equals(p, path)), j = i + delta;
+        if (i < 0 || j < 0 || j >= shown.Count || FavIsDir(shown[i]) != FavIsDir(shown[j])) return;
+        (shown[i], shown[j]) = (shown[j], shown[i]);
+        _settings.FavoriteFiles = shown;
         _settings.Save();
         RefreshTree();
+    }
+
+    /// <summary>A favourite dragged onto another one takes its place (the others move down or up).</summary>
+    internal void MoveFavoriteTo(string path, string target)
+    {
+        var shown = FavoritesShown();
+        int from = shown.FindIndex(p => PathCmp.Equals(p, path)), to = shown.FindIndex(p => PathCmp.Equals(p, target));
+        if (from < 0 || to < 0 || from == to) return;
+        var item = shown[from];
+        shown.RemoveAt(from);
+        shown.Insert(to, item);
+        _settings.FavoriteFiles = shown;
+        _settings.Save();
+        RefreshTree();
+    }
+
+    /// <summary>A row right under the Favourites title (not a file inside a favourite folder).</summary>
+    private static bool IsFavRow(TreeViewItem? row) =>
+        row != null && ItemsControl.ItemsControlFromItemContainer(row) is TreeViewItem { Tag: FavTag };
+
+    // ------------------------------------------------------------------ recent files (off by default)
+    private const string RecentTag = "::recent";
+
+    private void ToggleRecentPanel()
+    {
+        _settings.RecentPanel = !_settings.RecentPanel; _settings.Save();
+        UpdateRecentBlock(); ApplyFilesVisibility(); BuildMenu();
+    }
+
+    /// <summary>RECENT: the last files opened, under the favourites. Off unless turned on (View → Recent files, or
+    /// the panel's ⋯ menu).</summary>
+    private TreeViewItem? MakeRecentRoot()
+    {
+        if (!_settings.RecentPanel) return null;
+        var files = _settings.Recent.Where(File.Exists).Take(8).ToList();
+        if (files.Count == 0) return null;
+        var icon = new TextBlock { Text = "", FontFamily = (FontFamily)FindResource("Gm.Icons"), FontSize = 13, Margin = new Thickness(0, 0, 7, 0), VerticalAlignment = VerticalAlignment.Center };
+        icon.SetResourceReference(TextBlock.ForegroundProperty, "Gm.TextMuted");
+        var name = new TextBlock { Text = Strings.Get("RecentTitle"), FontSize = 11.5, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center };
+        var header = new DockPanel();
+        DockPanel.SetDock(icon, Dock.Left);
+        header.Children.Add(icon); header.Children.Add(name);
+        var item = new TreeViewItem { Header = header, Tag = RecentTag, Style = (Style)FindResource("Gm.FilesRoot"), Background = Brushes.Transparent };
+        item.SetResourceReference(Control.BorderBrushProperty, "Gm.ChromeBorder");
+        foreach (var f in files)
+        {
+            var node = MakeNode(f, false);
+            if (node.Header is DockPanel h && h.Children.OfType<TextBlock>().LastOrDefault() is { } t)
+            {
+                t.Inlines.Clear();
+                t.Inlines.Add(new Run(Path.GetFileName(f)));
+                var where = new Run("   " + FolderLabel(Path.GetDirectoryName(f) ?? f)) { FontSize = 11 };
+                where.SetResourceReference(TextElement.ForegroundProperty, "Gm.TextMuted");
+                t.Inlines.Add(where);
+            }
+            item.Items.Add(node);
+        }
+        item.ContextMenu = new ContextMenu { Items = { MenuEntry(Strings.Get("RecentHide"), ToggleRecentPanel) } };
+        return item;
+    }
+
+    /// <summary>Puts the RECENT block in step with File → Open recent without rebuilding the trees.</summary>
+    private void UpdateRecentBlock()
+    {
+        if (!_folderInit) return;
+        var old = FilesTree.Items.OfType<TreeViewItem>().FirstOrDefault(i => i.Tag as string == RecentTag);
+        bool wasOpen = old?.IsExpanded ?? true;
+        int at = old != null ? FilesTree.Items.IndexOf(old) : (FilesTree.Items.OfType<TreeViewItem>().FirstOrDefault()?.Tag as string == FavTag ? 1 : 0);
+        if (old != null) FilesTree.Items.Remove(old);
+        if (MakeRecentRoot() is { } fresh) { fresh.IsExpanded = wasOpen; FilesTree.Items.Insert(Math.Min(at, FilesTree.Items.Count), fresh); }
     }
 
     private static TextBlock StarGlyph(bool filled, double size = 12) => new()
@@ -127,7 +207,12 @@ public partial class MainWindow
         header.Children.Add(icon); header.Children.Add(count); header.Children.Add(name);
         var item = new TreeViewItem { Header = header, Tag = FavTag, ToolTip = Strings.Get("FavTip"), Style = (Style)FindResource("Gm.FilesRoot"), Background = fill, BorderBrush = edge };
         ToolTipService.SetInitialShowDelay(item, 900);
-        for (int i = 0; i < favs.Count; i++) item.Items.Add(MakeFavoriteNode(favs[i], i, favs.Count));
+        var shown = FavoritesShown();
+        for (int i = 0; i < shown.Count; i++)
+        {
+            bool dir = FavIsDir(shown[i]);
+            item.Items.Add(MakeFavoriteNode(shown[i], dir, i > 0 && FavIsDir(shown[i - 1]) == dir, i < shown.Count - 1 && FavIsDir(shown[i + 1]) == dir));
+        }
         item.ContextMenu = new ContextMenu
         {
             Items =
@@ -152,11 +237,12 @@ public partial class MainWindow
         return item;
     }
 
-    /// <summary>A favourite: the file name, its folder in grey, the golden star; greyed out when the file is gone.</summary>
-    private TreeViewItem MakeFavoriteNode(string path, int index, int total)
+    /// <summary>A favourite: the name, its folder in grey, the golden star; greyed out when it is gone. A favourite
+    /// folder opens like a tree.</summary>
+    private TreeViewItem MakeFavoriteNode(string path, bool isDir, bool canUp, bool canDown)
     {
-        var item = MakeNode(path, false);
-        bool exists = File.Exists(path);
+        bool exists = isDir ? SafeDirExists(path) : File.Exists(path);
+        var item = MakeNode(path, isDir && exists);
         if (item.Header is DockPanel header && header.Children.OfType<TextBlock>().LastOrDefault() is { } name)
         {
             name.Inlines.Clear();
@@ -168,10 +254,9 @@ public partial class MainWindow
         }
         if (item.ContextMenu is { } menu)
         {
-            menu.Items.Insert(0, MenuEntry(Strings.Get("FavUp"), () => MoveFavorite(path, -1), enabled: index > 0));
-            menu.Items.Insert(1, MenuEntry(Strings.Get("FavDown"), () => MoveFavorite(path, +1), enabled: index < total - 1));
-            menu.Items.Insert(2, new Separator());
-        }
+            menu.Items.Insert(0, MenuEntry(Strings.Get("FavUp"), () => MoveFavorite(path, -1), enabled: canUp));
+            menu.Items.Insert(1, MenuEntry(Strings.Get("FavDown"), () => MoveFavorite(path, +1), enabled: canDown));
+            menu.Items.Insert(2, new Separator());        }
         return item;
     }
 }

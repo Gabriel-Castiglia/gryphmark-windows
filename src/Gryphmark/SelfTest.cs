@@ -96,7 +96,7 @@ public static class SelfTest
                 w.UpdateLayout();
                 Save(pane, Path.Combine(dir, $"files_tree_{sfx}.png"));
                 // favourites: two starred files from two folders, and one that is gone
-                w.SetFavoritesForTest(Path.Combine(demo, "Notes", "Ideas.md"), Path.Combine(second, "docs", "setup.md"), Path.Combine(demo, "Gone.md"));
+                w.SetFavoritesForTest(Path.Combine(demo, "Archive"), Path.Combine(demo, "Notes", "Ideas.md"), Path.Combine(second, "docs", "setup.md"), Path.Combine(demo, "Gone.md"));
                 w.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
                 w.UpdateLayout();
                 Save(pane, Path.Combine(dir, $"files_favorites_{sfx}.png"));

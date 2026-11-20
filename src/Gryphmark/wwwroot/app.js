@@ -865,6 +865,8 @@
     focus() { if (editor && state.mode !== 'preview') editor.focus(); },
     find(q, cs, step) { const changed = q !== find.query || !!cs !== find.cs; find.query = q; find.cs = !!cs; if (changed) find.cur = -1; runFind(changed ? 0 : (step || 1)); },
     findClose() { find.query = ''; find.matches = []; find.cur = -1; paint(); },
+    // the Search pane: straight to the i-th match of q (counted from the top)
+    findAt(q, cs, i) { find.query = q; find.cs = !!cs; find.cur = Math.max(0, i | 0); runFind(0, true); },
     replace(q, cs, r) { find.query = q; find.cs = !!cs; replaceCurrent(r); },
     replaceAll(q, cs, r) { find.query = q; find.cs = !!cs; return replaceAll(r); },
     scrollToHeading(i) { scrollToHeading(i); },
@@ -910,6 +912,7 @@
     if (k === 'o' && e.shiftKey) { e.preventDefault(); post({ type: 'cmd', cmd: 'outline' }); return; }
     if (k === 'e' && e.shiftKey) { e.preventDefault(); post({ type: 'cmd', cmd: 'files' }); return; }
     if (k === 'l' && e.shiftKey) { e.preventDefault(); post({ type: 'cmd', cmd: 'readonly' }); return; }
+    if (k === 'f' && e.shiftKey) { e.preventDefault(); post({ type: 'cmd', cmd: 'search' }); return; }
     if (map[k]) { e.preventDefault(); post({ type: 'cmd', cmd: map[k] }); }
     else if (k === '1' || k === '2' || k === '3') { e.preventDefault(); post({ type: 'cmd', cmd: 'mode' + k }); }
     else if (k === '=' || k === '+' || k === '-' || k === '0') { e.preventDefault(); post({ type: 'cmd', cmd: k === '0' ? 'zoom0' : (k === '-' ? 'zoom-' : 'zoom+') }); }

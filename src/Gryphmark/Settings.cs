@@ -46,8 +46,18 @@ public sealed class Settings
     public string SideLayout { get; set; } = "stacked";
     public string FilesSide { get; set; } = "left";     // left | right of the text
     public string OutlineSide { get; set; } = "left";   // left | right of the text
-    public string SideArrange { get; set; } = "rows";   // both on one side: rows (one above the other) | cols (side by side)
-    public bool OutlineFirst { get; set; }              // both on one side: Contents above / to the left of Files
+    public string SideArrange { get; set; } = "rows";   // left side, two panes or more: rows (one above the other) | cols (side by side)
+    public string RightArrange { get; set; } = "";      // the same for the right side ("" until 2.2 copies SideArrange)
+    public bool OutlineFirst { get; set; }              // 2.1: Contents before Files on one side (2.2: PaneOrder)
+    public string SearchSide { get; set; } = "left";    // the Search pane (2.2), left | right of the text
+    public bool SearchPanel { get; set; }               // the Search pane is shown
+    /// <summary>Order of the panes on a side, first = top / left (2.2): "files", "outline", "search".</summary>
+    public List<string> PaneOrder { get; set; } = new();
+    /// <summary>Room of each pane against the others on its side (star weights), by pane name.</summary>
+    public Dictionary<string, double> PaneWeights { get; set; } = new();
+    /// <summary>Width of a sidebar per layout (2.2): key = side and the panes on it with their arrangement.</summary>
+    public Dictionary<string, double> LayoutWidths { get; set; } = new();
+    public bool RecentPanel { get; set; }               // a RECENT block in the Files panel (off by default)
     public double SideWidthColumns { get; set; } = 520; // sidebar width when Files and Contents sit side by side
     public double OutlineShareColumns { get; set; } = 0.45; // part of that width for Contents
     public double OutlineWidthRight { get; set; } = 260; // width of the right sidebar with one pane
@@ -82,6 +92,23 @@ public sealed class Settings
     public static string BaseDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Gryphmark");
     public static string Dir => Profile == null ? BaseDir : Path.Combine(BaseDir, "profiles", SafeName(Profile));
     private static string FilePath => Path.Combine(Dir, "settings.json");
+
+    /// <summary>Profiles left by --self-test and --render-chrome (their browser still held files when they ended):
+    /// deleted at a later start once they are a few minutes old. Only names of that exact form, never a user's.</summary>
+    internal static readonly System.Text.RegularExpressions.Regex TestProfileName = new(@"^(SelfTest|RenderChrome)-[0-9a-f]{8}$");
+
+    public static void CleanupTestProfiles()
+    {
+        try
+        {
+            var dir = new DirectoryInfo(Path.Combine(BaseDir, "profiles"));
+            if (!dir.Exists) return;
+            foreach (var p in dir.EnumerateDirectories())
+                if (TestProfileName.IsMatch(p.Name) && DateTime.UtcNow - p.LastWriteTimeUtc > TimeSpan.FromMinutes(5))
+                    try { p.Delete(true); } catch { }
+        }
+        catch { }
+    }
 
     public static string SafeName(string name)
     {

@@ -539,6 +539,7 @@ public partial class MainWindow : Window
             case "findclose": await HideFind(); break;
             case "outline": ToggleOutline(); break;
             case "files": ToggleFiles(); break;
+            case "search": ShowSearch(); break;
             case "readonly": await SetReadOnly(!_settings.ReadOnly); break;
             case "opendir": PickFolder(); break;
             case "manual": OpenManual(); break;
@@ -617,6 +618,7 @@ public partial class MainWindow : Window
             Key.S => Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) ? "saveas" : "save",
             Key.D1 => "mode1", Key.D2 => "mode2", Key.D3 => "mode3",
             Key.E when Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) => "files",
+            Key.F when Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) => "search",
             Key.L when Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) => "readonly",
             _ => null,
         };
@@ -635,7 +637,7 @@ public partial class MainWindow : Window
         ["Task"] = "", ["CodeBlock"] = "", ["Hr"] = "",
         ["ModeVisual"] = "", ["ModeSource"] = "", ["ModePreview"] = "",
         ["Dark"] = "", ["ZoomIn"] = "", ["ZoomOut"] = "", ["ZoomReset"] = "",
-        ["AutoSave"] = "\uE895", ["FavCurrent"] = "\uE734",
+        ["AutoSave"] = "\uE895", ["FavCurrent"] = "\uE734", ["SearchPanelMenu"] = "\uE721", ["RecentPanelMenu"] = "\uE81C",
         ["OpenDir"] = "\uE838", ["Files"] = "\uE8B7", ["CloseDir"] = "\uE711", ["Sample"] = "\uE736", ["Manual"] = "", ["Guide"] = "", ["About"] = "",
         ["Find"] = "", ["Replace"] = "", ["FindNext"] = "", ["Outline"] = "", ["CheckUpdates"] = "", ["RecentClear"] = "",
     };
@@ -780,6 +782,8 @@ public partial class MainWindow : Window
         view.Items.Add(new Separator());
         view.Items.Add(Item("Files", ctrl + "Shift+E", () => { ToggleFiles(); return Task.CompletedTask; }, _settings.FilesPanel));
         view.Items.Add(Item("Outline", ctrl + "Shift+O", () => { ToggleOutline(); return Task.CompletedTask; }, _settings.Outline));
+        view.Items.Add(Item("SearchPanelMenu", ctrl + "Shift+F", () => { ToggleSearch(); return Task.CompletedTask; }, _settings.SearchPanel));
+        view.Items.Add(Item("RecentPanelMenu", null, () => { ToggleRecentPanel(); return Task.CompletedTask; }, _settings.RecentPanel));
         view.Items.Add(LayoutMenu());
         var widthMenu = new MenuItem { Header = Strings.Get("TextWidth") };
         foreach (var (key, px) in new[] { ("WidthNormal", 980), ("WidthWide", 1280), ("WidthWider", 1600), ("WidthFull", 0) })
@@ -829,7 +833,7 @@ public partial class MainWindow : Window
         MainMenu.Items.Add(help);
 
         BuildToolbar();
-        if (_folderInit) ApplySideLayout();   // the layout button's drawing follows the theme colour
+        if (_folderInit) { ApplySideLayout(); UpdateRecentBlock(); }   // the layout drawing follows the theme colour; RECENT follows Open recent
         InputBindings.Clear();
         var f1 = new KeyBinding(new RelayCommand(OpenManual), Key.F1, ModifierKeys.None);
         InputBindings.Add(f1);
@@ -856,6 +860,7 @@ public partial class MainWindow : Window
         void Sep() => Tools.Children.Add(new Border { Style = (Style)FindResource("Gm.ToolSep") });
         Tools.Children.Add(Tool("\uE8B7", "Files", "Ctrl+Shift+E", () => { ToggleFiles(); return Task.CompletedTask; }));
         Tools.Children.Add(Tool("", "Outline", "Ctrl+Shift+O", () => { ToggleOutline(); return Task.CompletedTask; }));
+        Tools.Children.Add(Tool("\uE721", "SearchPanelMenu", "Ctrl+Shift+F", () => { ToggleSearch(); return Task.CompletedTask; }));
         Sep();
 
         var h = Tool("", "Heading", null, () => Task.CompletedTask);

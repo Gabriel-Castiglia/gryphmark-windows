@@ -97,6 +97,42 @@ public partial class MainWindow
                   $"{t1} | {t2} | {t3} | {t4}");
             SetLayout("left", "left", "rows", false); UpdateLayout();
 
+            // 2.2: a third pane (Search) placed like the others, a width per layout
+            Check("search and recent: off by default", !new Settings().SearchPanel && !new Settings().RecentPanel);
+            _settings.SearchPanel = true; _settings.SearchSide = "left"; _settings.PaneOrder = new() { "files", "outline", "search" };
+            SetLayout("left", "left", "rows", false); UpdateLayout();
+            var s1 = SearchPane.TranslatePoint(new Point(0, 0), this); f = FilesPane.TranslatePoint(new Point(0, 0), this); o = OutlinePane.TranslatePoint(new Point(0, 0), this);
+            Check("layout: three panes one above the other", f.Y < o.Y && o.Y < s1.Y && Math.Abs(f.X - s1.X) < 1 && SearchPane.ActualHeight > 60, $"{f} {o} {s1}");
+            DockTo("search", new DockTarget("left", "rows", true, Rect.Empty, "")); UpdateLayout();
+            s1 = SearchPane.TranslatePoint(new Point(0, 0), this); f = FilesPane.TranslatePoint(new Point(0, 0), this);
+            Check("drag a pane: Search dropped above the others goes first", s1.Y < f.Y && _settings.PaneOrder[0] == "search", string.Join(",", _settings.PaneOrder));
+            DockTo("search", new DockTarget("right", null, true, Rect.Empty, "")); UpdateLayout();
+            s1 = SearchPane.TranslatePoint(new Point(0, 0), this); w = Web.TranslatePoint(new Point(0, 0), this);
+            Check("drag a pane: Search alone on the right", s1.X > w.X && RightColumn.ActualWidth > 100 && SideColumn.ActualWidth > 100, $"{s1} {w}");
+            _settings.SearchPanel = false; _settings.SearchSide = "left";
+            SetLayout("left", "left", "rows", false);
+            _settings.LayoutWidths[WidthKey("left", PanesOn("left"))] = 333; ApplySideLayout(); UpdateLayout();
+            double wRows = SideColumn.ActualWidth;
+            SetLayout("left", "left", "cols", false); UpdateLayout(); double wCols = SideColumn.ActualWidth;
+            SetLayout("left", "left", "rows", false); UpdateLayout();
+            Check("layout: each layout keeps its own width", Math.Abs(wRows - 333) < 1 && Math.Abs(SideColumn.ActualWidth - 333) < 1 && wCols > 400, $"rows {wRows}, cols {wCols}, back {SideColumn.ActualWidth}");
+
+            // search in the folders: every match counted, tool and hidden folders left out
+            var sd = Path.Combine(tmp, "search"); Directory.CreateDirectory(Path.Combine(sd, "sub")); Directory.CreateDirectory(Path.Combine(sd, "node_modules"));
+            File.WriteAllText(Path.Combine(sd, "a.md"), "# Alpha\n\nthe Gryphon and the gryphon\nnothing\n");
+            File.WriteAllText(Path.Combine(sd, "sub", "b.md"), "one gryphon\n");
+            File.WriteAllText(Path.Combine(sd, "node_modules", "c.md"), "gryphon\n");
+            File.WriteAllText(Path.Combine(sd, "d.txt"), "gryphon\n");
+            var res = SearchFolders(new[] { sd }, "gryphon", false, CancellationToken.None, out bool cutS);
+            var resCase = SearchFolders(new[] { sd }, "Gryphon", true, CancellationToken.None, out _);
+            var hitsA = FindInText("x gryphon\ny\nGRYPHON gryphon\n", "gryphon", false);
+            Check("search: matches in Markdown files only, not in tool folders; case on demand; counted from the top",
+                  res.Count == 2 && res.Sum(r => r.Hits.Count) == 3 && !cutS && resCase.Sum(r => r.Hits.Count) == 1
+                  && hitsA.Count == 3 && hitsA[2].Line == 3 && hitsA[2].Occurrence == 2,
+                  string.Join(" | ", res.Select(r => Path.GetFileName(r.Path) + ":" + r.Hits.Count)));
+            Check("profiles: only test leftovers are cleaned up", Settings.TestProfileName.IsMatch("SelfTest-0123abcd") && Settings.TestProfileName.IsMatch("RenderChrome-ffffffff")
+                  && !Settings.TestProfileName.IsMatch("My notes") && !Settings.TestProfileName.IsMatch("SelfTest-xyz") && !Settings.TestProfileName.IsMatch("SelfTest-0123abcd2"), "");
+
             // favourites: one list for every tree, first block of the panel, following a rename
             var favDir = Path.Combine(tmp, "fav"); Directory.CreateDirectory(favDir);
             var fa = Path.Combine(favDir, "a.md"); File.WriteAllText(fa, "# A\n");
@@ -110,7 +146,19 @@ public partial class MainWindow
             await MovePath(fa, fb, false);
             Check("favourites: follow a rename", _settings.FavoriteFiles.Contains(fb, StringComparer.OrdinalIgnoreCase) && !_settings.FavoriteFiles.Contains(fa, StringComparer.OrdinalIgnoreCase),
                   string.Join(" | ", _settings.FavoriteFiles));
-            ToggleFavorite(fb);
+            var fc = Path.Combine(favDir, "c.md"); File.WriteAllText(fc, "# C\n");
+            var fsub = Path.Combine(favDir, "folder"); Directory.CreateDirectory(fsub);
+            ToggleFavorite(fc); ToggleFavorite(fsub);
+            var favRows = FilesTree.Items.OfType<System.Windows.Controls.TreeViewItem>().First().Items.OfType<System.Windows.Controls.TreeViewItem>().Select(i => i.Tag as string).ToList();
+            Check("favourites: a folder too, shown before the files", favRows.Count == 3 && favRows[0] == fsub && favRows[1] == fb && favRows[2] == fc, string.Join(" | ", favRows));
+            MoveFavoriteTo(fc, fb);
+            favRows = FilesTree.Items.OfType<System.Windows.Controls.TreeViewItem>().First().Items.OfType<System.Windows.Controls.TreeViewItem>().Select(i => i.Tag as string).ToList();
+            Check("favourites: dragged onto another one, it takes its place", favRows.Count == 3 && favRows[1] == fc && favRows[2] == fb, string.Join(" | ", favRows));
+            _settings.Recent.Insert(0, fb); _settings.RecentPanel = false; ToggleRecentPanel();
+            var blocks = FilesTree.Items.OfType<System.Windows.Controls.TreeViewItem>().Select(i => i.Tag as string).ToList();
+            Check("recent: when turned on, a block under the favourites", blocks.Count >= 2 && blocks[0] == FavTag && blocks[1] == RecentTag, string.Join(" | ", blocks));
+            ToggleRecentPanel();
+            ToggleFavorite(fb); ToggleFavorite(fc); ToggleFavorite(fsub);
             Check("favourites: the block goes when the list is empty", _settings.FavoriteFiles.Count == 0
                   && FilesTree.Items.OfType<System.Windows.Controls.TreeViewItem>().All(i => i.Tag as string != FavTag), "");
 

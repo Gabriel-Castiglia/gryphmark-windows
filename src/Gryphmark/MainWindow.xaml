@@ -71,22 +71,10 @@
                 <ColumnDefinition x:Name="RightSplitterColumn" Width="0" />
                 <ColumnDefinition x:Name="RightColumn" Width="0" MaxWidth="700" />
             </Grid.ColumnDefinitions>
-            <!-- Layout (Settings.SideLayout, MainWindow.Folder.cs ApplySideLayout):
-                 stacked = Files above Contents in the sidebar; columns = Files | Contents side by side;
-                 right = Files on the left, Contents in RightHost on the right of the text. -->
-            <!-- Sidebar, as in the macOS version: Files above, Contents below, a divider between them
-                 (MainWindow.Folder.cs ApplySideLayout). Either part can be hidden; the other then fills it. -->
+            <!-- Two sidebars, one on each side of the text. The panes (Files, Contents, Search) go to either one,
+               one above the other or side by side; the rows, columns and dividers inside are made by
+               MainWindow.Layout.cs ApplySideLayout. -->
             <Grid x:Name="SideGrid" Grid.Column="0" Background="{DynamicResource Gm.Chrome}">
-                <Grid.RowDefinitions>
-                    <RowDefinition x:Name="FilesRow" Height="*" />
-                    <RowDefinition x:Name="PanesSplitterRow" Height="0" />
-                    <RowDefinition x:Name="OutlineRow" Height="*" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition x:Name="FilesCol" Width="*" />
-                    <ColumnDefinition x:Name="PanesSplitterCol" Width="0" />
-                    <ColumnDefinition x:Name="OutlineCol" Width="0" />
-                </Grid.ColumnDefinitions>
                 <!-- Files panel (folder tree) -->
                 <Border x:Name="FilesPane" Grid.Row="0" Background="{DynamicResource Gm.Chrome}" Visibility="Collapsed">
                     <DockPanel>
@@ -111,27 +99,6 @@
                         <TreeView x:Name="FilesTree" Style="{DynamicResource Gm.FilesTree}" />
                     </DockPanel>
                 </Border>
-                <GridSplitter x:Name="PanesSplitter" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Cursor="SizeNS" Focusable="False"
-                              ResizeBehavior="PreviousAndNext" ResizeDirection="Rows" Visibility="Collapsed">
-                    <GridSplitter.Template>
-                        <ControlTemplate TargetType="GridSplitter">
-                            <Border Background="Transparent">
-                                <Rectangle Height="1" VerticalAlignment="Center" Fill="{DynamicResource Gm.ChromeBorder}" />
-                            </Border>
-                        </ControlTemplate>
-                    </GridSplitter.Template>
-                </GridSplitter>
-                <!-- divider between Files and Contents when they sit side by side (SideLayout = columns) -->
-                <GridSplitter x:Name="ColsSplitter" Grid.Column="1" Grid.RowSpan="3" HorizontalAlignment="Stretch" Cursor="SizeWE" Focusable="False"
-                              ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Visibility="Collapsed">
-                    <GridSplitter.Template>
-                        <ControlTemplate TargetType="GridSplitter">
-                            <Border Background="Transparent">
-                                <Rectangle Width="1" HorizontalAlignment="Center" Fill="{DynamicResource Gm.ChromeBorder}" />
-                            </Border>
-                        </ControlTemplate>
-                    </GridSplitter.Template>
-                </GridSplitter>
                 <!-- Outline -->
                 <Border x:Name="OutlinePane" Grid.Row="2" Background="{DynamicResource Gm.Chrome}">
                     <DockPanel>
@@ -142,6 +109,23 @@
                         <TextBlock x:Name="OutlineEmpty" DockPanel.Dock="Top" Margin="18,4,12,0" FontSize="12" TextWrapping="Wrap"
                                    Foreground="{DynamicResource Gm.TextMuted}" FontFamily="{DynamicResource Gm.Font}" />
                         <ListBox x:Name="OutlineList" Style="{DynamicResource Gm.OutlineList}" />
+                    </DockPanel>
+                </Border>
+                <!-- Search in every file of the open folders (MainWindow.Search.cs) -->
+                <Border x:Name="SearchPane" Background="{DynamicResource Gm.Chrome}" Visibility="Collapsed">
+                    <DockPanel>
+                        <DockPanel x:Name="SearchHeader" DockPanel.Dock="Top" Background="Transparent" Margin="18,10,6,4" MinHeight="26">
+                            <Button x:Name="SearchClose" DockPanel.Dock="Right" Style="{DynamicResource Gm.ToolButton}" Content="&#xE711;" FontSize="11" />
+                            <TextBlock x:Name="SearchTitle" VerticalAlignment="Center" FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Gm.TextMuted}" FontFamily="{DynamicResource Gm.Font}" />
+                        </DockPanel>
+                        <DockPanel DockPanel.Dock="Top" Margin="14,0,10,6">
+                            <ToggleButton x:Name="SearchCase" DockPanel.Dock="Right" Style="{DynamicResource Gm.ToolToggle}" Content="Aa" Margin="4,0,0,0" />
+                            <TextBox x:Name="SearchBox" Style="{DynamicResource Gm.Field}" />
+                        </DockPanel>
+                        <TextBlock x:Name="SearchStatus" DockPanel.Dock="Top" Margin="18,0,12,6" FontSize="11" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource Gm.TextMuted}" FontFamily="{DynamicResource Gm.Font}" />
+                        <TreeView x:Name="SearchTree" Style="{DynamicResource Gm.FilesTree}" />
                     </DockPanel>
                 </Border>
             </Grid>
@@ -167,36 +151,6 @@
             </GridSplitter>
             <!-- the right sidebar: the same as the left one; either pane can live on either side (MainWindow.Layout.cs) -->
             <Grid x:Name="RightGrid" Grid.Column="4" Background="{DynamicResource Gm.Chrome}" Visibility="Collapsed">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="0" />
-                    <RowDefinition Height="0" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="0" />
-                    <ColumnDefinition Width="0" />
-                </Grid.ColumnDefinitions>
-                <GridSplitter x:Name="RightPanesSplitter" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Cursor="SizeNS" Focusable="False"
-                              ResizeBehavior="PreviousAndNext" ResizeDirection="Rows" Visibility="Collapsed">
-                    <GridSplitter.Template>
-                        <ControlTemplate TargetType="GridSplitter">
-                            <Border Background="Transparent">
-                                <Rectangle Height="1" VerticalAlignment="Center" Fill="{DynamicResource Gm.ChromeBorder}" />
-                            </Border>
-                        </ControlTemplate>
-                    </GridSplitter.Template>
-                </GridSplitter>
-                <GridSplitter x:Name="RightColsSplitter" Grid.Column="1" Grid.RowSpan="3" HorizontalAlignment="Stretch" Cursor="SizeWE" Focusable="False"
-                              ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Visibility="Collapsed">
-                    <GridSplitter.Template>
-                        <ControlTemplate TargetType="GridSplitter">
-                            <Border Background="Transparent">
-                                <Rectangle Width="1" HorizontalAlignment="Center" Fill="{DynamicResource Gm.ChromeBorder}" />
-                            </Border>
-                        </ControlTemplate>
-                    </GridSplitter.Template>
-                </GridSplitter>
             </Grid>
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>

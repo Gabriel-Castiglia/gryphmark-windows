@@ -161,7 +161,7 @@ public partial class MainWindow
     }
 
     // ------------------------------------------------------------------ rename (F2 / right-click)
-    private bool CanEditNode(string path) => path != FavTag && !_roots.Contains(path, PathCmp);
+    private bool CanEditNode(string path) => !path.StartsWith("::") && !_roots.Contains(path, PathCmp);
 
     private async void RenameNode(string path)
     {
@@ -196,10 +196,18 @@ public partial class MainWindow
     // ------------------------------------------------------------------ drag and drop (tree unlocked)
     private void OnTreeDragMove(object sender, MouseEventArgs e)
     {
-        if (_settings.TreeLocked || e.LeftButton != MouseButtonState.Pressed || _dragItem is not { Tag: string path }) return;
+        if (e.LeftButton != MouseButtonState.Pressed || _dragItem is not { Tag: string path }) return;
+        bool fav = IsFavRow(_dragItem);   // favourites are reordered by dragging, locked or not
+        if (_settings.TreeLocked && !fav) return;
         var d = e.GetPosition(FilesTree) - _dragStart;
         if (Math.Abs(d.X) < SystemParameters.MinimumHorizontalDragDistance && Math.Abs(d.Y) < SystemParameters.MinimumVerticalDragDistance) return;
         var item = _dragItem; _dragItem = null;
+        if (fav)
+        {
+            try { DragDrop.DoDragDrop(item, new DataObject(FavDragFormat, path), DragDropEffects.Move); }
+            finally { SetDropTarget(null); }
+            return;
+        }
         if (!CanEditNode(path)) return;
         try { DragDrop.DoDragDrop(item, new DataObject(DragFormat, path), DragDropEffects.Move); }
         finally { SetDropTarget(null); }
@@ -219,8 +227,19 @@ public partial class MainWindow
         && !string.Equals(Path.GetDirectoryName(src), dir, StringComparison.OrdinalIgnoreCase)   // already there
         && !string.Equals(src, dir, StringComparison.OrdinalIgnoreCase) && !IsUnder(dir, src);  // not into itself
 
+    private const string FavDragFormat = "Gryphmark.Favorite";
+
     private void OnTreeDragOver(object sender, DragEventArgs e)
     {
+        if (e.Data.GetDataPresent(FavDragFormat))
+        {
+            var favRow = Ancestor<TreeViewItem>(e.OriginalSource as DependencyObject);
+            bool okFav = IsFavRow(favRow) && !PathCmp.Equals(favRow!.Tag as string, (string)e.Data.GetData(FavDragFormat));
+            e.Effects = okFav ? DragDropEffects.Move : DragDropEffects.None;
+            SetDropTarget(okFav ? favRow : null);
+            e.Handled = true;
+            return;
+        }
         if (!e.Data.GetDataPresent(DragFormat)) return;   // anything else (files from Explorer) is left to the window
         var src = (string)e.Data.GetData(DragFormat);
         var dir = DropDir(e, out var row);
@@ -233,6 +252,14 @@ public partial class MainWindow
 
     private async void OnTreeDrop(object sender, DragEventArgs e)
     {
+        if (e.Data.GetDataPresent(FavDragFormat))
+        {
+            e.Handled = true;
+            var row = Ancestor<TreeViewItem>(e.OriginalSource as DependencyObject);
+            SetDropTarget(null);
+            if (IsFavRow(row) && row!.Tag is string target) MoveFavoriteTo((string)e.Data.GetData(FavDragFormat), target);
+            return;
+        }
         if (!e.Data.GetDataPresent(DragFormat)) return;
         e.Handled = true;
         var src = (string)e.Data.GetData(DragFormat);
