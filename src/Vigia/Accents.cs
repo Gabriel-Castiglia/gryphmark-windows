@@ -24,13 +24,13 @@ public static class Accents
         public string Name => Strings.Lang == "es" ? Es : En;
     }
 
-    public const string Default = "gold";
+    public const string Default = "sky";      // the lighthouse against the sky (3.1.0; gold before)
 
     public static readonly Accent[] All =
     {
-        new("gold",   "Gold",     "Dorado",        "#9A6F00", "#E2B84C"),   // dark gold, the default
+        new("gold",   "Gold",     "Dorado",        "#9A6F00", "#E2B84C"),   // dark gold, the default until 3.0
         new("purple", "Purple",   "Morado",        "#5B2A86", "#B392E0"),   // Advent purple
-        new("sky",    "Sky blue", "Celeste",       "#1A8CD8", "#5CB8F0"),
+        new("sky",    "Sky blue", "Celeste",       "#1A8CD8", "#5CB8F0"),   // sky blue, the default
         new("ember",  "Orange",   "Naranja",       "#D9652F", "#F08A5D"),
         new("red",    "Red",      "Rojo",          "#C8102E", "#F2545B"),
         new("yellow", "Yellow",   "Amarillo",      "#B88A00", "#F5C842"),
@@ -42,7 +42,7 @@ public static class Accents
         new("white",  "White",    "Blanco",        "#8E8E93", "#F5F5F7"),
     };
 
-    public static Accent Get(string? key) => All.FirstOrDefault(a => a.Key == key) ?? All[0];
+    public static Accent Get(string? key) => All.FirstOrDefault(a => a.Key == key) ?? All.First(a => a.Key == Default);
 
     private static Uri IconUri(string key) => new($"pack://application:,,,/icons/vigia_{Get(key).Key}.ico");
 

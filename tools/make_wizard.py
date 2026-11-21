@@ -1,4 +1,4 @@
-"""Inno Setup wizard bitmaps from the icon: big side panel (gradient to the default dark gold) and small top-right logo.
+"""Inno Setup wizard bitmaps from the icon: big side panel (gradient from night to the default sky blue) and small top-right logo.
 Copyright (C) 2026 Gabriel Castiglia. Licensed under the GNU GPL, version 2 only.
 Date: November 10, 2026
 SPDX-License-Identifier: GPL-2.0-only
@@ -7,7 +7,7 @@ import pathlib
 from PIL import Image, ImageDraw, ImageFont
 
 root = pathlib.Path(__file__).resolve().parents[1]
-ico = Image.open(root / "src" / "Vigia" / "icons" / "vigia_gold.ico")  # default theme colour
+ico = Image.open(root / "src" / "Vigia" / "icons" / "vigia_sky.ico")  # default theme colour
 ico.size = (256, 256)
 icon = ico.convert("RGBA")
 
@@ -15,7 +15,7 @@ def gradient(w, h):
     im = Image.new("RGB", (w, h)); px = im.load()
     for y in range(h):
         t = y / h
-        c = tuple(int(a + (b - a) * t) for a, b in zip((21, 23, 42), (120, 86, 14)))
+        c = tuple(int(a + (b - a) * t) for a, b in zip((21, 23, 42), (18, 92, 150)))
         for x in range(w): px[x, y] = c
     return im
 
@@ -30,7 +30,7 @@ try:
     f2 = ImageFont.truetype("C:/Windows/Fonts/segoeui.ttf", 20)
 except OSError:
     f = f2 = ImageFont.load_default()
-for text, font, y, col in (("Vigía", f, 400, (255, 255, 255)), ("Markdown · GitHub", f2, 462, (240, 214, 140))):
+for text, font, y, col in (("Vigía", f, 400, (255, 255, 255)), ("Markdown · GitHub", f2, 462, (176, 218, 246))):
     w = d.textlength(text, font=font)
     d.text(((W - w) / 2, y), text, font=font, fill=col)
 big.save(root / "installer" / "wizard.bmp")

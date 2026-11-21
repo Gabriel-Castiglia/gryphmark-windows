@@ -32,7 +32,7 @@ follows tools that save by writing a new file and renaming it over the old one.
 - GitHub alerts, Mermaid diagrams, math, footnotes and emoji
 - **Files panel**: open a whole folder and browse its Markdown files in a tree beside the document, like VS Code or Obsidian (`Ctrl+Shift+E`); several folders at once, each with its own colour, pinning, sorting and a choice of what opens at start
 - **Read only**: the *Edit | Read only* switch in the toolbar locks the text so nothing changes by mistake (`Ctrl+Shift+L`)
-- **Themes**: light, dark or automatic (follows Windows), and a colour catalogue that changes the icon everywhere in Windows and the highlights of the app (*View → Theme…*)
+- **Themes**: light, dark or automatic (follows Windows), and a colour catalogue that changes the icon everywhere in Windows and the highlights of the app (*View → Theme…*); sky blue by default
 - **Dedicated instances**: open a file or folder in its own Vigía, separate from the main window (`--profile "Name"`, or right-click in the Files panel → desktop shortcut)
 - **Zoom bar** in the status bar (also `Ctrl` + mouse wheel); on a narrow window the buttons that do not fit go into a ⋯ menu
 - Find & replace, spell check; a sidebar with the files above and the outline below, as on the Mac (drag its edge and the line between them)
@@ -135,7 +135,7 @@ configuración se copia sola.
 
 ## Build tools / Herramientas de compilación
 
-Vigía 3.0.0 was built and tested with / se compiló y probó con:
+Vigía 3.1.0 was built and tested with / se compiló y probó con:
 
 | Tool | Version |
 |---|---|

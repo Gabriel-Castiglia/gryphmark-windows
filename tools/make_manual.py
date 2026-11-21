@@ -206,7 +206,7 @@ The first time, Vigía follows the Windows language.</p>
 (Settings → Personalisation → Colours) and switches by itself when Windows does. <b>Colour</b>: a catalogue of twelve colours for
 the icon and the highlights. The chosen colour becomes the background of the icon everywhere — window, taskbar, desktop and
 Start-menu shortcuts, <code>.md</code> files — and colours the folders of the Files panel, the check marks and the selected item.
-The default is dark gold. Shortcuts you made with an icon of your own are not changed.</p>
+The default is sky blue. Shortcuts you made with an icon of your own are not changed.</p>
 <figure><img src="{img('theme_en_light.png')}" style="width:520px"><figcaption>The theme window.</figcaption></figure>
 <p>Zoom with the <b>zoom bar</b> at the right of the status bar (−, slider, +; click the percentage to go back to 100 %), <kbd>Ctrl</kbd> + mouse wheel, <kbd>Ctrl</kbd>+<kbd>+</kbd>,
 <kbd>Ctrl</kbd>+<kbd>-</kbd> and <kbd>Ctrl</kbd>+<kbd>0</kbd>. Language, theme, mode and zoom are remembered, and the window opens again with the size, place and
@@ -404,7 +404,7 @@ La primera vez, Vigía toma el idioma de Windows.</p>
 (Configuración → Personalización → Colores) y cambia solo cuando Windows cambia. <b>Color</b>: un catálogo de doce colores para
 el ícono y el resaltado. El color elegido pasa a ser el fondo del ícono en todos lados — ventana, barra de tareas, accesos del
 escritorio y del menú Inicio, archivos <code>.md</code> — y colorea las carpetas del panel de archivos, las marcas de verificación y el elemento seleccionado.
-El color por defecto es el dorado oscuro. Los accesos directos que armaste con un ícono propio no se tocan.</p>
+El color por defecto es el celeste. Los accesos directos que armaste con un ícono propio no se tocan.</p>
 <figure><img src="{img('theme_es_light.png')}" style="width:520px"><figcaption>La ventana de tema.</figcaption></figure>
 <p>Zoom con la <b>barra de zoom</b> a la derecha de la barra de estado (−, deslizador, +; clic en el porcentaje vuelve a 100 %), <kbd>Ctrl</kbd> + rueda del mouse, <kbd>Ctrl</kbd>+<kbd>+</kbd>,
 <kbd>Ctrl</kbd>+<kbd>-</kbd> y <kbd>Ctrl</kbd>+<kbd>0</kbd>. Idioma, tema, modo y zoom quedan recordados, y la ventana vuelve a abrirse con el tamaño, el lugar y

@@ -99,6 +99,7 @@ public partial class MainWindow
 
             // 2.2: a third pane (Search) placed like the others, a width per layout
             Check("search and recent: off by default", !new Settings().SearchPanel && !new Settings().RecentPanel);
+            Check("theme: sky blue is the default colour, and an unknown one falls back to it", new Settings().Accent == "sky" && Accents.Get("nope").Key == "sky");
             _settings.SearchPanel = true; _settings.SearchSide = "left"; _settings.PaneOrder = new() { "files", "outline", "search" };
             SetLayout("left", "left", "rows", false); UpdateLayout();
             var s1 = SearchPane.TranslatePoint(new Point(0, 0), this); f = FilesPane.TranslatePoint(new Point(0, 0), this); o = OutlinePane.TranslatePoint(new Point(0, 0), this);

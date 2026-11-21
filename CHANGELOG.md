@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.0 — 2026-11-21
+
+- The default theme colour is sky blue, the lighthouse against the sky (it was dark gold), and so are the program's
+  icon, its shortcuts and the installer. A colour chosen before stays.
+- The same number as Vigía 3.1.0 for the Mac, which now lays out its panes as this version does.
+
 ## 3.0.0 — 2026-11-20
 
 **Gryphmark is now Vigía**, a name easier to remember: the one who keeps watch from above, as the app watches a

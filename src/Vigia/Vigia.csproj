@@ -16,7 +16,7 @@
     <AssemblyName>Vigia</AssemblyName>
     <RootNamespace>Vigia</RootNamespace>
     <!-- The version is set here only: build.ps1, the installer and the About window read it. -->
-    <Version>3.0.0</Version>
+    <Version>3.1.0</Version>
     <Product>Vigia</Product>
     <Company>Gabriel Castiglia</Company>
     <Copyright>© 2026 Gabriel Castiglia</Copyright>

@@ -56,7 +56,7 @@ if (-not $SkipNpm) {
 if ($Art) {
 Step "icon + wizard art"
 python "$root/tools/make_icon.py" "$root/src/Vigia/Vigia.ico" "$root/assets/vigia_base.png" "232,96,44"
-# theme colours from that orange base; the default (gold) variant becomes Vigia.ico and assets/vigia.png
+# theme colours from that orange base; the default (sky) variant becomes Vigia.ico and assets/vigia.png
 python "$root/tools/make_theme_icons.py"
 python "$root/tools/make_wizard.py"
 }
